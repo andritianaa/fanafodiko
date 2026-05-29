@@ -48,6 +48,9 @@ importers:
       hono:
         specifier: ^4.6.14
         version: 4.12.23
+      hono-rate-limiter:
+        specifier: ^0.5.3
+        version: 0.5.3(hono@4.12.23)
       mongoose:
         specifier: ^8.8.4
         version: 8.24.0
@@ -221,6 +224,9 @@ importers:
       expo-background-fetch:
         specifier: ~14.0.9
         version: 14.0.9(expo@54.0.35)(react-native@0.81.5)
+      expo-build-properties:
+        specifier: ~1.0.10
+        version: 1.0.10(expo@54.0.35)
       expo-constants:
         specifier: ~18.0.13
         version: 18.0.13(expo@54.0.35)(react-native@0.81.5)
@@ -7391,6 +7397,16 @@ packages:
       - react-native
     dev: false
 
+  /expo-build-properties@1.0.10(expo@54.0.35):
+    resolution: {integrity: sha512-mFCZbrbrv0AP5RB151tAoRzwRJelqM7bCJzCkxpu+owOyH+p/rFC/q7H5q8B9EpVWj8etaIuszR+gKwohpmu1Q==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      ajv: 8.20.0
+      expo: 54.0.35(@babel/core@7.29.7)(@expo/metro-runtime@6.1.2)(expo-router@6.0.24)(react-native@0.81.5)(react@19.1.0)(typescript@5.9.3)
+      semver: 7.8.1
+    dev: false
+
   /expo-constants@18.0.13(expo@54.0.35)(react-native@0.81.5):
     resolution: {integrity: sha512-FnZn12E1dRYKDHlAdIyNFhBurKTS3F9CrfrBDJI5m3D7U17KBHMQ6JEfYlSj7LG7t+Ulr+IKaj58L1k5gBwTcQ==}
     peerDependencies:
@@ -8231,6 +8247,18 @@ packages:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
     dependencies:
       react-is: 16.13.1
+    dev: false
+
+  /hono-rate-limiter@0.5.3(hono@4.12.23):
+    resolution: {integrity: sha512-M0DxbVMpPELEzLi0AJg1XyBHLGJXz7GySjsPoK+gc5YeeBsdGDGe+2RvVuCAv8ydINiwlbxqYMNxUEyYfRji/A==}
+    peerDependencies:
+      hono: ^4.10.8
+      unstorage: ^1.17.3
+    peerDependenciesMeta:
+      unstorage:
+        optional: true
+    dependencies:
+      hono: 4.12.23
     dev: false
 
   /hono@4.12.23:

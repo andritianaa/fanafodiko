@@ -1,16 +1,8 @@
 import React, { useEffect, useCallback } from 'react';
 import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
 import * as Notifications from 'expo-notifications';
-import { AppState, Platform } from 'react-native';
-import {
-  useFonts,
-  Nunito_400Regular,
-  Nunito_500Medium,
-  Nunito_600SemiBold,
-  Nunito_700Bold,
-  Nunito_800ExtraBold,
-} from '@expo-google-fonts/nunito';
+import { AppState, Platform, View, Text } from 'react-native';
+import { useFonts } from 'expo-font';
 import {
   setupNotificationChannel,
   requestNotificationPermissions,
@@ -20,41 +12,33 @@ import {
   scheduleAllNotifications,
 } from '../src/notifications/scheduler';
 import { loadFromLocal } from '../src/sync/syncService';
-import { useStore } from '../src/store/useStore';
 import { IS_EXPO_GO } from '../src/config/env';
 
-SplashScreen.preventAutoHideAsync();
+// Pas de SplashScreen.preventAutoHideAsync() — le splash natif (fond blanc)
+// s'efface seul dès que React est prêt. Pendant le chargement des polices,
+// on affiche un écran minimaliste au lieu de bloquer sur le splash.
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    Nunito_400Regular,
-    Nunito_500Medium,
-    Nunito_600SemiBold,
-    Nunito_700Bold,
-    Nunito_800ExtraBold,
+    FunnelDisplay_300Light:   require('../assets/fonts/Funnel_Display-Light.ttf'),
+    FunnelDisplay_400Regular: require('../assets/fonts/Funnel_Display-Regular.ttf'),
+    FunnelDisplay_500Medium:  require('../assets/fonts/Funnel_Display-Medium.ttf'),
+    FunnelDisplay_600SemiBold:require('../assets/fonts/Funnel_Display-SemiBold.ttf'),
+    FunnelDisplay_700Bold:    require('../assets/fonts/Funnel_Display-Bold.ttf'),
+    FunnelDisplay_800ExtraBold:require('../assets/fonts/Funnel_Display-ExtraBold.ttf'),
   });
-
-  const token = useStore((s) => s.token);
 
   const setupApp = useCallback(async () => {
     try {
-      // Canal Android (no-op en mode Expo Go / iOS)
       if (Platform.OS === 'android') {
         await setupNotificationChannel();
       }
-
       const hasPermission = await requestNotificationPermissions();
-
-      // Background task — ignoré silencieusement en mode Expo Go
       registerBackgroundTask();
       if (hasPermission && !IS_EXPO_GO) {
         await startBackgroundScheduling();
       }
-
-      // SQLite — disponible dans Expo Go et les builds natifs
       await loadFromLocal();
-
-      // Planification des notifications (fonctionne dans Expo Go)
       if (hasPermission && (await needsReschedule())) {
         scheduleAllNotifications().catch(() => {});
       }
@@ -81,22 +65,22 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
-      const data = response.notification.request.content.data as {
-        medicationId?: string;
-        scheduledAt?: string;
-      };
+    const sub = Notifications.addNotificationResponseReceivedListener((_response) => {
+      // TODO : naviguer vers la prise correspondante
     });
     return () => sub.remove();
   }, []);
 
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded) return null;
+  // Pendant le chargement des polices (~100-300 ms) : nom de l'app centré
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
+        <Text style={{ fontSize: 34, fontWeight: '700', color: '#4f46e5', letterSpacing: -0.5 }}>
+          Fanafodiko
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

@@ -16,6 +16,7 @@ import { globalEventBus } from './core/events/EventBus';
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
+import { authLimiter, apiLimiter, uploadLimiter } from "@/core/middleware/rateLimiter";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 
 type Variables = {
@@ -71,11 +72,20 @@ app.onError((error, c) => {
   );
 });
 
-// Routes
+// Routes — avec rate limiting différencié par type
+app.use("/auth/*", authLimiter);
 app.route("/auth", authController);
+
+app.use("/household/*", apiLimiter);
 app.route("/household", householdController);
+
+app.use("/medications/*", apiLimiter);
 app.route("/medications", medicationController);
+
+app.use("/notifications/*", apiLimiter);
 app.route("/notifications", notificationController);
+
+app.use("/files/*", uploadLimiter);
 app.route("/files", fileController);
 
 // Routes

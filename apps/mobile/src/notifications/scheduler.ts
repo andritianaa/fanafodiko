@@ -1,4 +1,4 @@
-import * as Notifications from 'expo-notifications';
+﻿import * as Notifications from 'expo-notifications';
 import type { Medication } from '../types';
 import { features, IS_EXPO_GO } from '../config/env';
 import {
@@ -14,7 +14,7 @@ export const BACKGROUND_SCHEDULE_TASK = 'BACKGROUND_NOTIFICATION_SCHEDULE';
 const SCHEDULE_DAYS = 30;
 const DAY_NAMES = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
 
-// ─── Notification handler (requis au top-level) ────────────────────────────────
+// â”€â”€â”€ Notification handler (requis au top-level) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -25,14 +25,14 @@ Notifications.setNotificationHandler({
   }),
 });
 
-// ─── Background task (défini au top-level même en mode Expo Go) ───────────────
-// TaskManager.defineTask DOIT être appelé au top-level du module.
-// En mode Expo Go, la tâche est définie mais jamais enregistrée (no-op safe).
+// â”€â”€â”€ Background task (dÃ©fini au top-level mÃªme en mode Expo Go) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// TaskManager.defineTask DOIT Ãªtre appelÃ© au top-level du module.
+// En mode Expo Go, la tÃ¢che est dÃ©finie mais jamais enregistrÃ©e (no-op safe).
 let _bgTaskDefined = false;
 function ensureBackgroundTaskDefined(): void {
   if (_bgTaskDefined) return;
   _bgTaskDefined = true;
-  // Import dynamique pour éviter le crash au démarrage en mode Expo Go
+  // Import dynamique pour Ã©viter le crash au dÃ©marrage en mode Expo Go
   // si expo-task-manager n'est pas disponible.
   Promise.all([
     import('expo-task-manager'),
@@ -48,25 +48,25 @@ function ensureBackgroundTaskDefined(): void {
       }
     });
   }).catch(() => {
-    // Background fetch non disponible (Expo Go) — ignoré silencieusement
+    // Background fetch non disponible (Expo Go) â€” ignorÃ© silencieusement
   });
 }
 
-// ─── Setup canal Android ───────────────────────────────────────────────────────
+// â”€â”€â”€ Setup canal Android â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function setupNotificationChannel(): Promise<void> {
-  if (!features.notificationChannels) return; // iOS / Expo Go → skip
+  if (!features.notificationChannels) return; // iOS / Expo Go â†’ skip
   await Notifications.setNotificationChannelAsync('medications', {
-    name: 'Médicaments',
+    name: 'MÃ©dicaments',
     importance: Notifications.AndroidImportance.HIGH,
     vibrationPattern: [0, 150, 100, 150],
-    lightColor: '#7C3AED',
+    lightColor: '#4f46e5',
     sound: 'default',
-    description: 'Rappels de prise de médicaments',
+    description: 'Rappels de prise de mÃ©dicaments',
     enableVibrate: true,
     showBadge: true,
   });
   await Notifications.setNotificationChannelAsync('medications-urgent', {
-    name: 'Médicaments (urgent)',
+    name: 'MÃ©dicaments (urgent)',
     importance: Notifications.AndroidImportance.MAX,
     vibrationPattern: [0, 250, 250, 250],
     lightColor: '#DC2626',
@@ -78,7 +78,7 @@ export async function setupNotificationChannel(): Promise<void> {
   });
 }
 
-// ─── Permissions ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ Permissions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function requestNotificationPermissions(): Promise<boolean> {
   try {
     const { status: existing } = await Notifications.getPermissionsAsync();
@@ -90,7 +90,7 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   }
 }
 
-// ─── Scheduling ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Scheduling â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function shouldScheduleForDay(med: Medication, date: Date): boolean {
   const start = new Date(med.startDate);
   start.setHours(0, 0, 0, 0);
@@ -123,7 +123,7 @@ export async function scheduleAllNotifications(
   const now = new Date();
   let scheduledCount = 0;
 
-  // En mode Expo Go, on limite à 7 jours pour rester dans la limite iOS (64 notifs max)
+  // En mode Expo Go, on limite Ã  7 jours pour rester dans la limite iOS (64 notifs max)
   const days = IS_EXPO_GO ? 7 : SCHEDULE_DAYS;
 
   for (const med of activeMeds) {
@@ -158,8 +158,8 @@ export async function scheduleAllNotifications(
         try {
           const notifId = await Notifications.scheduleNotificationAsync({
             content: {
-              title: `💊 ${med.name}`,
-              body: `${med.dosage} · ${timeStr}`,
+              title: `ðŸ’Š ${med.name}`,
+              body: `${med.dosage} Â· ${timeStr}`,
               data: {
                 medicationId: med.id,
                 profileId: med.profileId,
@@ -172,7 +172,7 @@ export async function scheduleAllNotifications(
             trigger: {
               type: Notifications.SchedulableTriggerInputTypes.DATE,
               date: scheduledDate,
-              // channelId seulement Android (ignoré sur iOS)
+              // channelId seulement Android (ignorÃ© sur iOS)
               ...(features.notificationChannels ? { channelId: 'medications' } : {}),
             },
           });
@@ -187,7 +187,7 @@ export async function scheduleAllNotifications(
           );
           scheduledCount++;
         } catch {
-          // Quota iOS dépassé (64 notifs max) ou autre erreur — on s'arrête proprement
+          // Quota iOS dÃ©passÃ© (64 notifs max) ou autre erreur â€” on s'arrÃªte proprement
           break;
         }
       }
@@ -219,10 +219,10 @@ export async function needsReschedule(): Promise<boolean> {
   return hoursSince >= threshold;
 }
 
-// ─── Background task registration ─────────────────────────────────────────────
+// â”€â”€â”€ Background task registration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function registerBackgroundTask(): void {
   if (!features.backgroundScheduling) {
-    if (__DEV__) console.log('[scheduler] Expo Go mode — background task skipped');
+    if (__DEV__) console.log('[scheduler] Expo Go mode â€” background task skipped');
     return;
   }
   ensureBackgroundTaskDefined();
@@ -246,7 +246,7 @@ export async function startBackgroundScheduling(): Promise<void> {
       });
     }
   } catch (e) {
-    // Non disponible dans cet environnement (simulateur, Expo Go) — ignoré
+    // Non disponible dans cet environnement (simulateur, Expo Go) â€” ignorÃ©
     if (__DEV__) console.log('[scheduler] Background scheduling non disponible:', e);
   }
 }

@@ -8,14 +8,12 @@
     "newArchEnabled": true,
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#7C3AED"
+      "backgroundColor": "#FFFFFF"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#7C3AED"
+        "backgroundColor": "#4f46e5"
       },
       "package": "com.fanafodiko.app",
       "permissions": [
@@ -23,7 +21,9 @@
         "SCHEDULE_EXACT_ALARM",
         "USE_EXACT_ALARM",
         "VIBRATE",
-        "POST_NOTIFICATIONS"
+        "POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.WAKE_LOCK"
       ]
     },
     "plugins": [
@@ -31,7 +31,7 @@
       [
         "expo-notifications",
         {
-          "color": "#7C3AED",
+          "color": "#4f46e5",
           "androidMode": "default",
           "androidCollapsedTitle": "Médicaments",
           "iosDisplayInForeground": true
@@ -44,11 +44,19 @@
         {
           "enableFTS": false
         }
-      ]
+      ],
+      "expo-build-properties"
     ],
     "experiments": {
       "typedRoutes": false
     },
-    "scheme": "fanafodiko"
+    "scheme": "fanafodiko",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "df6f1b8e-dfc3-4dcf-a263-f59335fea0ab"
+      }
+    },
+    "owner": "andritianaa"
   }
 }

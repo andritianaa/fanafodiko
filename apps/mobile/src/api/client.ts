@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const DEFAULT_API_URL = "http://172.20.10.3:3000";
+const DEFAULT_API_URL = "https://fanafodiko-bck.andritiana.tech";
 
 export async function getApiUrl(): Promise<string> {
   const stored = await AsyncStorage.getItem("api_url");

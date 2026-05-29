@@ -5,7 +5,7 @@ import { colors, radius, shadows, spacing } from '../src/theme';
 import type { Profile, Medication } from '../src/types';
 
 const RELATIONSHIP_COLORS: Record<string, { bg: string; text: string }> = {
-  moi: { bg: '#EDE9FE', text: '#7C3AED' },
+  moi: { bg: '#e0e7ff', text: '#4f46e5' },
   conjoint: { bg: '#FCE7F3', text: '#9D174D' },
   enfant: { bg: '#D1FAE5', text: '#065F46' },
   parent: { bg: '#FEF3C7', text: '#92400E' },
