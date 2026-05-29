@@ -138,6 +138,10 @@ export default function LoginScreen() {
               <Text style={styles.switchAction}>Créer un compte</Text>
             </Text>
           </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => router.push('/(auth)/cgu')} style={styles.cguLink}>
+            <Text style={styles.cguText}>Conditions Générales d'Utilisation</Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -232,5 +236,15 @@ const styles = StyleSheet.create({
   switchAction: {
     fontFamily: 'Nunito_700Bold',
     color: colors.primary,
+  },
+  cguLink: {
+    alignItems: 'center',
+    paddingBottom: spacing.md,
+  },
+  cguText: {
+    fontFamily: 'Nunito_400Regular',
+    fontSize: 12,
+    color: colors.textMuted,
+    textDecorationLine: 'underline',
   },
 });

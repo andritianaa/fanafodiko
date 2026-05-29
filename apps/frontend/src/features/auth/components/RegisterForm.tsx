@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Field, FieldLabel, FieldContent, FieldError } from '@/components/ui/field';
 import { DateBirthPicker } from '@/components/ui/date-birth-picker';
 import { useRegister, useLogin } from '../api/hooks';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 export const RegisterForm = () => {
@@ -122,6 +122,14 @@ export const RegisterForm = () => {
         </FieldContent>
         <FieldError errors={[errors.password]} />
       </Field>
+
+      <p className="text-xs text-center text-gray-500">
+        En créant un compte, vous acceptez nos{' '}
+        <Link to="/cgu" className="underline hover:text-gray-700" target="_blank" rel="noopener noreferrer">
+          Conditions Générales d'Utilisation
+        </Link>
+        .
+      </p>
 
       <Button type="submit" className="w-full" disabled={isPending}>
         {isPending ? 'Création du compte...' : 'Créer le compte'}

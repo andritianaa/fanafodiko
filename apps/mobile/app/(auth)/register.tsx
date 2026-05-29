@@ -161,13 +161,20 @@ export default function RegisterScreen() {
             leftIcon={<Lock size={18} color={colors.textMuted} />}
           />
 
+          <TouchableOpacity onPress={() => router.push('/(auth)/cgu')} style={styles.cguNotice}>
+            <Text style={styles.cguNoticeText}>
+              En créant un compte, vous acceptez nos{' '}
+              <Text style={styles.cguNoticeLink}>Conditions Générales d'Utilisation</Text>.
+            </Text>
+          </TouchableOpacity>
+
           <Button
             label="Créer mon compte"
             onPress={handleRegister}
             loading={loading}
             fullWidth
             size="lg"
-            style={{ marginTop: 8 }}
+            style={{ marginTop: 4 }}
           />
 
           <TouchableOpacity onPress={() => router.back()} style={styles.switchLink}>
@@ -175,6 +182,10 @@ export default function RegisterScreen() {
               Déjà un compte ?{' '}
               <Text style={styles.switchAction}>Se connecter</Text>
             </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => router.push('/(auth)/cgu')} style={styles.cguBottomLink}>
+            <Text style={styles.cguBottomText}>Conditions Générales d'Utilisation</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -249,5 +260,31 @@ const styles = StyleSheet.create({
   switchAction: {
     fontFamily: 'FunnelDisplay_700Bold',
     color: colors.primary,
+  },
+  cguNotice: {
+    marginTop: spacing.md,
+    marginBottom: 4,
+  },
+  cguNoticeText: {
+    fontFamily: 'FunnelDisplay_400Regular',
+    fontSize: 12,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  cguNoticeLink: {
+    fontFamily: 'FunnelDisplay_600SemiBold',
+    color: colors.primary,
+    textDecorationLine: 'underline',
+  },
+  cguBottomLink: {
+    alignItems: 'center',
+    paddingBottom: spacing.md,
+  },
+  cguBottomText: {
+    fontFamily: 'FunnelDisplay_400Regular',
+    fontSize: 12,
+    color: colors.textMuted,
+    textDecorationLine: 'underline',
   },
 });

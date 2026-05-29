@@ -8,6 +8,7 @@ import DashboardPage from "@/pages/dashboard/DashboardPage"
 import SchedulePage from "@/pages/schedule/SchedulePage"
 import MedicationsPage from "@/pages/medications/MedicationsPage"
 import HouseholdPage from "@/pages/household/HouseholdPage"
+import CguPage from "@/pages/legal/CguPage"
 
 const PrivateRoute = () => {
   const token = localStorage.getItem("token")
@@ -41,6 +42,9 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
         </Route>
+
+        {/* Open Routes */}
+        <Route path="/cgu" element={<CguPage />} />
       </Routes>
     </BrowserRouter>
   )

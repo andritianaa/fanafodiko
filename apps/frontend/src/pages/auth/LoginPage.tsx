@@ -21,6 +21,9 @@ export default function LoginPage() {
           <div className="text-sm text-center text-gray-500">
             Pas encore de compte ? <Link to="/register" className="underline">S'inscrire</Link>
           </div>
+          <div className="text-xs text-center text-gray-400 pt-1">
+            <Link to="/cgu" className="hover:underline">Conditions Générales d'Utilisation</Link>
+          </div>
         </CardFooter>
       </Card>
     </div>
