@@ -32,10 +32,22 @@ app.use("*", secureHeaders({
   crossOriginResourcePolicy: "cross-origin",
 }));
 
+// CORS — origines autorisées via variable d'environnement
+// Les apps mobiles (React Native/Expo) ne sont PAS des navigateurs :
+// elles ignorent CORS et peuvent appeler le backend sans restriction.
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+  : ["http://localhost:3000", "http://localhost:5173"];
+
 app.use(
   "*",
   cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(",") || ["http://localhost:3000", "http://localhost:5173"],
+    origin: (origin) => {
+      // Pas d'origine = requête mobile/curl/server-to-server → autorisé
+      if (!origin) return origin;
+      if (allowedOrigins.includes(origin)) return origin;
+      return undefined; // bloqué
+    },
     credentials: true,
   }),
 );
