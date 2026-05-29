@@ -10,7 +10,7 @@ export class ResendMailer implements IMailer {
   }
   async sendEmail(to: string, subject: string, html: string): Promise<void> {
     const { error } = await this.resend.emails.send({
-      from: `contact@${process.env.RESEND_DOMAIN_NAME}`,
+      from: `Fanafodiko <contact@${process.env.RESEND_DOMAIN_NAME}>`,
       to,
       subject,
       html,

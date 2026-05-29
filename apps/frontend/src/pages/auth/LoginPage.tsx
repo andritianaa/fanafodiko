@@ -8,7 +8,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="items-center text-center justify-center">
           <img src="/logo.png" alt="Fanafodiko" className="w-16 h-16 rounded-2xl mb-2 shadow-md" />
-          <CardTitle>Bon retour</CardTitle>
+          <CardTitle>Bon retour sur Fanafodiko</CardTitle>
           <CardDescription>Entrez votre email pour vous connecter à votre compte</CardDescription>
         </CardHeader>
         <CardContent>

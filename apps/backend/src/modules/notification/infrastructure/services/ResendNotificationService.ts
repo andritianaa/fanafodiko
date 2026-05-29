@@ -23,7 +23,7 @@ export class ResendNotificationService implements INotificationService {
       }
 
       await this.resend.emails.send({
-        from: `reminder@${process.env.RESEND_DOMAIN_NAME}`,
+        from: `Fanafodiko <reminder@${process.env.RESEND_DOMAIN_NAME}>`,
         to: params.profileEmail,
         subject: `Rappel: ${params.medicationName}`,
         html: emailBody,
