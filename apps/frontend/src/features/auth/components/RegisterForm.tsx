@@ -32,7 +32,7 @@ export const RegisterForm = () => {
           { email: data.email, password: data.password },
           {
             onSuccess: () => {
-              toast.success('Compte créé — bienvenue !');
+              toast.success('Compte créé, bienvenue !');
               navigate('/dashboard');
             },
             onError: () => {

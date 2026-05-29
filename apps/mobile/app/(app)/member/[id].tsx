@@ -361,7 +361,7 @@ export default function MemberDetailScreen() {
           {profileMeds.length === 0 ? (
             <View style={styles.empty}>
               <Pill size={40} color={colors.primaryLight} strokeWidth={1.5} />
-              <Text style={styles.emptyText}>Aucun médicament — appuyez sur + pour en ajouter</Text>
+              <Text style={styles.emptyText}>Aucun médicament, appuyez sur + pour en ajouter</Text>
             </View>
           ) : (
             profileMeds

@@ -12,11 +12,15 @@ import { initPlanningModule } from "@/modules/planning/infrastructure/planning.m
 import { initNotificationModule } from "@/modules/notification/infrastructure/notification.module";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { globalEventBus } from './core/events/EventBus';
+import { globalEventBus } from "./core/events/EventBus";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
-import { authLimiter, apiLimiter, uploadLimiter } from "@/core/middleware/rateLimiter";
+import {
+  authLimiter,
+  apiLimiter,
+  uploadLimiter,
+} from "@/core/middleware/rateLimiter";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 
 type Variables = {
@@ -28,11 +32,14 @@ const port = Number.parseInt(process.env.PORT || "3000", 10);
 
 // Security middleware
 app.use("*", logger());
-app.use("*", secureHeaders({
-  crossOriginResourcePolicy: "cross-origin",
-}));
+app.use(
+  "*",
+  secureHeaders({
+    crossOriginResourcePolicy: "cross-origin",
+  }),
+);
 
-// CORS — origines autorisées via variable d'environnement
+// CORS, origines autorisées via variable d'environnement
 // Les apps mobiles (React Native/Expo) ne sont PAS des navigateurs :
 // elles ignorent CORS et peuvent appeler le backend sans restriction.
 const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -84,7 +91,7 @@ app.onError((error, c) => {
   );
 });
 
-// Routes — avec rate limiting différencié par type
+// Routes, avec rate limiting différencié par type
 app.use("/auth/*", authLimiter);
 app.route("/auth", authController);
 
@@ -146,11 +153,11 @@ async function startServer(port: number) {
 
     const resendKey = process.env.RESEND_API_KEY || "re_xxxxxx";
     console.log(resendKey);
-     
+
     initIdentityModule(globalEventBus, new ResendMailer(resendKey));
     initPlanningModule(globalEventBus);
     initNotificationModule(resendKey);
-    
+
     Bun.serve({
       port,
       fetch: app.fetch,

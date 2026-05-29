@@ -9,7 +9,7 @@
  *   - Dev Build    : modifier .env.development → EXPO_PUBLIC_EXPO_GO=false
  *                    puis `npx expo run:android` ou `eas build --profile development`
  */
-export const IS_EXPO_GO = process.env.EXPO_PUBLIC_EXPO_GO === 'true';
+export const IS_EXPO_GO = process.env.EXPO_PUBLIC_EXPO_GO === "true";
 
 /**
  * Features disponibles selon le mode
@@ -21,12 +21,12 @@ export const features = {
   /** Canaux de notification Android (ignoré sur iOS de toute façon) */
   notificationChannels: !IS_EXPO_GO,
 
-  /** SQLite local — disponible dans Expo Go et les builds natifs */
+  /** SQLite local, disponible dans Expo Go et les builds natifs */
   sqlite: true,
 
-  /** Notifications locales — disponibles dans Expo Go */
+  /** Notifications locales, disponibles dans Expo Go */
   localNotifications: true,
 
-  /** Sync backend — toujours disponible */
+  /** Sync backend, toujours disponible */
   backendSync: true,
 } as const;

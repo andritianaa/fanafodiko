@@ -115,7 +115,7 @@ function handleNotificationNavigation(data: Record<string, unknown>) {
         router.navigate('/(app)/(tabs)/');
       }
     } catch {
-      // Navigateur pas encore prêt (cold start extrême) — ignoré
+      // Navigateur pas encore prêt (cold start extrême), ignoré
     }
   }, 300);
 }

@@ -1,5 +1,5 @@
 /**
- * PM2 — Backend Fanafodiko (runtime Bun)
+ * PM2, Backend Fanafodiko (runtime Bun)
  *
  * On utilise un script shell wrapper (start.sh) pour éviter que PM2
  * utilise son ProcessContainerForkBun interne qui tente un require()

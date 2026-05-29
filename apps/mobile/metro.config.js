@@ -7,7 +7,7 @@ const workspaceRoot = path.resolve(projectRoot, '../..');
 const config = getDefaultConfig(projectRoot);
 
 /**
- * Monorepo pnpm — résolution des modules depuis le workspace root
+ * Monorepo pnpm, résolution des modules depuis le workspace root
  * sans l'ajouter à watchFolders (évite que Metro confonde le workspace
  * root avec un projet source lors du bundle release).
  */

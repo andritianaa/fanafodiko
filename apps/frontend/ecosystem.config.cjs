@@ -1,5 +1,5 @@
 /**
- * PM2 — Frontend Fanafodiko (Vite preview, build statique)
+ * PM2, Frontend Fanafodiko (Vite preview, build statique)
  *
  * Prérequis : pnpm build (génère ./dist)
  *

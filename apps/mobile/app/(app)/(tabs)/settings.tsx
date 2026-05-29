@@ -125,7 +125,7 @@ export default function SettingsScreen() {
         <View style={styles.card}>
           <SettingRow icon={<Database size={18} color={colors.primary} />} label="Stockage local" subtitle="Données stockées sur l'appareil (SQLite)" />
           <View style={styles.div} />
-          <SettingRow icon={<WifiOff size={18} color={colors.primary} />} label="Mode hors-ligne" subtitle="Fonctionne sans connexion — synchronisation au retour en ligne" />
+          <SettingRow icon={<WifiOff size={18} color={colors.primary} />} label="Mode hors-ligne" subtitle="Fonctionne sans connexion, synchronisation au retour en ligne" />
         </View>
 
         <Text style={styles.sectionTitle}>À propos</Text>

@@ -16,7 +16,7 @@ export function SyncBanner({ onSyncPress }: SyncBannerProps) {
       <View style={[styles.banner, styles.offline]}>
         <WifiOff size={14} color={colors.warning} strokeWidth={2.5} />
         <Text style={[styles.text, { color: colors.warning }]}>
-          Mode hors ligne — données locales
+          Mode hors ligne, données locales
         </Text>
       </View>
     );
@@ -36,7 +36,7 @@ export function SyncBanner({ onSyncPress }: SyncBannerProps) {
       <TouchableOpacity style={[styles.banner, styles.error]} onPress={onSyncPress}>
         <AlertCircle size={14} color={colors.error} strokeWidth={2.5} />
         <Text style={[styles.text, { color: colors.error }]} numberOfLines={1}>
-          Erreur sync — Réessayer
+          Erreur sync, Réessayer
         </Text>
       </TouchableOpacity>
     );

@@ -1,10 +1,10 @@
 /**
- * Templates HTML d'emails — Fanafodiko
+ * Templates HTML d'emails, Fanafodiko
  *
  * Design inline-style pour compatibilité maximale avec tous les clients mail
  * (Gmail, Outlook, Apple Mail, Yahoo…).
  * Couleur principale : #4f46e5 (indigo-600)
- * Pas de border-radius — cohérent avec le style du frontend.
+ * Pas de border-radius, cohérent avec le style du frontend.
  */
 
 const APP_NAME = "Fanafodiko";
@@ -55,7 +55,7 @@ function baseLayout(content: string): string {
 </html>`;
 }
 
-// ─── Template — Email de bienvenue ─────────────────────────────────────────────
+// ─── Template, Email de bienvenue ─────────────────────────────────────────────
 export function welcomeEmailTemplate(email: string): {
   subject: string;
   html: string;
@@ -92,11 +92,25 @@ export function welcomeEmailTemplate(email: string): {
     <!-- Fonctionnalités -->
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
       ${[
-        ["Suivre les médicaments", "Planifiez et suivez les traitements de chaque membre de votre foyer."],
-        ["Rappels intelligents", "Recevez des notifications pour ne manquer aucune prise, jusqu'à 30 jours à l'avance."],
-        ["Historique complet", "Consultez l'historique des prises et mesurez l'observance du traitement."],
-        ["Mode hors-ligne", "L'application fonctionne même sans connexion internet."],
-      ].map(([title, desc]) => `
+        [
+          "Suivre les médicaments",
+          "Planifiez et suivez les traitements de chaque membre de votre foyer.",
+        ],
+        [
+          "Rappels intelligents",
+          "Recevez des notifications pour ne manquer aucune prise, jusqu'à 30 jours à l'avance.",
+        ],
+        [
+          "Historique complet",
+          "Consultez l'historique des prises et mesurez l'observance du traitement.",
+        ],
+        [
+          "Mode hors-ligne",
+          "L'application fonctionne même sans connexion internet.",
+        ],
+      ]
+        .map(
+          ([title, desc]) => `
       <tr>
         <td style="padding:0 0 14px 0;">
           <table width="100%" cellpadding="0" cellspacing="0">
@@ -111,7 +125,9 @@ export function welcomeEmailTemplate(email: string): {
             </tr>
           </table>
         </td>
-      </tr>`).join("")}
+      </tr>`,
+        )
+        .join("")}
     </table>
 
     <!-- CTA -->
@@ -136,7 +152,7 @@ export function welcomeEmailTemplate(email: string): {
   };
 }
 
-// ─── Template — Réinitialisation du mot de passe ───────────────────────────────
+// ─── Template, Réinitialisation du mot de passe ───────────────────────────────
 export function resetPasswordEmailTemplate(code: string): {
   subject: string;
   html: string;
@@ -184,7 +200,7 @@ export function resetPasswordEmailTemplate(code: string): {
         <td style="background-color:#fef3c7;border-left:3px solid #d97706;padding:14px 18px;">
           <p style="margin:0;color:#92400e;font-size:13px;line-height:20px;">
             <strong>Ce code expire dans 15 minutes.</strong><br/>
-            Si vous n'avez pas demandé cette réinitialisation, ignorez simplement cet email — votre compte reste sécurisé.
+            Si vous n'avez pas demandé cette réinitialisation, ignorez simplement cet email, votre compte reste sécurisé.
           </p>
         </td>
       </tr>
