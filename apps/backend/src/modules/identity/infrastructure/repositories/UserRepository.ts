@@ -22,11 +22,8 @@ export class MongoUserRepository implements IUserRepository {
       data._id = new Types.ObjectId().toString();
     }
 
-    await UserModel.updateOne(
-      { email: data.email },
-      { $set: data },
-      { upsert: true },
-    );
+    const filter = data._id ? { _id: data._id } : { email: data.email };
+    await UserModel.updateOne(filter, { $set: data }, { upsert: true });
 
     return UserMapper.toDomain(data);
   }

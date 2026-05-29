@@ -1,6 +1,8 @@
 import { createRoute } from "@hono/zod-openapi";
 import { BunPasswordHasher } from "../security/BunPasswordHasher";
 import { RegisterUser } from "../../application/use-cases/RegisterUser";
+import { ChangePassword } from "../../application/use-cases/ChangePassword";
+import { ChangeEmail } from "../../application/use-cases/ChangeEmail";
 
 import { MongoUserRepository } from "../repositories/UserRepository";
 import { globalEventBus } from "@/core/events/EventBus";
@@ -25,6 +27,10 @@ import {
   RequestPasswordResetSchema,
   RegisterResponseSchema,
   RegisterSchema,
+  ChangePasswordSchema,
+  ChangePasswordResponseSchema,
+  ChangeEmailSchema,
+  ChangeEmailResponseSchema,
 } from "@ext/schemas";
 
 const authController = createController();
@@ -200,6 +206,8 @@ const meRoute = createRoute({
 });
 
 authController.use("/me", authMiddleware(tokenService, userRepository));
+authController.use("/password/change", authMiddleware(tokenService, userRepository));
+authController.use("/email/change", authMiddleware(tokenService, userRepository));
 
 authController.openapi(meRoute, async (c) => {
   const user = c.get("user");
@@ -219,6 +227,55 @@ authController.openapi(meRoute, async (c) => {
     },
     200,
   );
+});
+
+const changePasswordRoute = createRoute({
+  method: "patch",
+  path: "/password/change",
+  security: [{ AuthorizationApiKey: [] }],
+  request: {
+    body: { content: { "application/json": { schema: ChangePasswordSchema } } },
+  },
+  responses: {
+    200: {
+      description: "Password changed",
+      content: { "application/json": { schema: ChangePasswordResponseSchema } },
+    },
+    400: { description: "Invalid current password" },
+  },
+});
+
+authController.openapi(changePasswordRoute, async (c) => {
+  const user = c.get("user");
+  const { currentPassword, newPassword } = c.req.valid("json");
+  const useCase = new ChangePassword(userRepository, passwordHasher);
+  await useCase.execute(user.id!, currentPassword, newPassword);
+  return c.json({ message: "Mot de passe modifié avec succès." }, 200);
+});
+
+const changeEmailRoute = createRoute({
+  method: "patch",
+  path: "/email/change",
+  security: [{ AuthorizationApiKey: [] }],
+  request: {
+    body: { content: { "application/json": { schema: ChangeEmailSchema } } },
+  },
+  responses: {
+    200: {
+      description: "Email changed",
+      content: { "application/json": { schema: ChangeEmailResponseSchema } },
+    },
+    400: { description: "Invalid password" },
+    409: { description: "Email already in use" },
+  },
+});
+
+authController.openapi(changeEmailRoute, async (c) => {
+  const user = c.get("user");
+  const { newEmail, currentPassword } = c.req.valid("json");
+  const useCase = new ChangeEmail(userRepository, passwordHasher);
+  const email = await useCase.execute(user.id!, newEmail, currentPassword);
+  return c.json({ email, message: "Email modifié avec succès." }, 200);
 });
 
 export default authController;

@@ -8,7 +8,9 @@ import DashboardPage from "@/pages/dashboard/DashboardPage"
 import SchedulePage from "@/pages/schedule/SchedulePage"
 import MedicationsPage from "@/pages/medications/MedicationsPage"
 import HouseholdPage from "@/pages/household/HouseholdPage"
+import AccountPage from "@/pages/account/AccountPage"
 import CguPage from "@/pages/legal/CguPage"
+import { FontSizeProvider } from "@/contexts/FontSizeContext"
 
 const PrivateRoute = () => {
   const token = localStorage.getItem("token")
@@ -22,6 +24,7 @@ const PublicRoute = () => {
 
 function App() {
   return (
+    <FontSizeProvider>
     <BrowserRouter>
       <Routes>
         {/* Private Routes */}
@@ -32,6 +35,7 @@ function App() {
             <Route path="/schedule" element={<SchedulePage />} />
             <Route path="/medications" element={<MedicationsPage />} />
             <Route path="/household" element={<HouseholdPage />} />
+            <Route path="/account" element={<AccountPage />} />
           </Route>
         </Route>
 
@@ -47,6 +51,7 @@ function App() {
         <Route path="/cgu" element={<CguPage />} />
       </Routes>
     </BrowserRouter>
+    </FontSizeProvider>
   )
 }
 

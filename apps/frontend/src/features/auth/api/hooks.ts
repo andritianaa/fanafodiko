@@ -6,6 +6,8 @@ import {
   getMe,
   requestPasswordReset,
   confirmPasswordReset,
+  changePassword,
+  changeEmail,
 } from './fetchers';
 
 export const useLogin = () => {
@@ -54,3 +56,17 @@ export const useConfirmPasswordReset = () => {
         mutationFn: confirmPasswordReset
     });
 }
+
+export const useChangePassword = () => {
+  return useMutation({ mutationFn: changePassword });
+};
+
+export const useChangeEmail = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: changeEmail,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+  });
+};

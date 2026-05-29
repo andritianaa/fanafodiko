@@ -33,9 +33,10 @@ export class User {
   }
 
   updatePassword(passwordHash: string): User {
-    return new User({
-      ...this.props,
-      passwordHash: passwordHash,
-    });
+    return new User({ ...this.props, passwordHash });
+  }
+
+  updateEmail(email: Email): User {
+    return new User({ ...this.props, email });
   }
 }

@@ -3,6 +3,7 @@ export * from './identity/RegisterSchema';
 export * from './identity/LoginSchema';
 export * from './identity/HouseholdSchema';
 export * from './identity/PasswordResetSchema';
+export * from './identity/AccountSchema';
 
 export * from './medication/MedicationSchema';
 

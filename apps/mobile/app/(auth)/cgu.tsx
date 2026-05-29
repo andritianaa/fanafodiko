@@ -17,7 +17,7 @@ const articles = [
   {
     title: 'Article 1 – Éditeur',
     content:
-      "L'application Fanafodiko est éditée à titre personnel par Andritiana Steve Rakotonimanana. Contact : contact@andritiana.tech",
+      "L'application Fanafodiko est éditée à titre personnel par Andritiana Steve Rakotonimanana. Contact : pro@andritiana.tech",
   },
   {
     title: 'Article 2 – Objet',
@@ -32,7 +32,7 @@ const articles = [
   {
     title: 'Article 4 – Données personnelles',
     content:
-      "Les données collectées (nom, email, informations relatives aux médicaments) sont utilisées pour le fonctionnement du service. Des données anonymisées peuvent être utilisées pour améliorer l'Application. Aucune donnée personnelle identifiable n'est vendue ni cédée à des tiers à des fins commerciales.\n\nL'utilisateur dispose d'un droit d'accès, de rectification et de suppression de ses données en contactant : contact@andritiana.tech",
+      "Les données collectées (nom, email, informations relatives aux médicaments) sont utilisées pour le fonctionnement du service. Des données anonymisées peuvent être utilisées pour améliorer l'Application. Aucune donnée personnelle identifiable n'est vendue ni cédée à des tiers à des fins commerciales.\n\nL'utilisateur dispose d'un droit d'accès, de rectification et de suppression de ses données en contactant : pro@andritiana.tech",
   },
   {
     title: 'Article 5 – Avertissement médical',
@@ -61,7 +61,7 @@ const articles = [
   },
   {
     title: 'Article 10 – Contact',
-    content: 'Pour toute question relative aux présentes CGU : contact@andritiana.tech',
+    content: 'Pour toute question relative aux présentes CGU : pro@andritiana.tech',
   },
 ];
 

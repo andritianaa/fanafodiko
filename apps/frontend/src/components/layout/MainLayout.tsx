@@ -13,6 +13,7 @@ import { useMe } from "@/features/auth/api/hooks"
 import { useHouseholdMembers } from "@/features/household/api/hooks"
 import { NotificationBell } from "@/features/notification/components/NotificationBell"
 import { CheckFatIcon, LayoutIcon, PillIcon, UsersIcon } from "@phosphor-icons/react"
+import { useFontSize } from "@/contexts/FontSizeContext"
 
 export default function MainLayout() {
   const navigate = useNavigate()
@@ -20,6 +21,7 @@ export default function MainLayout() {
   const token = localStorage.getItem("token")
   const { data: user } = useMe()
   const { data: members } = useHouseholdMembers()
+  const { iconSize } = useFontSize()
 
   const activeProfileId = members?.[0]?.id || ""
 
@@ -68,7 +70,7 @@ export default function MainLayout() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                  <DropdownMenuItem onClick={() => navigate("/account")}>
                     Mon compte
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -93,50 +95,50 @@ export default function MainLayout() {
       <main className="flex-1 container mx-auto p-4 pt-16 pb-32">
         <Outlet />
       </main>
-      <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
-        <nav className="bg-white/80 backdrop-blur-xl border border-white/20 shadow-2xl shadow-slate-200/50 px-2 py-2 flex items-center justify-between">
-            <Link 
-              to="/dashboard" 
-              className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-300 ${
-                  location.pathname === '/dashboard' 
-                  ? 'bg-primary text-primary-foreground shadow-md transform' 
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
+        <nav className="bg-white border-t border-gray-200 shadow-lg px-2 py-1 flex items-center justify-around">
+            <Link
+              to="/dashboard"
+              className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
+                  location.pathname === '/dashboard'
+                  ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:bg-slate-100'
               }`}
             >
-              <LayoutIcon size={24} weight={location.pathname === '/dashboard' ? "fill" : "regular"} />
-            </Link>
-            
-            <Link 
-              to="/schedule" 
-              className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-300 ${
-                  location.pathname === '/schedule' 
-                  ? 'bg-primary text-primary-foreground shadow-md transform' 
-                  : 'text-muted-foreground hover:bg-slate-100'
-              }`}
-            >
-              <CheckFatIcon size={24} weight={location.pathname === '/schedule' ? "fill" : "regular"} />
+              <LayoutIcon size={iconSize} weight={location.pathname === '/dashboard' ? "fill" : "regular"} />
             </Link>
 
-            <Link 
-              to="/medications" 
-              className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-300 ${
-                  location.pathname === '/medications' 
-                  ? 'bg-primary text-primary-foreground shadow-md transform' 
+            <Link
+              to="/schedule"
+              className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
+                  location.pathname === '/schedule'
+                  ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:bg-slate-100'
               }`}
             >
-              <PillIcon size={24} weight={location.pathname === '/medications' ? "fill" : "regular"} />
+              <CheckFatIcon size={iconSize} weight={location.pathname === '/schedule' ? "fill" : "regular"} />
             </Link>
 
-            <Link 
-              to="/household" 
-              className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-300 ${
-                  location.pathname === '/household' 
-                  ? 'bg-primary text-primary-foreground shadow-md transform' 
+            <Link
+              to="/medications"
+              className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
+                  location.pathname === '/medications'
+                  ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:bg-slate-100'
               }`}
             >
-              <UsersIcon size={24} weight={location.pathname === '/household' ? "fill" : "regular"} />
+              <PillIcon size={iconSize} weight={location.pathname === '/medications' ? "fill" : "regular"} />
+            </Link>
+
+            <Link
+              to="/household"
+              className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
+                  location.pathname === '/household'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-slate-100'
+              }`}
+            >
+              <UsersIcon size={iconSize} weight={location.pathname === '/household' ? "fill" : "regular"} />
             </Link>
         </nav>
       </div>

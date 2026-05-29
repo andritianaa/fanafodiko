@@ -8,6 +8,10 @@ import type {
   RequestPasswordResetResponse,
   ConfirmPasswordResetInput,
   ConfirmPasswordResetResponse,
+  ChangePasswordInput,
+  ChangePasswordResponse,
+  ChangeEmailInput,
+  ChangeEmailResponse,
 } from '../types';
 
 export const login = async (data: LoginInput): Promise<LoginResponse> => {
@@ -41,5 +45,15 @@ export const requestPasswordReset = async (data: RequestPasswordResetInput): Pro
 
 export const confirmPasswordReset = async (data: ConfirmPasswordResetInput): Promise<ConfirmPasswordResetResponse> => {
   const response = await apiClient.post<ConfirmPasswordResetResponse>('/auth/password/confirm', data);
+  return response.data;
+};
+
+export const changePassword = async (data: ChangePasswordInput): Promise<ChangePasswordResponse> => {
+  const response = await apiClient.patch<ChangePasswordResponse>('/auth/password/change', data);
+  return response.data;
+};
+
+export const changeEmail = async (data: ChangeEmailInput): Promise<ChangeEmailResponse> => {
+  const response = await apiClient.patch<ChangeEmailResponse>('/auth/email/change', data);
   return response.data;
 };
