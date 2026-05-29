@@ -207,13 +207,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   title: {
-    fontFamily: 'Nunito_800ExtraBold',
+    fontFamily: 'FunnelDisplay_800ExtraBold',
     fontSize: 26,
     color: colors.text,
     marginBottom: 6,
   },
   subtitle: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14,
     color: colors.textSecondary,
     marginBottom: spacing.lg,
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   errorBannerText: {
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 13,
     color: colors.error,
     textAlign: 'center',
@@ -242,12 +242,12 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
   },
   switchText: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14,
     color: colors.textSecondary,
   },
   switchAction: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     color: colors.primary,
   },
 });

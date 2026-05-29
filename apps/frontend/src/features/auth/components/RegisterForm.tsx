@@ -6,13 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field, FieldLabel, FieldContent, FieldError } from '@/components/ui/field';
 import { DateBirthPicker } from '@/components/ui/date-birth-picker';
-import { useRegister } from '../api/hooks';
+import { useRegister, useLogin } from '../api/hooks';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 export const RegisterForm = () => {
   const navigate = useNavigate();
   const { mutate: registerUser, isPending } = useRegister();
+  const { mutate: loginUser } = useLogin();
   
   const {
     register,
@@ -26,8 +27,21 @@ export const RegisterForm = () => {
   const onSubmit = (data: RegisterInput) => {
     registerUser(data, {
       onSuccess: () => {
-        toast.success('Compte créé avec succès !');
-        navigate('/login');
+        // Auto-connexion immédiate après la création du compte
+        loginUser(
+          { email: data.email, password: data.password },
+          {
+            onSuccess: () => {
+              toast.success('Compte créé — bienvenue !');
+              navigate('/dashboard');
+            },
+            onError: () => {
+              // La création a réussi mais le login a échoué → redirection vers login
+              toast.success('Compte créé ! Connectez-vous pour continuer.');
+              navigate('/login');
+            },
+          }
+        );
       },
       onError: (error: any) => {
         const message = error.response?.data?.message || error.message || 'Échec de la création du compte';
