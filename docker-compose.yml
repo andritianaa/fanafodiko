@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:3000}
+    ports:
+      - "3000:3000"
+      - "5173:5173"
+    env_file:
+      - ./apps/backend/.env
+      - ./apps/frontend/.env
+    volumes:
+      - mongodb_data:/data/db
+      - ./apps/backend/uploads:/app/apps/backend/uploads
+
+volumes:
+  mongodb_data:

@@ -1,0 +1,30 @@
+{
+  "name": "@ext/backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot src/main.ts",
+    "start": "bun src/main.ts",
+    "type-check": "tsc --noEmit",
+    "test": "bun test",
+    "sonar": "bun sonar-run.ts"
+  },
+  "dependencies": {
+    "@clickhouse/client": "^1.7.0",
+    "@ext/schemas": "workspace:*",
+    "@ext/utils": "workspace:*",
+    "@hono/swagger-ui": "^0.4.1",
+    "@hono/zod-openapi": "^0.18.3",
+    "croner": "^9.0.0",
+    "cross-env": "^10.1.0",
+    "hono": "^4.6.14",
+    "mongoose": "^8.8.4",
+    "resend": "^4.0.1",
+    "sharp": "^0.34.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.7",
+    "typescript": "^5.6.3"
+  }
+}

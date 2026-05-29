@@ -1,0 +1,7 @@
+sonar.projectKey=ExtSteve
+sonar.sources=.
+sonar.host.url=http://localhost:9999
+sonar.inclusions=apps/**, packages/**
+sonar.token=sqp_a95c57e58f66a07e80dd49d5c74e24a784ede71e
+sonar.exclusions=**/node_modules/**, **/dist/**, **/.next/**, **/build/**, .turbo, apps/frontend/src/components/ui/**, **/**.test.ts
+sonar.javascript.lcov.reportPaths=coverage/lcov.info

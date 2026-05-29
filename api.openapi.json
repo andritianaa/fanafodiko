@@ -1,0 +1,1527 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "My Backend API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "security": [
+    {
+      "Bearer": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "AuthorizationApiKey": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "Frequency": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "DAILY",
+              "WEEKLY",
+              "INTERVAL"
+            ],
+            "description": "Frequency type",
+            "example": "DAILY"
+          },
+          "times": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of times in HH:mm format",
+            "example": [
+              "08:00",
+              "20:00"
+            ]
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of days (required for WEEKLY)",
+            "example": [
+              "MONDAY",
+              "THURSDAY"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "times"
+        ]
+      },
+      "MedicationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "medication-uuid"
+          },
+          "profileId": {
+            "type": "string",
+            "example": "profile-uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Doliprane"
+          },
+          "dosage": {
+            "type": "string",
+            "example": "500mg"
+          },
+          "frequency": {
+            "$ref": "#/components/schemas/Frequency"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "profileId",
+          "name",
+          "dosage",
+          "frequency",
+          "startDate",
+          "isActive",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateMedication": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "description": "ID associated profile",
+            "example": "profile-uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "Medication name",
+            "example": "Doliprane"
+          },
+          "dosage": {
+            "type": "string",
+            "description": "Dosage instructions",
+            "example": "500mg"
+          },
+          "frequency": {
+            "$ref": "#/components/schemas/Frequency"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start date",
+            "example": "2023-01-01T00:00:00Z"
+          },
+          "endDate": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time",
+            "description": "End date (optional)",
+            "example": "2023-01-10T00:00:00Z"
+          }
+        },
+        "required": [
+          "profileId",
+          "name",
+          "dosage",
+          "frequency",
+          "startDate"
+        ]
+      },
+      "MedicationList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/MedicationResponse"
+        }
+      },
+      "UpdateMedication": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Medication name",
+            "example": "Doliprane"
+          },
+          "dosage": {
+            "type": "string",
+            "description": "Dosage instructions",
+            "example": "1000mg"
+          },
+          "frequency": {
+            "$ref": "#/components/schemas/Frequency"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start date",
+            "example": "2023-01-01T00:00:00Z"
+          },
+          "endDate": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time",
+            "description": "End date (optional)",
+            "example": "2023-01-10T00:00:00Z"
+          }
+        }
+      },
+      "ToggleMedicationStatus": {
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean",
+            "description": "True to activate, False to pause",
+            "example": false
+          }
+        },
+        "required": [
+          "isActive"
+        ]
+      }
+    },
+    "parameters": {
+
+    }
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "minLength": 5,
+                    "maxLength": 255,
+                    "format": "email",
+                    "example": "user@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 128,
+                    "pattern": "[a-z]",
+                    "example": "Password123!"
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "example": "John"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "example": "Doe"
+                  },
+                  "dateOfBirth": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": "1990-01-01"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password",
+                  "firstName",
+                  "lastName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "65f1a..."
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "example": "user@example.com"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User created successfully"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "email",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "409": {
+            "description": "User already exists"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "minLength": 5,
+                    "maxLength": 255,
+                    "format": "email",
+                    "example": "user@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 128,
+                    "pattern": "[a-z]",
+                    "example": "Password123!"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR..."
+                    }
+                  },
+                  "required": [
+                    "token"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logout successful"
+          }
+        }
+      }
+    },
+    "/auth/password/reset": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address to send the reset link to",
+                    "example": "john.doe@example.com"
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reset link sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "If an account with that email exists, a reset link has been sent."
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/password/confirm": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The reset code received via email",
+                    "example": "123456"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "minLength": 8,
+                    "description": "The new password",
+                    "example": "NewPassword123!"
+                  }
+                },
+                "required": [
+                  "code",
+                  "newPassword"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Password has been successfully reset."
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid code"
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "65f1a..."
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "example": "user@example.com"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User created successfully"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "email",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/households": {
+      "get": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of household members",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "profile-123"
+                      },
+                      "accountId": {
+                        "type": "string",
+                        "example": "account-123"
+                      },
+                      "firstName": {
+                        "type": "string",
+                        "example": "John"
+                      },
+                      "lastName": {
+                        "type": "string",
+                        "example": "Doe"
+                      },
+                      "dateOfBirth": {
+                        "type": "string",
+                        "example": "1990-01-01T00:00:00.000Z"
+                      },
+                      "relationship": {
+                        "type": "string",
+                        "example": "child"
+                      },
+                      "avatarUrl": {
+                        "type": "string",
+                        "example": "https://example.com/avatar.jpg"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "accountId",
+                      "firstName",
+                      "lastName",
+                      "dateOfBirth",
+                      "relationship"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "example": "Alice"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "example": "Doe"
+                  },
+                  "dateOfBirth": {
+                    "type": "string",
+                    "example": "2015-05-15"
+                  },
+                  "relationship": {
+                    "type": "string",
+                    "minLength": 1,
+                    "example": "child"
+                  },
+                  "avatarUrl": {
+                    "type": "string",
+                    "example": "https://example.com/alice.jpg"
+                  }
+                },
+                "required": [
+                  "firstName",
+                  "lastName",
+                  "dateOfBirth",
+                  "relationship"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Member created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "profile-123"
+                    },
+                    "accountId": {
+                      "type": "string",
+                      "example": "account-123"
+                    },
+                    "firstName": {
+                      "type": "string",
+                      "example": "John"
+                    },
+                    "lastName": {
+                      "type": "string",
+                      "example": "Doe"
+                    },
+                    "dateOfBirth": {
+                      "type": "string",
+                      "example": "1990-01-01T00:00:00.000Z"
+                    },
+                    "relationship": {
+                      "type": "string",
+                      "example": "child"
+                    },
+                    "avatarUrl": {
+                      "type": "string",
+                      "example": "https://example.com/avatar.jpg"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "accountId",
+                    "firstName",
+                    "lastName",
+                    "dateOfBirth",
+                    "relationship"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/households/{id}": {
+      "get": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Member ID",
+              "example": "507f1f77bcf86cd799439011"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Member details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "profile-123"
+                    },
+                    "accountId": {
+                      "type": "string",
+                      "example": "account-123"
+                    },
+                    "firstName": {
+                      "type": "string",
+                      "example": "John"
+                    },
+                    "lastName": {
+                      "type": "string",
+                      "example": "Doe"
+                    },
+                    "dateOfBirth": {
+                      "type": "string",
+                      "example": "1990-01-01T00:00:00.000Z"
+                    },
+                    "relationship": {
+                      "type": "string",
+                      "example": "child"
+                    },
+                    "avatarUrl": {
+                      "type": "string",
+                      "example": "https://example.com/avatar.jpg"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "accountId",
+                    "firstName",
+                    "lastName",
+                    "dateOfBirth",
+                    "relationship"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Member not found"
+          }
+        }
+      },
+      "patch": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "example": "Alice"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "example": "Doe"
+                  },
+                  "dateOfBirth": {
+                    "type": "string",
+                    "example": "2015-05-15"
+                  },
+                  "avatarUrl": {
+                    "type": "string",
+                    "example": "https://example.com/alice-new.jpg"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Member updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "profile-123"
+                    },
+                    "accountId": {
+                      "type": "string",
+                      "example": "account-123"
+                    },
+                    "firstName": {
+                      "type": "string",
+                      "example": "John"
+                    },
+                    "lastName": {
+                      "type": "string",
+                      "example": "Doe"
+                    },
+                    "dateOfBirth": {
+                      "type": "string",
+                      "example": "1990-01-01T00:00:00.000Z"
+                    },
+                    "relationship": {
+                      "type": "string",
+                      "example": "child"
+                    },
+                    "avatarUrl": {
+                      "type": "string",
+                      "example": "https://example.com/avatar.jpg"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "accountId",
+                    "firstName",
+                    "lastName",
+                    "dateOfBirth",
+                    "relationship"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Member not found"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Member removed successfully"
+          },
+          "400": {
+            "description": "Cannot delete owner"
+          },
+          "404": {
+            "description": "Member not found"
+          }
+        }
+      }
+    },
+    "/medications": {
+      "post": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMedication"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Medication created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medications/profile/{profileId}": {
+      "get": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Profile ID"
+            },
+            "required": true,
+            "name": "profileId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of medications for a profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicationList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medications/{id}": {
+      "get": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Medication ID"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Medication details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Medication not found"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMedication"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Medication updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Medication deleted successfully"
+          }
+        }
+      }
+    },
+    "/medications/{id}/status": {
+      "patch": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToggleMedicationStatus"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Medication status updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/tasks": {
+      "get": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Profile ID"
+            },
+            "required": true,
+            "name": "profileId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Date in YYYY-MM-DD format"
+            },
+            "required": false,
+            "name": "date",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of medication tasks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "medicationId": {
+                        "type": "string"
+                      },
+                      "profileId": {
+                        "type": "string"
+                      },
+                      "scheduledAt": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "PENDING",
+                          "TAKEN",
+                          "MISSED",
+                          "SKIPPED"
+                        ]
+                      },
+                      "takenAt": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "medicationId",
+                      "profileId",
+                      "scheduledAt",
+                      "status",
+                      "createdAt",
+                      "updatedAt"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/tasks/{id}/take": {
+      "patch": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Task ID"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task marked as taken",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found"
+          }
+        }
+      }
+    },
+    "/notifications/tasks/{id}/skip": {
+      "patch": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Task ID"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task marked as skipped",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found"
+          }
+        }
+      }
+    },
+    "/notifications/tasks/stats/{profileId}": {
+      "get": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Profile ID"
+            },
+            "required": true,
+            "name": "profileId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Date in YYYY-MM-DD format"
+            },
+            "required": false,
+            "name": "date",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daily adherence statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string"
+                    },
+                    "totalTasks": {
+                      "type": "number"
+                    },
+                    "takenCount": {
+                      "type": "number"
+                    },
+                    "missedCount": {
+                      "type": "number"
+                    },
+                    "skippedCount": {
+                      "type": "number"
+                    },
+                    "pendingCount": {
+                      "type": "number"
+                    },
+                    "adherenceRate": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "date",
+                    "totalTasks",
+                    "takenCount",
+                    "missedCount",
+                    "skippedCount",
+                    "pendingCount",
+                    "adherenceRate"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/in-app/{profileId}": {
+      "get": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Profile ID"
+            },
+            "required": true,
+            "name": "profileId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of unread in-app notifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "profileId": {
+                        "type": "string"
+                      },
+                      "taskId": {
+                        "type": "string"
+                      },
+                      "medicationName": {
+                        "type": "string"
+                      },
+                      "dosage": {
+                        "type": "string"
+                      },
+                      "scheduledAt": {
+                        "type": "string"
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "read": {
+                        "type": "boolean"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "profileId",
+                      "medicationName",
+                      "dosage",
+                      "scheduledAt",
+                      "message",
+                      "read",
+                      "createdAt"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/in-app/{profileId}/count": {
+      "get": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Profile ID"
+            },
+            "required": true,
+            "name": "profileId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unread notification count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "unreadCount": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "unreadCount"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/in-app/{id}/read": {
+      "patch": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Notification ID"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification marked as read",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Notification not found"
+          }
+        }
+      }
+    },
+    "/notifications/in-app/{profileId}/read-all": {
+      "patch": {
+        "security": [
+          {
+            "AuthorizationApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Profile ID"
+            },
+            "required": true,
+            "name": "profileId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All notifications marked as read",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

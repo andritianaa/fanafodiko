@@ -1,0 +1,45 @@
+import { apiClient } from '@/api/client';
+import type {
+  LoginInput,
+  LoginResponse,
+  RegisterInput,
+  RegisterResponse,
+  RequestPasswordResetInput,
+  RequestPasswordResetResponse,
+  ConfirmPasswordResetInput,
+  ConfirmPasswordResetResponse,
+} from '../types';
+
+export const login = async (data: LoginInput): Promise<LoginResponse> => {
+  const response = await apiClient.post<LoginResponse>('/auth/login', data);
+  if (response.data.token) {
+    // not secure but simpler for now
+    localStorage.setItem('token', response.data.token);
+  }
+  return response.data;
+};
+
+export const register = async (data: RegisterInput): Promise<RegisterResponse> => {
+  const response = await apiClient.post<RegisterResponse>('/auth/register', data);
+  return response.data;
+};
+
+export const logout = async (): Promise<void> => {
+  await apiClient.post('/auth/logout');
+  localStorage.removeItem('token');
+};
+
+export const getMe = async (): Promise<RegisterResponse> => {
+  const response = await apiClient.get<RegisterResponse>('/auth/me');
+  return response.data;
+};
+
+export const requestPasswordReset = async (data: RequestPasswordResetInput): Promise<RequestPasswordResetResponse> => {
+  const response = await apiClient.post<RequestPasswordResetResponse>('/auth/password/reset', data);
+  return response.data;
+};
+
+export const confirmPasswordReset = async (data: ConfirmPasswordResetInput): Promise<ConfirmPasswordResetResponse> => {
+  const response = await apiClient.post<ConfirmPasswordResetResponse>('/auth/password/confirm', data);
+  return response.data;
+};
