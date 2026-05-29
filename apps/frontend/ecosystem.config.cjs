@@ -1,27 +1,26 @@
 /**
  * PM2 — Frontend Fanafodiko (Vite preview, build statique)
  *
- * Prérequis : avoir buildé le projet une fois → pnpm build (génère ./dist)
+ * Prérequis : pnpm build (génère ./dist)
  *
- * On utilise le binaire vite local (node_modules/.bin/vite) pour ne pas
- * dépendre de pnpm dans le PATH du process PM2 systemd.
- *
- * Commandes utiles :
- *   pnpm build                         # à faire avant toute mise en prod
- *   pm2 start ecosystem.config.cjs
- *   pm2 save && pm2 startup
+ * Dans un workspace pnpm, vite est dans le node_modules/ de la RACINE
+ * du monorepo, pas dans apps/frontend/node_modules/.
+ * On calcule le chemin absolu dynamiquement.
  */
+
+const path = require('path');
+
+// apps/frontend → ../../ → racine du workspace
+const workspaceRoot = path.resolve(__dirname, '..', '..');
+const viteBin = path.join(workspaceRoot, 'node_modules', '.bin', 'vite');
 
 module.exports = {
   apps: [
     {
       name: 'fanafodiko-frontend',
-
-      // Binaire vite local — pas besoin de pnpm dans le PATH
-      script: 'node_modules/.bin/vite',
+      script: viteBin,
       args: 'preview --port 9992 --host 0.0.0.0',
       interpreter: 'node',
-
       cwd: __dirname,
 
       autorestart: true,
