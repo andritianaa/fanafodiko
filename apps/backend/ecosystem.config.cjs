@@ -1,28 +1,25 @@
 /**
  * PM2 — Backend Fanafodiko (runtime Bun)
  *
- * Linux : bun s'installe dans ~/.bun/bin — PM2 via systemd
- *   n'hérite pas du PATH utilisateur, donc on passe le chemin absolu.
+ * On utilise un script shell wrapper (start.sh) pour éviter que PM2
+ * utilise son ProcessContainerForkBun interne qui tente un require()
+ * incompatible avec les modules ES / top-level await de main.ts.
  *
- * Windows : idem, bun est dans %USERPROFILE%\.bun\bin
- *
- * Commandes utiles :
- *   pm2 start ecosystem.config.cjs
- *   pm2 save && pm2 startup   (puis copier-coller la commande affichée)
+ * Sur le serveur, créer start.sh une fois :
+ *   cat > start.sh << 'EOF'
+ *   #!/bin/bash
+ *   export PATH="$HOME/.bun/bin:$PATH"
+ *   exec bun src/main.ts
+ *   EOF
+ *   chmod +x start.sh
  */
-
-const home = process.env.HOME || process.env.USERPROFILE || '/root';
-const bunBin = `${home}/.bun/bin`;
 
 module.exports = {
   apps: [
     {
       name: 'fanafodiko-backend',
-      script: 'src/main.ts',
-
-      // Chemin absolu vers bun — fonctionne même quand PM2 démarre via systemd
-      interpreter: `${bunBin}/bun`,
-
+      script: './start.sh',
+      interpreter: '/bin/bash',
       cwd: __dirname,
 
       autorestart: true,
@@ -34,8 +31,6 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 9991,
         HOST: '0.0.0.0',
-        // S'assure que bun et ses dépendances sont trouvables
-        PATH: `${bunBin}:${process.env.PATH || '/usr/local/bin:/usr/bin:/bin'}`,
       },
 
       out_file: './logs/out.log',
