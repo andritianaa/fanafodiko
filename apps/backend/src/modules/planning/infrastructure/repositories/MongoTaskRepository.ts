@@ -117,6 +117,29 @@ export class MongoTaskRepository implements ITaskRepository {
     return docs.map(doc => this.toDomain(doc));
   }
 
+  async findFuturePending(afterDate: Date): Promise<MedicationTask[]> {
+    const docs = await MedicationTaskModel.find({
+      status: TaskStatus.PENDING,
+      scheduledAt: { $gt: afterDate },
+    });
+    return docs.map((doc) => this.toDomain(doc));
+  }
+
+  async deleteUnnotifiedFutureByMedicationId(
+    medicationId: string,
+    afterDate: Date,
+  ): Promise<void> {
+    await MedicationTaskModel.deleteMany({
+      medicationId,
+      scheduledAt: { $gt: afterDate },
+      notifiedAt: { $exists: false },
+    });
+  }
+
+  async deleteById(id: string): Promise<void> {
+    await MedicationTaskModel.findByIdAndDelete(id);
+  }
+
   async findByProfileAndDate(profileId: string, date: Date): Promise<MedicationTask[]> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);

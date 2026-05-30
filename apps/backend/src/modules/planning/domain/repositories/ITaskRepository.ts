@@ -12,4 +12,12 @@ export interface ITaskRepository {
   findTasksToNotify(currentTime: Date): Promise<MedicationTask[]>;
   findOverdueTasks(limitTime: Date): Promise<MedicationTask[]>;
   findByProfileAndDate(profileId: string | string[], date: Date): Promise<MedicationTask[]>;
+
+  // Sync methods
+  /** Retourne toutes les tâches PENDING dont l'heure est dans le futur */
+  findFuturePending(afterDate: Date): Promise<MedicationTask[]>;
+  /** Supprime les tâches futures non encore notifiées pour un médicament (pour régénérer après modif) */
+  deleteUnnotifiedFutureByMedicationId(medicationId: string, afterDate: Date): Promise<void>;
+  /** Supprime une tâche par son id */
+  deleteById(id: string): Promise<void>;
 }
