@@ -1,5 +1,4 @@
 import { createRoute } from "@hono/zod-openapi";
-import { setCookie, deleteCookie } from "hono/cookie";
 import { BunPasswordHasher } from "../security/BunPasswordHasher";
 import { RegisterUser } from "../../application/use-cases/RegisterUser";
 import { ChangePassword } from "../../application/use-cases/ChangePassword";
@@ -116,13 +115,16 @@ authController.openapi(loginRoute, async (c) => {
   // Web: store token in HttpOnly cookie (inaccessible to JS, safe from XSS)
   // Mobile clients (React Native) ignore cookies and use the token from the response body
   const isProd = process.env.NODE_ENV === "production";
-  setCookie(c, "auth_token", result.token, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: "Lax",
-    path: "/",
-    maxAge: 7300 * 24 * 60 * 60, // 20 ans
-  });
+  const maxAge = 7300 * 24 * 60 * 60; // 20 ans en secondes
+  const cookieParts = [
+    `auth_token=${result.token}`,
+    "HttpOnly",
+    "Path=/",
+    "SameSite=Lax",
+    `Max-Age=${maxAge}`,
+  ];
+  if (isProd) cookieParts.push("Secure");
+  c.header("Set-Cookie", cookieParts.join("; "));
 
   return c.json(result, 200);
 });
@@ -141,8 +143,8 @@ const logoutRoute = createRoute({
 });
 
 authController.openapi(logoutRoute, async (c) => {
-  // Clear the HttpOnly cookie on web clients
-  deleteCookie(c, "auth_token", { path: "/" });
+  // Clear the HttpOnly cookie on web clients (Max-Age=0 supprime immédiatement)
+  c.header("Set-Cookie", "auth_token=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0");
   return c.json({ message: "Logout successful" }, 200);
 });
 
