@@ -16,10 +16,9 @@ import type {
 
 export const login = async (data: LoginInput): Promise<LoginResponse> => {
   const response = await apiClient.post<LoginResponse>('/auth/login', data);
-  if (response.data.token) {
-    // not secure but simpler for now
-    localStorage.setItem('token', response.data.token);
-  }
+  // Token is stored in an HttpOnly cookie by the server (inaccessible to JS).
+  // We only keep a lightweight flag to know if the user is logged in on the client.
+  localStorage.setItem('auth', '1');
   return response.data;
 };
 
@@ -30,7 +29,7 @@ export const register = async (data: RegisterInput): Promise<RegisterResponse> =
 
 export const logout = async (): Promise<void> => {
   await apiClient.post('/auth/logout');
-  localStorage.removeItem('token');
+  localStorage.removeItem('auth');
 };
 
 export const getMe = async (): Promise<RegisterResponse> => {

@@ -1,4 +1,5 @@
 import { createMiddleware } from "hono/factory";
+import { getCookie } from "hono/cookie";
 import { IUserRepository } from "../../domain/repositories/IUserRepository";
 import { AppError } from "@/core/errors/AppError";
 
@@ -9,11 +10,16 @@ export const authMiddleware = (
   userRepository: IUserRepository,
 ) => {
   return createMiddleware(async (c, next) => {
+    // Web: read from HttpOnly cookie — Mobile: read from Authorization header
+    const cookieToken = getCookie(c, "auth_token");
     const authHeader = c.req.header("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
+    const token =
+      cookieToken ??
+      (authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : undefined);
+
+    if (!token) {
       throw new AppError("Missing or invalid token", 401, "UNAUTHORIZED");
     }
-    const token = authHeader.split(" ")[1];
 
     let userId: string;
     try {

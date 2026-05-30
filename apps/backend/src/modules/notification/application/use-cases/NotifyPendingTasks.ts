@@ -48,6 +48,10 @@ export class NotifyPendingTasks {
           utcOffsetMinutes: medication.utcOffsetMinutes,
         });
 
+        // Mark as notified so it is never sent again regardless of cron frequency.
+        task.markAsNotified();
+        await this.taskRepo.save(task);
+
       } catch (error) {
         console.error(`Failed to send notification for task ${task.id}:`, error);
       }

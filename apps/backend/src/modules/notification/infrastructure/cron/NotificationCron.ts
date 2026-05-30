@@ -4,12 +4,12 @@ import { MarkExpiredTasksAsMissed } from "../../application/use-cases/MarkExpire
 
 export function setupNotificationCron(
   notifyPendingTasks: NotifyPendingTasks,
-  markExpiredTasksAsMissed: MarkExpiredTasksAsMissed
+  markExpiredTasksAsMissed: MarkExpiredTasksAsMissed,
 ) {
   console.log("Initializing notification cron jobs...");
 
-  // Alert Worker: Every 5 minutes - check and send notifications
-  const alertJob = new Cron("*/5 * * * *", async () => {
+  // Alert Worker: Every 10 minutes - check and send notifications
+  const alertJob = new Cron("*/30 * * * *", async () => {
     try {
       await notifyPendingTasks.execute();
     } catch (error) {
@@ -17,7 +17,7 @@ export function setupNotificationCron(
     }
   });
 
-  // Cleanup Worker: Every 30 minutes - mark overdue tasks as missed
+  // Cleanup Worker: Every 30 min — marks tasks as MISSED if 2h have passed since scheduled time
   const cleanupJob = new Cron("*/30 * * * *", async () => {
     try {
       await markExpiredTasksAsMissed.execute();
@@ -26,5 +26,7 @@ export function setupNotificationCron(
     }
   });
 
-  console.log(`Jobs scheduled. Next alert at ${alertJob.nextRun()}, next cleanup at ${cleanupJob.nextRun()}`);
+  console.log(
+    `Jobs scheduled. Next alert at ${alertJob.nextRun()}, next cleanup at ${cleanupJob.nextRun()}`,
+  );
 }

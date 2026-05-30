@@ -17,7 +17,7 @@ export function setupPlanningCron(
     }
   });
 
-  // Every 30 min: Auto mark missed tasks
+  // Every 30 min: marks tasks as MISSED if 2h have passed since scheduled time (grace period)
   const missedJob = new Cron("*/30 * * * *", async () => {
     try {
       await autoMarkMissedTasks.execute();

@@ -18,7 +18,7 @@ import { useFontSize } from "@/contexts/FontSizeContext"
 export default function MainLayout() {
   const navigate = useNavigate()
   const location = useLocation()
-  const token = localStorage.getItem("token")
+  const auth = localStorage.getItem("auth")
   const { data: user } = useMe()
   const { data: members } = useHouseholdMembers()
   const { iconSize } = useFontSize()
@@ -54,10 +54,10 @@ export default function MainLayout() {
             </nav>
           </div>
           <div className="flex items-center gap-4">
-            {token && activeProfileId && (
+            {auth && activeProfileId && (
               <NotificationBell profileId={activeProfileId} />
             )}
-            {token ? (
+            {auth ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -71,7 +71,7 @@ export default function MainLayout() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuItem onClick={() => navigate("/account")}>
-                    Mon compte
+                    Paramètres
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-700">

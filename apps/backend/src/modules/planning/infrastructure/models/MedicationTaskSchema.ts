@@ -7,6 +7,7 @@ export interface IMedicationTaskDocument extends Document {
   scheduledAt: Date;
   status: string;
   takenAt?: Date;
+  notifiedAt?: Date;
   uniqueHash?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -23,6 +24,7 @@ const MedicationTaskSchema = new Schema<IMedicationTaskDocument>(
       default: TaskStatus.PENDING 
     },
     takenAt: { type: Date },
+    notifiedAt: { type: Date },
     uniqueHash: { type: String },
   },
   { timestamps: true }

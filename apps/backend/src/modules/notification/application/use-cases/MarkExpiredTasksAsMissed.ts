@@ -4,11 +4,11 @@ export class MarkExpiredTasksAsMissed {
   constructor(private readonly taskRepo: ITaskRepository) {}
 
   async execute(): Promise<void> {
-    // Tasks are considered expired if they haven't been completed 4h after scheduled time
-    const fourHoursAgo = new Date();
-    fourHoursAgo.setHours(fourHoursAgo.getHours() - 4);
+    // Tasks are considered missed if they haven't been taken 2h after scheduled time.
+    const twoHoursAgo = new Date();
+    twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
 
-    const expiredTasks = await this.taskRepo.findOverdueTasks(fourHoursAgo);
+    const expiredTasks = await this.taskRepo.findOverdueTasks(twoHoursAgo);
 
     if (expiredTasks.length === 0) {
       return;

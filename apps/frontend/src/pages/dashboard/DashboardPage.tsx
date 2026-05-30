@@ -89,7 +89,7 @@ const HistoryItem = ({ task, medication, member }: HistoryItemProps) => {
 export default function DashboardPage() {
   const { data: members } = useHouseholdMembers();
   const [selectedProfileId, setSelectedProfileId] = useState<string>('all');
-  const [timeRange, setTimeRange] = useState<TimeRange>('today');
+  const [timeRange, setTimeRange] = useState<TimeRange>('week');
 
   // Filter calculations
   const filterParams = useMemo(() => {

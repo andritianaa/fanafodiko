@@ -1,4 +1,5 @@
 import { createRoute } from "@hono/zod-openapi";
+import { setCookie, deleteCookie } from "hono/cookie";
 import { BunPasswordHasher } from "../security/BunPasswordHasher";
 import { RegisterUser } from "../../application/use-cases/RegisterUser";
 import { ChangePassword } from "../../application/use-cases/ChangePassword";
@@ -111,6 +112,18 @@ authController.openapi(loginRoute, async (c) => {
   );
 
   const result = await loginUseCase.execute(email, password);
+
+  // Web: store token in HttpOnly cookie (inaccessible to JS, safe from XSS)
+  // Mobile clients (React Native) ignore cookies and use the token from the response body
+  const isProd = process.env.NODE_ENV === "production";
+  setCookie(c, "auth_token", result.token, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: "Lax",
+    path: "/",
+    maxAge: 7300 * 24 * 60 * 60, // 20 ans
+  });
+
   return c.json(result, 200);
 });
 
@@ -128,7 +141,8 @@ const logoutRoute = createRoute({
 });
 
 authController.openapi(logoutRoute, async (c) => {
-  // Stateless logout
+  // Clear the HttpOnly cookie on web clients
+  deleteCookie(c, "auth_token", { path: "/" });
   return c.json({ message: "Logout successful" }, 200);
 });
 

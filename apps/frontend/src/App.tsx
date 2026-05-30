@@ -13,12 +13,12 @@ import CguPage from "@/pages/legal/CguPage"
 import { FontSizeProvider } from "@/contexts/FontSizeContext"
 
 const PrivateRoute = () => {
-  const token = localStorage.getItem("token")
+  const token = localStorage.getItem("auth")
   return token ? <Outlet /> : <Navigate to="/register" replace />
 }
 
 const PublicRoute = () => {
-  const token = localStorage.getItem("token")
+  const token = localStorage.getItem("auth")
   return token ? <Navigate to="/dashboard" replace /> : <Outlet />
 }
 

@@ -72,9 +72,6 @@ export default function AccountPage() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
-              {user?.email?.toString().charAt(0).toUpperCase() || 'U'}
-            </div>
             <div>
               <p className="text-sm font-medium">{user?.email?.toString() || '—'}</p>
               <p className="text-xs text-muted-foreground">Adresse email actuelle</p>
@@ -98,6 +95,7 @@ export default function AccountPage() {
                   id="newEmail"
                   type="email"
                   placeholder="nouveau@exemple.com"
+                  autoComplete="off"
                   {...emailForm.register('newEmail')}
                 />
               </FieldContent>
@@ -111,6 +109,7 @@ export default function AccountPage() {
                   id="emailCurrentPassword"
                   type="password"
                   placeholder="••••••••"
+                  autoComplete="new-password"
                   {...emailForm.register('currentPassword')}
                 />
               </FieldContent>
@@ -139,6 +138,7 @@ export default function AccountPage() {
                   id="currentPassword"
                   type="password"
                   placeholder="••••••••"
+                  autoComplete="new-password"
                   {...passwordForm.register('currentPassword')}
                 />
               </FieldContent>
@@ -152,6 +152,7 @@ export default function AccountPage() {
                   id="newPassword"
                   type="password"
                   placeholder="Minimum 8 caractères"
+                  autoComplete="new-password"
                   {...passwordForm.register('newPassword')}
                 />
               </FieldContent>

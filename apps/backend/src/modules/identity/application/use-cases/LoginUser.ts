@@ -25,11 +25,15 @@ export class LoginUser {
     if (!isValid)
       throw new AppError("Invalid credentials", 401, "INVALID_CREDENTIALS");
 
-    const accessToken = await this.tokenService.generate({
-      sub: user.id,
-      email: user.email.getValue(),
-      role: "owner", 
-    });
+    const expiresIn = process.env.JWT_EXPIRES_IN || "7300d"; // 20 ans par défaut
+    const accessToken = await this.tokenService.generate(
+      {
+        sub: user.id,
+        email: user.email.getValue(),
+        role: "owner",
+      },
+      expiresIn,
+    );
 
     return { token: accessToken };
   }

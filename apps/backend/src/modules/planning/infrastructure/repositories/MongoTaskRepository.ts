@@ -13,6 +13,7 @@ export class MongoTaskRepository implements ITaskRepository {
       scheduledAt: doc.scheduledAt,
       status: doc.status as TaskStatus,
       takenAt: doc.takenAt,
+      notifiedAt: doc.notifiedAt,
       uniqueHash: doc.uniqueHash,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
@@ -26,6 +27,7 @@ export class MongoTaskRepository implements ITaskRepository {
       scheduledAt: task.scheduledAt,
       status: task.status,
       takenAt: task.takenAt,
+      notifiedAt: task.notifiedAt,
       uniqueHash: task.uniqueHash,
     };
   }
@@ -97,9 +99,12 @@ export class MongoTaskRepository implements ITaskRepository {
 
   // Notification methods
   async findTasksToNotify(currentTime: Date): Promise<MedicationTask[]> {
+    // Only return tasks that have never been notified (notifiedAt absent or null).
+    // This guarantees each scheduled dose triggers exactly one email/push notification.
     const docs = await MedicationTaskModel.find({
       status: TaskStatus.PENDING,
-      scheduledAt: { $lte: currentTime }
+      scheduledAt: { $lte: currentTime },
+      notifiedAt: { $exists: false },
     }).sort({ scheduledAt: 1 });
     return docs.map(doc => this.toDomain(doc));
   }

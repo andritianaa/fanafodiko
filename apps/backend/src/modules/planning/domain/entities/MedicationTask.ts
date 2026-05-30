@@ -14,6 +14,7 @@ export interface MedicationTaskProps {
   scheduledAt: Date;
   status: TaskStatus;
   takenAt?: Date;
+  notifiedAt?: Date;
   uniqueHash?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -59,6 +60,7 @@ export class MedicationTask {
   get status(): TaskStatus { return this.props.status; }
   get uniqueHash(): string | undefined { return this.props.uniqueHash; }
   get takenAt(): Date | undefined { return this.props.takenAt; }
+  get notifiedAt(): Date | undefined { return this.props.notifiedAt; }
   get createdAt(): Date | undefined { return this.props.createdAt; }
   get updatedAt(): Date | undefined { return this.props.updatedAt; }
 
@@ -79,6 +81,11 @@ export class MedicationTask {
   markAsSkipped(): void {
     if (this.props.status !== TaskStatus.PENDING) return;
     this.props.status = TaskStatus.SKIPPED;
+    this.props.updatedAt = new Date();
+  }
+
+  markAsNotified(): void {
+    this.props.notifiedAt = new Date();
     this.props.updatedAt = new Date();
   }
 }

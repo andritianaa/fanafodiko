@@ -8,21 +8,9 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Required for the browser to send/receive HttpOnly cookies cross-origin
+  withCredentials: true,
 });
-
-// Request interceptor to include the auth token
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 // Response interceptor to handle errors
 apiClient.interceptors.response.use(
@@ -41,10 +29,10 @@ apiClient.interceptors.response.use(
 
     // Handle 401 Unauthorized globally
     if (status === 401) {
-      localStorage.removeItem('token');
-      
+      localStorage.removeItem('auth');
+
       const isLoginError = data?.code === 'INVALID_CREDENTIALS' || globalThis.location.pathname === '/login';
-      
+
       if (!isLoginError) {
         toast.error("Session expirée", {
           description: "Veuillez vous reconnecter.",
