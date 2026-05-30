@@ -372,4 +372,57 @@ medicationController.openapi(deleteRoute, async (c) => {
   return c.json({ message: "Medication deleted successfully" }, 200);
 });
 
+// ─── Migration : applique un utcOffsetMinutes à tous les médicaments du compte ─
+const fixTimezoneRoute = createRoute({
+  method: "post",
+  path: "/fix-timezone",
+  security: [{ AuthorizationApiKey: [] }],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            utcOffsetMinutes: z.number().openapi({
+              example: -180,
+              description: "Offset à appliquer (ex: -180 pour UTC+3 Madagascar)",
+            }),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Médicaments mis à jour",
+      content: {
+        "application/json": {
+          schema: z.object({ updated: z.number() }),
+        },
+      },
+    },
+  },
+});
+
+medicationController.openapi(fixTimezoneRoute, async (c) => {
+  const user = c.get("user");
+  const { utcOffsetMinutes } = c.req.valid("json");
+
+  // Récupère tous les profils du compte puis tous leurs médicaments
+  const profiles = await profileRepository.findAllByAccountId(user.id!);
+  const profileIds = profiles.map((p) => p.id!);
+  const medications = await medicationRepository.findByProfileId(profileIds);
+
+  let updated = 0;
+  for (const med of medications) {
+    // Met à jour uniquement les médicaments sans offset correct (utcOffsetMinutes === 0)
+    if (med.utcOffsetMinutes !== utcOffsetMinutes) {
+      med.update({ utcOffsetMinutes });
+      await medicationRepository.save(med);
+      updated++;
+    }
+  }
+
+  return c.json({ updated }, 200);
+});
+
 export default medicationController;
