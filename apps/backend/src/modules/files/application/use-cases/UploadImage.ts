@@ -1,7 +1,7 @@
 import { ImageProcessor } from '../../infrastructure/image/ImageProcessor';
 import { AppError } from '@/core/errors/AppError';
 import { randomUUID } from 'node:crypto';
-import { writeFile } from 'node:fs/promises';
+import { writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
 export class UploadImage {
@@ -14,6 +14,8 @@ export class UploadImage {
   }
 
   async execute(file: File): Promise<{ filename: string; url: string }> {
+    // Crée le dossier uploads s'il n'existe pas encore
+    await mkdir(this.uploadDir, { recursive: true });
     if (!file.type.startsWith('image/')) {
       throw new AppError('Only images are allowed', 400, 'INVALID_FILE_TYPE');
     }
