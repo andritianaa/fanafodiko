@@ -23,6 +23,7 @@ export const CreateMedicationSchema = z.object({
   frequency: FrequencySchema,
   startDate: z.string().datetime().openapi({ example: '2023-01-01T00:00:00Z', description: 'Start date' }),
   endDate: z.string().datetime().nullable().optional().openapi({ example: '2023-01-10T00:00:00Z', description: 'End date (optional)' }),
+  utcOffsetMinutes: z.number().default(0).openapi({ example: -180, description: 'Browser timezone offset from getTimezoneOffset() — negative for UTC+ zones (e.g., -180 for UTC+3/Madagascar)' }),
 }).openapi('CreateMedication');
 
 export const UpdateMedicationSchema = z.object({
@@ -31,6 +32,7 @@ export const UpdateMedicationSchema = z.object({
   frequency: FrequencySchema.optional(),
   startDate: z.string().datetime().optional().openapi({ example: '2023-01-01T00:00:00Z', description: 'Start date' }),
   endDate: z.string().datetime().nullable().optional().openapi({ example: '2023-01-10T00:00:00Z', description: 'End date (optional)' }),
+  utcOffsetMinutes: z.number().optional().openapi({ example: -180, description: 'Browser timezone offset' }),
 }).openapi('UpdateMedication');
 
 export const ToggleMedicationStatusSchema = z.object({
@@ -46,6 +48,7 @@ export const MedicationResponseSchema = z.object({
   startDate: z.string().datetime(),
   endDate: z.string().datetime().nullable().optional(),
   isActive: z.boolean(),
+  utcOffsetMinutes: z.number().default(0),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 }).openapi('MedicationResponse');

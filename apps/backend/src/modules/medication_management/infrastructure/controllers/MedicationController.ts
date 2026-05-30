@@ -102,6 +102,7 @@ medicationController.openapi(createMedicationRoute, async (c) => {
     },
     startDate: new Date(data.startDate),
     endDate: data.endDate ? new Date(data.endDate) : undefined,
+    utcOffsetMinutes: data.utcOffsetMinutes ?? 0,
   });
 
   return c.json(
@@ -118,6 +119,7 @@ medicationController.openapi(createMedicationRoute, async (c) => {
       startDate: medication.startDate.toISOString(),
       endDate: medication.endDate?.toISOString() || undefined,
       isActive: medication.isActive,
+      utcOffsetMinutes: medication.utcOffsetMinutes,
       createdAt: medication.createdAt?.toISOString() || new Date().toISOString(),
       updatedAt: medication.updatedAt?.toISOString() || new Date().toISOString(),
     },
@@ -220,6 +222,7 @@ medicationController.openapi(getDetailsRoute, async (c) => {
       startDate: med.startDate.toISOString(),
       endDate: med.endDate?.toISOString() || undefined,
       isActive: med.isActive,
+      utcOffsetMinutes: med.utcOffsetMinutes,
       createdAt: med.createdAt?.toISOString() || new Date().toISOString(),
       updatedAt: med.updatedAt?.toISOString() || new Date().toISOString(),
     },
@@ -263,6 +266,7 @@ medicationController.openapi(updateRoute, async (c) => {
       days: data.frequency.days,
     };
   }
+  if (data.utcOffsetMinutes !== undefined) updates.utcOffsetMinutes = data.utcOffsetMinutes;
 
   const med = await updateMedicationUseCase.execute({
     userId: user.id!,
@@ -284,6 +288,7 @@ medicationController.openapi(updateRoute, async (c) => {
       startDate: med.startDate.toISOString(),
       endDate: med.endDate?.toISOString() || undefined,
       isActive: med.isActive,
+      utcOffsetMinutes: med.utcOffsetMinutes,
       createdAt: med.createdAt?.toISOString() || new Date().toISOString(),
       updatedAt: med.updatedAt?.toISOString() || new Date().toISOString(),
     },
@@ -335,6 +340,7 @@ medicationController.openapi(toggleStatusRoute, async (c) => {
       startDate: med.startDate.toISOString(),
       endDate: med.endDate?.toISOString() || undefined,
       isActive: med.isActive,
+      utcOffsetMinutes: med.utcOffsetMinutes,
       createdAt: med.createdAt?.toISOString() || new Date().toISOString(),
       updatedAt: med.updatedAt?.toISOString() || new Date().toISOString(),
     },

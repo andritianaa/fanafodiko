@@ -34,10 +34,14 @@ export class ResendNotificationService implements INotificationService {
   }
 
   private buildEmailHTML(params: NotificationParams): string {
-    const scheduledTime = params.scheduledAt.toLocaleTimeString("fr-FR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    // Convert UTC scheduledAt back to the user's local time using the stored offset.
+    // utcOffsetMinutes = getTimezoneOffset() = -(UTC offset in hours)*60
+    // localMinutes = utcMinutes - utcOffsetMinutes
+    const utcMins = params.scheduledAt.getUTCHours() * 60 + params.scheduledAt.getUTCMinutes();
+    const localTotalMins = ((utcMins - params.utcOffsetMinutes) % 1440 + 1440) % 1440;
+    const localH = Math.floor(localTotalMins / 60);
+    const localM = localTotalMins % 60;
+    const scheduledTime = `${String(localH).padStart(2, "0")}:${String(localM).padStart(2, "0")}`;
 
     return `
       <!DOCTYPE html>

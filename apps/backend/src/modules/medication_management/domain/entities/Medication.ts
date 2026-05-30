@@ -10,6 +10,7 @@ export interface MedicationProps {
   startDate: Date;
   endDate?: Date | null;
   isActive: boolean;
+  utcOffsetMinutes: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -24,6 +25,7 @@ export class Medication {
     frequency: FrequencyProps;
     startDate: Date;
     endDate?: Date | null;
+    utcOffsetMinutes?: number;
   }): Medication {
     // Basic Validation
     if (!props.profileId) throw new AppError("Profile ID is required", 400, "INVALID_PROFILE_ID");
@@ -39,7 +41,8 @@ export class Medication {
       frequency: frequency,
       startDate: props.startDate,
       endDate: props.endDate ?? null,
-      isActive: true, // Active by default
+      isActive: true,
+      utcOffsetMinutes: props.utcOffsetMinutes ?? 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -58,6 +61,7 @@ export class Medication {
   get startDate(): Date { return this.props.startDate; }
   get endDate(): Date | null | undefined { return this.props.endDate; }
   get isActive(): boolean { return this.props.isActive; }
+  get utcOffsetMinutes(): number { return this.props.utcOffsetMinutes; }
   get createdAt(): Date | undefined { return this.props.createdAt; }
   get updatedAt(): Date | undefined { return this.props.updatedAt; }
 
@@ -85,6 +89,7 @@ export class Medication {
     frequency?: FrequencyProps;
     startDate?: Date;
     endDate?: Date | null;
+    utcOffsetMinutes?: number;
   }): void {
     if (updates.name !== undefined) {
         if (!updates.name || updates.name.trim().length === 0) throw new AppError("Name cannot be empty", 400, "INVALID_NAME");
@@ -103,7 +108,10 @@ export class Medication {
     if (updates.endDate !== undefined) {
         this.props.endDate = updates.endDate;
     }
-    
+    if (updates.utcOffsetMinutes !== undefined) {
+        this.props.utcOffsetMinutes = updates.utcOffsetMinutes;
+    }
+
     this.props.updatedAt = new Date();
   }
 }

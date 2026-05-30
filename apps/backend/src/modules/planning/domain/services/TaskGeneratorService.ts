@@ -57,7 +57,7 @@ export class TaskGeneratorService {
     const dayTasks: MedicationTask[] = [];
 
     for (const timeStr of medication.frequency.times) {
-      const taskDate = this.createDateTime(day, timeStr);
+      const taskDate = this.createDateTime(day, timeStr, medication.utcOffsetMinutes);
 
       if (this.isTaskDateValid(taskDate, medication, windowStart, windowEnd)) {
         dayTasks.push(MedicationTask.create({
@@ -71,10 +71,21 @@ export class TaskGeneratorService {
     return dayTasks;
   }
 
-  private static createDateTime(date: Date, timeStr: string): Date {
+  /**
+   * Converts a local "HH:mm" time string to a UTC Date.
+   * utcOffsetMinutes = new Date().getTimezoneOffset() in the user's browser:
+   *   - negative for UTC+ zones (e.g. -180 for UTC+3 Madagascar)
+   *   - positive for UTC- zones
+   * Formula: utcMinutes = localMinutes + utcOffsetMinutes
+   */
+  private static createDateTime(date: Date, timeStr: string, utcOffsetMinutes: number): Date {
     const [hours, minutes] = timeStr.split(':').map(Number);
+    const localMinutes = hours * 60 + minutes;
+    const utcTotalMinutes = ((localMinutes + utcOffsetMinutes) % 1440 + 1440) % 1440;
+    const utcHours = Math.floor(utcTotalMinutes / 60);
+    const utcMins = utcTotalMinutes % 60;
     const dateTime = new Date(date);
-    dateTime.setHours(hours, minutes, 0, 0);
+    dateTime.setUTCHours(utcHours, utcMins, 0, 0);
     return dateTime;
   }
 

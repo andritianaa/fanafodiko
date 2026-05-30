@@ -13,6 +13,7 @@ export interface UpdateMedicationDTO {
         frequency?: FrequencyProps;
         startDate?: Date;
         endDate?: Date | null;
+        utcOffsetMinutes?: number;
     }
 }
 

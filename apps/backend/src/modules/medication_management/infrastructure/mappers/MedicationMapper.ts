@@ -17,6 +17,7 @@ export class MedicationMapper {
       startDate: raw.startDate,
       endDate: raw.endDate ?? null,
       isActive: raw.isActive,
+      utcOffsetMinutes: raw.utcOffsetMinutes ?? 0,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt
     });
@@ -35,6 +36,7 @@ export class MedicationMapper {
       startDate: medication.startDate,
       endDate: medication.endDate,
       isActive: medication.isActive,
+      utcOffsetMinutes: medication.utcOffsetMinutes,
       updatedAt: medication.updatedAt
     };
   }

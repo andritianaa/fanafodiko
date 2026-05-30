@@ -45,6 +45,7 @@ export class NotifyPendingTasks {
           dosage: medication.dosage,
           scheduledAt: task.scheduledAt,
           profileEmail,
+          utcOffsetMinutes: medication.utcOffsetMinutes,
         });
 
       } catch (error) {

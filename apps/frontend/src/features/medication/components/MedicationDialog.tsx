@@ -151,9 +151,13 @@ export const MedicationDialog = ({
   }, [medication, reset, open, defaultProfileId]);
 
   const onSubmit = (data: CreateMedicationInput) => {
+    // Attach the browser's UTC offset so the backend converts HH:mm (local) → UTC correctly.
+    // getTimezoneOffset() is negative for UTC+ zones (e.g. -180 for Madagascar UTC+3).
+    const utcOffsetMinutes = new Date().getTimezoneOffset();
+
     if (isEditing && medication) {
       updateMedication(
-        { id: medication.id, data },
+        { id: medication.id, data: { ...data, utcOffsetMinutes } },
         {
           onSuccess: () => {
             toast.success('Médicament mis à jour');
@@ -165,7 +169,7 @@ export const MedicationDialog = ({
         }
       );
     } else {
-      createMedication(data, {
+      createMedication({ ...data, utcOffsetMinutes }, {
         onSuccess: () => {
           toast.success('Médicament ajouté');
           onOpenChange(false);

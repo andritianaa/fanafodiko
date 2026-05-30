@@ -106,6 +106,8 @@ function MedModal({
     setLoading(true);
     try {
       let saved: Medication;
+      // Attach the device's UTC offset so the backend converts HH:mm (local) → UTC correctly.
+      // getTimezoneOffset() is negative for UTC+ zones (e.g. -180 for Madagascar UTC+3).
       const payload = {
         profileId,
         name: form.name.trim(),
@@ -113,6 +115,7 @@ function MedModal({
         frequency: getFrequency(),
         startDate: new Date(form.startDate).toISOString(),
         endDate: form.endDate ? new Date(form.endDate).toISOString() : undefined,
+        utcOffsetMinutes: new Date().getTimezoneOffset(),
       };
 
       if (isEdit && editMed) {

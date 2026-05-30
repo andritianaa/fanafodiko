@@ -13,6 +13,7 @@ export interface CreateMedicationDTO {
   frequency: FrequencyProps;
   startDate: Date;
   endDate?: Date;
+  utcOffsetMinutes?: number;
 }
 
 export class CreateMedication {
@@ -40,6 +41,7 @@ export class CreateMedication {
       frequency: dto.frequency,
       startDate: dto.startDate,
       endDate: dto.endDate,
+      utcOffsetMinutes: dto.utcOffsetMinutes ?? 0,
     });
 
     const savedMedication = await this.medicationRepository.save(medication);

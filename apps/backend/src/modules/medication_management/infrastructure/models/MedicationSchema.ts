@@ -12,6 +12,7 @@ export interface IMedicationDocument extends Document {
   startDate: Date;
   endDate?: Date;
   isActive: boolean;
+  utcOffsetMinutes: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,6 +30,7 @@ const MedicationSchema = new Schema<IMedicationDocument>(
     startDate: { type: Date, required: true },
     endDate: { type: Date },
     isActive: { type: Boolean, default: true },
+    utcOffsetMinutes: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
