@@ -136,6 +136,17 @@ export class MongoTaskRepository implements ITaskRepository {
     });
   }
 
+  async deleteFuturePendingByMedicationId(
+    medicationId: string,
+    afterDate: Date,
+  ): Promise<void> {
+    await MedicationTaskModel.deleteMany({
+      medicationId,
+      scheduledAt: { $gt: afterDate },
+      status: TaskStatus.PENDING,
+    });
+  }
+
   async deleteById(id: string): Promise<void> {
     await MedicationTaskModel.findByIdAndDelete(id);
   }

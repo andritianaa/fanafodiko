@@ -2,12 +2,13 @@ import { AppError } from "@/core/errors/AppError";
 import { Medication } from "../../domain/entities/Medication";
 import { IMedicationRepository } from "../../domain/repositories/IMedicationRepository";
 import { IProfileRepository } from "@/modules/identity/domain/repositories/IProfileRepository";
-
+import { EventBus } from "@/core/events/EventBus";
 
 export class ToggleMedicationStatus {
     constructor(
         private readonly medicationRepository: IMedicationRepository,
-        private readonly profileRepository: IProfileRepository
+        private readonly profileRepository: IProfileRepository,
+        private readonly eventBus: EventBus,
     ) {}
 
     async execute(userId: string, medicationId: string, isActive: boolean): Promise<Medication> {
@@ -28,8 +29,14 @@ export class ToggleMedicationStatus {
         }
 
         const updated = await this.medicationRepository.save(medication);
-        
 
+        if (!isActive) {
+            // Désactivation : supprime immédiatement les futures tâches
+            this.eventBus.publish("medication.deactivated", { medicationId: updated.id });
+        } else {
+            // Réactivation : régénère les tâches comme une mise à jour
+            this.eventBus.publish("medication.updated", { medicationId: updated.id });
+        }
 
         return updated;
     }

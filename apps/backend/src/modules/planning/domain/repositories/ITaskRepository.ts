@@ -18,6 +18,8 @@ export interface ITaskRepository {
   findFuturePending(afterDate: Date): Promise<MedicationTask[]>;
   /** Supprime les tâches futures non encore notifiées pour un médicament (pour régénérer après modif) */
   deleteUnnotifiedFutureByMedicationId(medicationId: string, afterDate: Date): Promise<void>;
+  /** Supprime toutes les tâches futures PENDING pour un médicament (désactivation / suppression) */
+  deleteFuturePendingByMedicationId(medicationId: string, afterDate: Date): Promise<void>;
   /** Supprime une tâche par son id */
   deleteById(id: string): Promise<void>;
 }

@@ -51,15 +51,18 @@ const listMedicationsByProfileUseCase = new ListMedicationsByProfile(
 );
 const updateMedicationUseCase = new UpdateMedication(
   medicationRepository,
-  profileRepository
+  profileRepository,
+  globalEventBus,
 );
 const deleteMedicationUseCase = new DeleteMedication(
   medicationRepository,
-  profileRepository
+  profileRepository,
+  globalEventBus,
 );
 const toggleMedicationStatusUseCase = new ToggleMedicationStatus(
   medicationRepository,
-  profileRepository
+  profileRepository,
+  globalEventBus,
 );
 
 // Middleware

@@ -1,11 +1,13 @@
 import { AppError } from "@/core/errors/AppError";
 import { IMedicationRepository } from "../../domain/repositories/IMedicationRepository";
 import { IProfileRepository } from "@/modules/identity/domain/repositories/IProfileRepository";
+import { EventBus } from "@/core/events/EventBus";
 
 export class DeleteMedication {
     constructor(
         private readonly medicationRepository: IMedicationRepository,
-        private readonly profileRepository: IProfileRepository
+        private readonly profileRepository: IProfileRepository,
+        private readonly eventBus: EventBus,
     ) {}
 
     async execute(userId: string, medicationId: string): Promise<void> {
@@ -20,5 +22,8 @@ export class DeleteMedication {
         }
 
         await this.medicationRepository.delete(medicationId);
+
+        // Publié après la suppression pour nettoyer les tâches planifiées
+        this.eventBus.publish("medication.deleted", { medicationId });
     }
 }

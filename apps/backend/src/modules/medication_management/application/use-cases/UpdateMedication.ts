@@ -3,6 +3,7 @@ import { Medication } from "../../domain/entities/Medication";
 import { IMedicationRepository } from "../../domain/repositories/IMedicationRepository";
 import { IProfileRepository } from "@/modules/identity/domain/repositories/IProfileRepository";
 import { FrequencyProps } from "../../domain/value-objects/Frequency";
+import { EventBus } from "@/core/events/EventBus";
 
 export interface UpdateMedicationDTO {
     userId: string;
@@ -20,7 +21,8 @@ export interface UpdateMedicationDTO {
 export class UpdateMedication {
     constructor(
         private readonly medicationRepository: IMedicationRepository,
-        private readonly profileRepository: IProfileRepository
+        private readonly profileRepository: IProfileRepository,
+        private readonly eventBus: EventBus,
     ) {}
 
     async execute(dto: UpdateMedicationDTO): Promise<Medication> {
@@ -42,7 +44,7 @@ export class UpdateMedication {
 
         const updated = await this.medicationRepository.save(medication);
 
-
+        this.eventBus.publish("medication.updated", { medicationId: updated.id });
 
         return updated;
     }

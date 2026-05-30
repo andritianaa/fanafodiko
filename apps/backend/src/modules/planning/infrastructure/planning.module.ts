@@ -5,6 +5,9 @@ import { ScheduleTasksForMedication } from "../application/use-cases/ScheduleTas
 import { AutoMarkMissedTasks } from "../application/use-cases/AutoMarkMissedTasks";
 import { setupPlanningCron } from "./cron/PlanningCron";
 import { setupScheduleTasksForNewMedicationHandler } from "../application/handlers/ScheduleTasksForNewMedicationHandler";
+import { setupHandleMedicationUpdatedHandler } from "../application/handlers/HandleMedicationUpdatedHandler";
+import { setupHandleMedicationDeactivatedHandler } from "../application/handlers/HandleMedicationDeactivatedHandler";
+import { setupHandleMedicationDeletedHandler } from "../application/handlers/HandleMedicationDeletedHandler";
 import { EventBus } from "@/core/events/EventBus";
 
 export function initPlanningModule(eventBus: EventBus) {
@@ -15,9 +18,16 @@ export function initPlanningModule(eventBus: EventBus) {
   const scheduleTasksForMedication = new ScheduleTasksForMedication(medicationRepo, taskRepo);
   const autoMarkMissedTasks = new AutoMarkMissedTasks(taskRepo);
 
-  // Cron toutes les 5 min : synchronisation complète (mises à jour, désactivations, suppressions)
+  // ── Cron toutes les 5 min : filet de sécurité ─────────────────────────────
   setupPlanningCron(syncMedicationTasks, autoMarkMissedTasks);
 
-  // Événement medication.created : génération immédiate des tâches du jour
+  // ── Event handlers : réaction immédiate aux changements ───────────────────
+  // Ajout → génération instantanée des tâches du jour
   setupScheduleTasksForNewMedicationHandler(eventBus, scheduleTasksForMedication);
+  // Modification → supprime anciennes tâches non notifiées + régénère
+  setupHandleMedicationUpdatedHandler(eventBus, taskRepo, scheduleTasksForMedication);
+  // Désactivation → supprime toutes les futures tâches PENDING
+  setupHandleMedicationDeactivatedHandler(eventBus, taskRepo);
+  // Suppression → idem
+  setupHandleMedicationDeletedHandler(eventBus, taskRepo);
 }
