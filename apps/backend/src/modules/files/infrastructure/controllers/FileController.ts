@@ -98,7 +98,15 @@ const getFileRoute = createRoute({
 
 fileController.openapi(getFileRoute, async (c) => {
   const { filename } = c.req.valid("param");
-  const filePath = path.join(UPLOAD_DIR, filename);
+
+  // Protection path traversal : on ne garde que le nom de fichier (pas de ../ etc.)
+  const safeFilename = path.basename(filename);
+  const filePath = path.resolve(path.join(UPLOAD_DIR, safeFilename));
+  const uploadDirResolved = path.resolve(UPLOAD_DIR);
+
+  if (!filePath.startsWith(uploadDirResolved + path.sep)) {
+    throw new AppError("Accès interdit", 403, "FORBIDDEN");
+  }
 
   if (!existsSync(filePath)) {
     return c.json({ message: "File not found" }, 404);

@@ -15,7 +15,7 @@ export class PasswordResetCode {
 
     const code = randomBytes(3).toString('hex').toUpperCase();
 
-    expiresAt.setHours(expiresAt.getHours() + 24); // valide 24h
+    expiresAt.setMinutes(expiresAt.getMinutes() + 15); // valide 15 min
     return new PasswordResetCode({
       ...props,
       expiresAt,

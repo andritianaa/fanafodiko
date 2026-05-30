@@ -7,6 +7,9 @@ export const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
+    // Protection CSRF : ce header custom ne peut pas être envoyé par un formulaire HTML
+    // ou un fetch cross-origin sans CORS explicite → le backend le vérifie.
+    'X-Requested-With': 'XMLHttpRequest',
   },
   // Required for the browser to send/receive HttpOnly cookies cross-origin
   withCredentials: true,

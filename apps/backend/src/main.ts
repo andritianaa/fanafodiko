@@ -16,6 +16,7 @@ import { globalEventBus } from "./core/events/EventBus";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
+import { getCookie } from "hono/cookie";
 import {
   authLimiter,
   apiLimiter,
@@ -36,8 +37,31 @@ app.use(
   "*",
   secureHeaders({
     crossOriginResourcePolicy: "cross-origin",
+    // Empêche le clickjacking
+    xFrameOptions: "DENY",
+    // Force HTTPS pendant 1 an en production
+    strictTransportSecurity: "max-age=31536000; includeSubDomains",
+    // Désactive le sniffing de type MIME
+    xContentTypeOptions: "nosniff",
   }),
 );
+
+// Protection CSRF : les requêtes cookie-authentifiées doivent porter
+// le header X-Requested-With (impossible à envoyer depuis un formulaire HTML cross-origin).
+// Les requêtes mobiles n'ont pas de cookie auth_token → ce check est ignoré pour elles.
+app.use("*", async (c, next) => {
+  const method = c.req.method;
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+    const hasCookie = !!getCookie(c, "auth_token");
+    if (hasCookie) {
+      const xRequested = c.req.header("x-requested-with");
+      if (!xRequested || xRequested.toLowerCase() !== "xmlhttprequest") {
+        return c.json({ message: "Requête non autorisée (CSRF)", code: "CSRF_REJECTED" }, 403);
+      }
+    }
+  }
+  await next();
+});
 
 // CORS, origines autorisées via variable d'environnement
 // Les apps mobiles (React Native/Expo) ne sont PAS des navigateurs :

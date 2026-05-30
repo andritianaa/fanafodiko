@@ -5,6 +5,19 @@
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fanafodiko</title>
+    <!-- Content Security Policy : limite les sources autorisées pour bloquer XSS et injections -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self';
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: https:;
+      connect-src 'self' http://localhost:3000 https://andritiana.tech https://*.andritiana.tech;
+      font-src 'self' data:;
+      object-src 'none';
+      frame-src 'none';
+      base-uri 'self';
+      form-action 'self';
+    " />
   </head>
   <body>
     <div id="root"></div>
