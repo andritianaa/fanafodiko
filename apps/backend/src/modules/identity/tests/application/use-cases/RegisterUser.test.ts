@@ -38,8 +38,7 @@ describe("RegisterUser", () => {
     const data = {
       email: "test@example.com",
       password: "password123",
-      firstName: "John",
-      lastName: "Doe",
+      fullName: "John Doe",
     };
 
     mockUserRepository.findByEmail.mockResolvedValue(null);
@@ -68,8 +67,7 @@ describe("RegisterUser", () => {
     const data = {
       email: "existing@example.com",
       password: "password123",
-      firstName: "Jane",
-      lastName: "Doe",
+      fullName: "Jane Doe",
     };
 
     mockUserRepository.findByEmail.mockResolvedValue(

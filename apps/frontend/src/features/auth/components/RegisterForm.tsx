@@ -1,11 +1,10 @@
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RegisterSchema } from '@ext/schemas';
 import type { RegisterInput } from '../types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field, FieldLabel, FieldContent, FieldError } from '@/components/ui/field';
-import { DateBirthPicker } from '@/components/ui/date-birth-picker';
 import { useRegister, useLogin } from '../api/hooks';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -18,7 +17,6 @@ export const RegisterForm = () => {
   const {
     register,
     handleSubmit,
-    control,
     formState: { errors },
   } = useForm<RegisterInput>({
     resolver: zodResolver(RegisterSchema),
@@ -52,33 +50,18 @@ export const RegisterForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <Field>
-          <FieldLabel htmlFor="firstName">Prénom</FieldLabel>
-          <FieldContent>
-            <Input
-              id="firstName"
-              placeholder="John"
-              required
-              {...register('firstName')}
-            />
-          </FieldContent>
-          <FieldError errors={[errors.firstName]} />
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="lastName">Nom</FieldLabel>
-          <FieldContent>
-            <Input
-              id="lastName"
-              placeholder="Doe"
-              required
-              {...register('lastName')}
-            />
-          </FieldContent>
-          <FieldError errors={[errors.lastName]} />
-        </Field>
-      </div>
+      <Field>
+        <FieldLabel htmlFor="fullName">Nom complet</FieldLabel>
+        <FieldContent>
+          <Input
+            id="fullName"
+            placeholder="John Doe"
+            required
+            {...register('fullName')}
+          />
+        </FieldContent>
+        <FieldError errors={[errors.fullName]} />
+      </Field>
 
       <Field>
         <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -91,24 +74,6 @@ export const RegisterForm = () => {
           />
         </FieldContent>
         <FieldError errors={[errors.email]} />
-      </Field>
-
-      <Field>
-        <FieldLabel htmlFor="dateOfBirth">Date de naissance</FieldLabel>
-        <FieldContent>
-          <Controller
-            control={control}
-            name="dateOfBirth"
-            render={({ field }) => (
-              <DateBirthPicker
-                date={field.value}
-                setDate={field.onChange}
-                placeholder="Sélectionner une date"
-              />
-            )}
-          />
-        </FieldContent>
-        <FieldError errors={[errors.dateOfBirth]} />
       </Field>
 
       <Field>

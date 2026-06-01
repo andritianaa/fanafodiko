@@ -8,8 +8,8 @@ export function setupNotificationCron(
 ) {
   console.log("Initializing notification cron jobs...");
 
-  // Alert Worker: Every 10 minutes - check and send notifications
-  const alertJob = new Cron("*/30 * * * *", async () => {
+  // Alert Worker: Every 5 min,retard max de 5 min sur l'heure prévue
+  const alertJob = new Cron("*/5 * * * *", async () => {
     try {
       await notifyPendingTasks.execute();
     } catch (error) {
@@ -17,7 +17,7 @@ export function setupNotificationCron(
     }
   });
 
-  // Cleanup Worker: Every 30 min — marks tasks as MISSED if 2h have passed since scheduled time
+  // Cleanup Worker: Every 30 min,marks tasks as MISSED if 2h have passed since scheduled time
   const cleanupJob = new Cron("*/30 * * * *", async () => {
     try {
       await markExpiredTasksAsMissed.execute();

@@ -152,6 +152,64 @@ export function welcomeEmailTemplate(email: string): {
   };
 }
 
+// ─── Template, Demande de médicament (membre pharmacie) ───────────────────────
+export function medSearchEmailTemplate(params: {
+  pharmacyName: string;
+  medicationName: string;
+  note?: string;
+  radiusKm: number;
+  manageUrl: string;
+}): { subject: string; html: string } {
+  const { pharmacyName, medicationName, note, radiusKm, manageUrl } = params;
+
+  const html = baseLayout(`
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+      <tr><td style="background-color:#4f46e5;height:4px;"></td></tr>
+    </table>
+
+    <h1 style="margin:0 0 6px 0;color:#1c1917;font-size:22px;font-weight:700;letter-spacing:-0.5px;">
+      Demande de médicament
+    </h1>
+    <p style="margin:0 0 24px 0;color:#6366f1;font-size:14px;">
+      Un patient recherche ce médicament près de <strong>${pharmacyName}</strong>
+    </p>
+
+    <hr style="border:none;border-top:1px solid #e0e7ff;margin:0 0 24px 0;" />
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f3ff;border-radius:8px;margin-bottom:24px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 4px 0;color:#6366f1;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Médicament recherché</p>
+          <p style="margin:0;color:#1c1917;font-size:20px;font-weight:700;">${medicationName}</p>
+          ${note ? `<p style="margin:8px 0 0 0;color:#6b7280;font-size:13px;font-style:italic;">"${note}"</p>` : ""}
+          <p style="margin:12px 0 0 0;color:#6b7280;font-size:12px;">Rayon de recherche : ${radiusKm} km</p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0 0 20px 0;color:#374151;font-size:14px;line-height:22px;">
+      Ouvrez l'application pour confirmer rapidement si vous avez ce médicament en stock.
+      Le patient sera notifié en temps réel.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+      <tr>
+        <td align="center">
+          <a href="${manageUrl}" style="display:inline-block;background-color:#4f46e5;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:8px;">
+            Répondre dans l'application
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0;color:#9ca3af;font-size:12px;text-align:center;">
+      Vous recevez cet email car vous êtes membre de <strong>${pharmacyName}</strong> sur ${APP_NAME}.
+    </p>
+  `);
+
+  return { subject: `Demande de médicament,${medicationName}`, html };
+}
+
 // ─── Template, Réinitialisation du mot de passe ───────────────────────────────
 export function resetPasswordEmailTemplate(code: string): {
   subject: string;
@@ -215,5 +273,111 @@ export function resetPasswordEmailTemplate(code: string): {
   return {
     subject: `Réinitialisation de votre mot de passe ${APP_NAME}`,
     html,
+  };
+}
+
+// ─── Petit utilitaire : barre + titre + CTA ───────────────────────────────────
+function simpleTemplate(opts: {
+  title: string;
+  subtitle?: string;
+  body: string; // HTML autorisé
+  ctaLabel?: string;
+  ctaUrl?: string;
+}): string {
+  const cta =
+    opts.ctaLabel && opts.ctaUrl
+      ? `<table width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 28px 0;">
+          <tr><td align="center">
+            <a href="${opts.ctaUrl}" style="display:inline-block;background-color:#4f46e5;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;">${opts.ctaLabel}</a>
+          </td></tr>
+        </table>`
+      : "";
+
+  return baseLayout(`
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+      <tr><td style="background-color:#4f46e5;height:4px;"></td></tr>
+    </table>
+    <h1 style="margin:0 0 8px 0;text-align:center;color:#1c1917;font-size:24px;font-weight:700;letter-spacing:-0.5px;">
+      ${opts.title}
+    </h1>
+    ${opts.subtitle ? `<p style="margin:0 0 28px 0;text-align:center;color:#6366f1;font-size:15px;">${opts.subtitle}</p>` : ""}
+    <hr style="border:none;border-top:1px solid #e0e7ff;margin:0 0 28px 0;" />
+    <div style="color:#374151;font-size:15px;line-height:24px;margin-bottom:24px;">${opts.body}</div>
+    ${cta}
+    <p style="margin:0;color:#9ca3af;font-size:13px;line-height:22px;text-align:center;">L'équipe ${APP_NAME}</p>
+  `);
+}
+
+// ─── Invitation à gérer une pharmacie ─────────────────────────────────────────
+export function pharmacyInvitationEmailTemplate(opts: {
+  pharmacyName: string;
+  role: "admin" | "staff";
+  acceptUrl: string;
+}): { subject: string; html: string } {
+  const roleLabel =
+    opts.role === "admin" ? "administrateur" : "membre du staff";
+  return {
+    subject: `Invitation à gérer ${opts.pharmacyName} sur ${APP_NAME}`,
+    html: simpleTemplate({
+      title: "Invitation à gérer une pharmacie",
+      subtitle: opts.pharmacyName,
+      body: `Bonjour,<br/><br/>Vous avez été invité(e) à rejoindre <strong style="color:#4f46e5;">${opts.pharmacyName}</strong>
+        en tant que <strong>${roleLabel}</strong> sur ${APP_NAME}.<br/><br/>
+        Cliquez sur le bouton ci-dessous pour accepter l'invitation. Si vous n'avez pas encore de compte,
+        vous pourrez en créer un avec cette adresse email.`,
+      ctaLabel: "Accepter l'invitation",
+      ctaUrl: opts.acceptUrl,
+    }),
+  };
+}
+
+// ─── Notification admin plateforme : nouvelle demande de pharmacie ────────────
+export function newPharmacyRequestEmailTemplate(opts: {
+  pharmacyName: string;
+  submitterEmail: string;
+  wantsToManage: boolean;
+  reviewUrl: string;
+}): { subject: string; html: string } {
+  return {
+    subject: `Nouvelle demande de pharmacie : ${opts.pharmacyName}`,
+    html: simpleTemplate({
+      title: "Nouvelle demande de pharmacie",
+      subtitle: opts.pharmacyName,
+      body: `Une nouvelle pharmacie a été soumise par <strong>${opts.submitterEmail}</strong>.<br/><br/>
+        ${opts.wantsToManage ? "⚠️ Le demandeur souhaite <strong>gérer cette pharmacie</strong> (justificatifs joints à vérifier)." : "Le demandeur ne demande pas la gestion."}
+        <br/><br/>Connectez-vous au backoffice pour examiner et approuver/refuser la demande.`,
+      ctaLabel: "Examiner la demande",
+      ctaUrl: opts.reviewUrl,
+    }),
+  };
+}
+
+// ─── Notification au soumetteur : décision sur sa demande ─────────────────────
+export function pharmacyRequestDecisionEmailTemplate(opts: {
+  pharmacyName: string;
+  approved: boolean;
+  managementApproved?: boolean;
+  reason?: string;
+}): { subject: string; html: string } {
+  const body = opts.approved
+    ? `Bonne nouvelle ! Votre pharmacie <strong style="color:#4f46e5;">${opts.pharmacyName}</strong>
+       a été <strong>approuvée</strong> et est désormais visible sur ${APP_NAME}.<br/><br/>
+       ${
+         opts.managementApproved
+           ? "Votre demande de gestion a également été acceptée : vous pouvez maintenant gérer cette pharmacie depuis la section « Ma pharmacie »."
+           : "Votre demande de gestion n'a pas été retenue, mais la pharmacie est bien publiée."
+       }`
+    : `Votre demande concernant <strong>${opts.pharmacyName}</strong> a été <strong>refusée</strong>.<br/><br/>
+       ${opts.reason ? `Motif : ${opts.reason}` : "N'hésitez pas à nous contacter pour plus d'informations."}`;
+
+  return {
+    subject: opts.approved
+      ? `Votre pharmacie ${opts.pharmacyName} a été approuvée`
+      : `Votre demande de pharmacie a été refusée`,
+    html: simpleTemplate({
+      title: opts.approved ? "Demande approuvée 🎉" : "Demande refusée",
+      subtitle: opts.pharmacyName,
+      body,
+    }),
   };
 }

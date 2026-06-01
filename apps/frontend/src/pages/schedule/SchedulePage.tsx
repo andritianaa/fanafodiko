@@ -60,17 +60,17 @@ export default function SchedulePage() {
                   </div>
                 </SelectItem>
                 {members?.map((member) => {
-                  const initials = `${member.firstName.charAt(0)}${member.lastName.charAt(0)}`.toUpperCase();
+                  const initials = member.fullName.charAt(0).toUpperCase();
                   return (
                     <SelectItem key={member.id} value={member.id} className="rounded-lg">
                       <div className="flex items-center gap-2">
                         <Avatar size="sm">
-                          {member.avatarUrl && <AvatarImage src={member.avatarUrl} alt={`${member.firstName} ${member.lastName}`} />}
+                          {member.avatarUrl && <AvatarImage src={member.avatarUrl} alt={member.fullName} />}
                           <AvatarFallback className="text-xs font-semibold">
                             {initials}
                           </AvatarFallback>
                         </Avatar>
-                        <span>{member.firstName} {member.lastName}</span>
+                        <span>{member.fullName}</span>
                       </div>
                     </SelectItem>
                   );
@@ -87,7 +87,7 @@ export default function SchedulePage() {
             <div className="flex justify-between items-end mb-4">
               <div>
                 <h3 className="font-bold text-lg">
-                  {selectedProfileId === 'all' ? 'Progression globale' : `Progression de ${members?.find(m => m.id === selectedProfileId)?.firstName}`}
+                  {selectedProfileId === 'all' ? 'Progression globale' : `Progression de ${members?.find(m => m.id === selectedProfileId)?.fullName}`}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {progress.takenCount} sur {progress.totalTasks} prises effectuées
@@ -132,7 +132,7 @@ export default function SchedulePage() {
                     key={task.id} 
                     task={task} 
                     medicationName={selectedProfileId === 'all' 
-                      ? `${medication?.name || '...'} (${member?.firstName || '...'})` 
+                      ? `${medication?.name || '...'} (${member?.fullName || '...'})`
                       : (medication?.name || 'Médicament inconnu')
                     }
                     dosage={medication?.dosage || '-'}

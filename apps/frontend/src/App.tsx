@@ -9,8 +9,18 @@ import SchedulePage from "@/pages/schedule/SchedulePage"
 import MedicationsPage from "@/pages/medications/MedicationsPage"
 import HouseholdPage from "@/pages/household/HouseholdPage"
 import AccountPage from "@/pages/account/AccountPage"
+import BackofficePage from "@/pages/backoffice/BackofficePage"
+import MapPage from "@/pages/map/MapPage"
+import MyPharmacyListPage from "@/pages/my-pharmacy/MyPharmacyListPage"
+import MyPharmacyManagePage from "@/pages/my-pharmacy/MyPharmacyManagePage"
+import SuggestPharmacyPage from "@/pages/suggest/SuggestPharmacyPage"
+import MedSearchPage from "@/pages/med-search/MedSearchPage"
+import MedSearchResultsPage from "@/pages/med-search/MedSearchResultsPage"
+import MedSearchHistoryPage from "@/pages/med-search/MedSearchHistoryPage"
+import InvitationPage from "@/pages/pharmacy-invitation/InvitationPage"
 import CguPage from "@/pages/legal/CguPage"
 import { FontSizeProvider } from "@/contexts/FontSizeContext"
+import { useMe } from "@/features/auth/api/hooks"
 
 const PrivateRoute = () => {
   const token = localStorage.getItem("auth")
@@ -20,6 +30,15 @@ const PrivateRoute = () => {
 const PublicRoute = () => {
   const token = localStorage.getItem("auth")
   return token ? <Navigate to="/dashboard" replace /> : <Outlet />
+}
+
+const AdminRoute = () => {
+  const { data: user, isLoading } = useMe()
+  if (isLoading) return null
+  if (!user || (user.role !== "admin" && user.role !== "support")) {
+    return <Navigate to="/dashboard" replace />
+  }
+  return <Outlet />
 }
 
 function App() {
@@ -36,6 +55,18 @@ function App() {
             <Route path="/medications" element={<MedicationsPage />} />
             <Route path="/household" element={<HouseholdPage />} />
             <Route path="/account" element={<AccountPage />} />
+            <Route path="/map" element={<MapPage />} />
+            <Route path="/my-pharmacy" element={<MyPharmacyListPage />} />
+            <Route path="/my-pharmacy/:id" element={<MyPharmacyManagePage />} />
+            <Route path="/suggest-pharmacy" element={<SuggestPharmacyPage />} />
+            <Route path="/med-search" element={<MedSearchPage />} />
+            <Route path="/med-search/history" element={<MedSearchHistoryPage />} />
+            <Route path="/med-search/:id" element={<MedSearchResultsPage />} />
+
+            {/* Admin / Support only */}
+            <Route element={<AdminRoute />}>
+              <Route path="/backoffice" element={<BackofficePage />} />
+            </Route>
           </Route>
         </Route>
 
@@ -49,6 +80,7 @@ function App() {
 
         {/* Open Routes */}
         <Route path="/cgu" element={<CguPage />} />
+        <Route path="/pharmacy-invitation/:token" element={<InvitationPage />} />
       </Routes>
     </BrowserRouter>
     </FontSizeProvider>

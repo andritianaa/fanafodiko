@@ -4,9 +4,7 @@ import { Relationship } from "../../domain/value-objects/Relationship";
 
 export interface AddMemberDTO {
   accountId: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: Date;
+  fullName: string;
   relationship: string;
   avatarUrl?: string;
 }
@@ -17,9 +15,7 @@ export class AddHouseholdMember {
   async execute(data: AddMemberDTO): Promise<Profile> {
     const profile = Profile.create({
       accountId: data.accountId,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      dateOfBirth: data.dateOfBirth,
+      fullName: data.fullName,
       relationship: Relationship.create(data.relationship),
       avatarUrl: data.avatarUrl,
     });

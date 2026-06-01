@@ -12,9 +12,7 @@ import { IProfileRepository } from "../../domain/repositories/IProfileRepository
 interface RegisterUserDTO {
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth?: Date;
+  fullName: string;
 }
 
 export class RegisterUser {
@@ -48,9 +46,7 @@ export class RegisterUser {
 
     const profile = Profile.create({
       accountId: savedUser.id!,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      dateOfBirth: data.dateOfBirth ?? new Date("2000-01-01"), 
+      fullName: data.fullName,
       relationship: Relationship.create("self"),
     });
 

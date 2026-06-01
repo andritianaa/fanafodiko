@@ -56,9 +56,7 @@ householdController.openapi(listMembersRoute, async (c) => {
   const response = members.map((member) => ({
     id: member.id!,
     accountId: member.accountId,
-    firstName: member.firstName,
-    lastName: member.lastName,
-    dateOfBirth: member.dateOfBirth.toISOString(),
+    fullName: member.fullName,
     relationship: member.relationship.getValue(),
     avatarUrl: member.avatarUrl,
   }));
@@ -87,9 +85,7 @@ householdController.openapi(addMemberRoute, async (c) => {
 
   const newMember = await addHouseholdMemberUseCase.execute({
     accountId: user.id!,
-    firstName: data.firstName,
-    lastName: data.lastName,
-    dateOfBirth: new Date(data.dateOfBirth),
+    fullName: data.fullName,
     relationship: data.relationship,
     avatarUrl: data.avatarUrl,
   });
@@ -98,9 +94,7 @@ householdController.openapi(addMemberRoute, async (c) => {
     {
       id: newMember.id!,
       accountId: newMember.accountId,
-      firstName: newMember.firstName,
-      lastName: newMember.lastName,
-      dateOfBirth: newMember.dateOfBirth.toISOString(),
+      fullName: newMember.fullName,
       relationship: newMember.relationship.getValue(),
       avatarUrl: newMember.avatarUrl,
     },
@@ -139,9 +133,7 @@ householdController.openapi(getMemberRoute, async (c) => {
     {
       id: member.id!,
       accountId: member.accountId,
-      firstName: member.firstName,
-      lastName: member.lastName,
-      dateOfBirth: member.dateOfBirth.toISOString(),
+      fullName: member.fullName,
       relationship: member.relationship.getValue(),
       avatarUrl: member.avatarUrl,
     },
@@ -171,24 +163,17 @@ householdController.openapi(updateMemberRoute, async (c) => {
   const { id } = c.req.valid("param");
   const data = c.req.valid("json");
 
-  const updates: any = { ...data };
-  if (data.dateOfBirth) {
-    updates.dateOfBirth = new Date(data.dateOfBirth);
-  }
-
   const updatedMember = await updateHouseholdMemberUseCase.execute(
     user.id!,
     id,
-    updates
+    data
   );
 
   return c.json(
     {
       id: updatedMember.id!,
       accountId: updatedMember.accountId,
-      firstName: updatedMember.firstName,
-      lastName: updatedMember.lastName,
-      dateOfBirth: updatedMember.dateOfBirth.toISOString(),
+      fullName: updatedMember.fullName,
       relationship: updatedMember.relationship.getValue(),
       avatarUrl: updatedMember.avatarUrl,
     },

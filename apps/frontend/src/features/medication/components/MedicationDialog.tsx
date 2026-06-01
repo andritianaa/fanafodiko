@@ -211,7 +211,7 @@ export const MedicationDialog = ({
                       <SelectContent>
                         {members?.map((member) => (
                           <SelectItem key={member.id} value={member.id}>
-                            {member.firstName} {member.lastName}
+                            {member.fullName}
                           </SelectItem>
                         ))}
                       </SelectContent>

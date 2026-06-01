@@ -102,3 +102,43 @@
     @apply font-sans;
   }
 }
+
+.leaflet-container {
+  z-index: 0 !important;
+  font-family: "Funnel Display", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+/* Popup wrapper,carte épurée, sans le style Leaflet par défaut */
+.leaflet-popup-content-wrapper {
+  padding: 0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06) !important;
+  border: 1px solid oklch(0.928 0.006 264.531) !important;
+  overflow: hidden !important;
+  font-family: "Funnel Display", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  font-family: "Funnel Display", ui-sans-serif, system-ui, sans-serif !important;
+  font-size: 14px !important;
+}
+
+/* Pointe blanche assortie */
+.leaflet-popup-tip {
+  background: white !important;
+  box-shadow: none !important;
+}
+
+/* Bouton ✕ discret */
+.leaflet-popup-close-button {
+  top: 8px !important;
+  right: 10px !important;
+  font-size: 18px !important;
+  color: oklch(0.551 0.027 264.364) !important;
+  z-index: 10;
+}
+.leaflet-popup-close-button:hover {
+  color: oklch(0.13 0.028 261.692) !important;
+  background: transparent !important;
+}

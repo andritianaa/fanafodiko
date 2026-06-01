@@ -31,10 +31,17 @@ export class MongoUserRepository implements IUserRepository {
   async findById(id: string): Promise<User | null> {
     const userDoc = await UserModel.findById(id).lean();
     if (!userDoc) return null;
-    
+
     return UserMapper.toDomain({
       ...userDoc,
       _id: userDoc._id?.toString(),
     });
+  }
+
+  async findAll(): Promise<User[]> {
+    const docs = await UserModel.find().lean();
+    return docs.map((doc) =>
+      UserMapper.toDomain({ ...doc, _id: doc._id?.toString() })
+    );
   }
 }

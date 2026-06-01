@@ -11,8 +11,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { logout } from "@/features/auth/api/fetchers"
 import { useMe } from "@/features/auth/api/hooks"
 import { useHouseholdMembers } from "@/features/household/api/hooks"
+import { useMyPharmacies } from "@/features/myPharmacy/api/hooks"
 import { NotificationBell } from "@/features/notification/components/NotificationBell"
-import { CheckFatIcon, LayoutIcon, PillIcon, UsersIcon } from "@phosphor-icons/react"
+import { PharmacySearchNotifications } from "@/features/medSearch/components/PharmacySearchNotifications"
+import { PharmacySearchAlert } from "@/features/medSearch/components/PharmacySearchAlert"
+import { CheckFatIcon, HospitalIcon, LayoutIcon, MapPinIcon, MagnifyingGlassIcon, PillIcon, ShieldIcon, UsersIcon } from "@phosphor-icons/react"
 import { useFontSize } from "@/contexts/FontSizeContext"
 
 export default function MainLayout() {
@@ -21,7 +24,9 @@ export default function MainLayout() {
   const auth = localStorage.getItem("auth")
   const { data: user } = useMe()
   const { data: members } = useHouseholdMembers()
+  const { data: myPharmacies } = useMyPharmacies()
   const { iconSize } = useFontSize()
+  const managesPharmacy = (myPharmacies?.length ?? 0) > 0
 
   const activeProfileId = members?.[0]?.id || ""
 
@@ -51,11 +56,34 @@ export default function MainLayout() {
               <Link to="/household" className="transition-colors hover:text-primary">
                 Foyer
               </Link>
+              <Link to="/map" className="transition-colors hover:text-primary">
+                Carte
+              </Link>
+              <Link to="/med-search" className="transition-colors hover:text-primary">
+                Recherche médicament
+              </Link>
+              {managesPharmacy && (
+                <Link to="/my-pharmacy" className="transition-colors hover:text-primary">
+                  Ma pharmacie
+                </Link>
+              )}
+              {(user?.role === "admin" || user?.role === "support") && (
+                <Link
+                  to="/backoffice"
+                  className="flex items-center gap-1 transition-colors hover:text-primary text-orange-600"
+                >
+                  <ShieldIcon size={14} weight="fill" />
+                  Backoffice
+                </Link>
+              )}
             </nav>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             {auth && activeProfileId && (
               <NotificationBell profileId={activeProfileId} />
+            )}
+            {auth && managesPharmacy && myPharmacies?.[0]?.id && (
+              <PharmacySearchNotifications pharmacyId={myPharmacies![0].id} />
             )}
             {auth ? (
               <DropdownMenu>
@@ -73,6 +101,22 @@ export default function MainLayout() {
                   <DropdownMenuItem onClick={() => navigate("/account")}>
                     Paramètres
                   </DropdownMenuItem>
+                  {managesPharmacy && (
+                    <DropdownMenuItem onClick={() => navigate("/my-pharmacy")}>
+                      Ma pharmacie
+                    </DropdownMenuItem>
+                  )}
+                  {(user?.role === "admin" || user?.role === "support") && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => navigate("/backoffice")}
+                        className="text-orange-600 focus:text-orange-700"
+                      >
+                        Backoffice
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-700">
                     Déconnexion
@@ -92,7 +136,13 @@ export default function MainLayout() {
           </div>
         </div>
       </header>
-      <main className="flex-1 container mx-auto p-4 pt-16 pb-32">
+      <main className={
+        // Routes plein-écran : pas de container ni de padding horizontal/bas
+        // La carte et autres pages full-viewport gèrent elles-mêmes leur layout
+        ['/map'].some(r => location.pathname.startsWith(r))
+          ? 'flex-1 flex flex-col pt-16 overflow-hidden'
+          : 'flex-1 container mx-auto p-4 pt-16 pb-32'
+      }>
         <Outlet />
       </main>
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
@@ -140,8 +190,49 @@ export default function MainLayout() {
             >
               <UsersIcon size={iconSize} weight={location.pathname === '/household' ? "fill" : "regular"} />
             </Link>
+
+            <Link
+              to="/map"
+              className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
+                  location.pathname === '/map'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-slate-100'
+              }`}
+            >
+              <MapPinIcon size={iconSize} weight={location.pathname === '/map' ? "fill" : "regular"} />
+            </Link>
+
+            <Link
+              to="/med-search"
+              className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
+                  location.pathname.startsWith('/med-search')
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-slate-100'
+              }`}
+            >
+              <MagnifyingGlassIcon size={iconSize} weight={location.pathname.startsWith('/med-search') ? "fill" : "regular"} />
+            </Link>
+
+            {/* Accès rapide "Ma pharmacie" pour les membres,mobile */}
+            {managesPharmacy && (
+              <Link
+                to="/my-pharmacy"
+                className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
+                  location.pathname.startsWith('/my-pharmacy')
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-slate-100'
+                }`}
+              >
+                <HospitalIcon size={iconSize} weight={location.pathname.startsWith('/my-pharmacy') ? "fill" : "regular"} />
+              </Link>
+            )}
         </nav>
       </div>
+
+      {/* Alerte plein-écran pour les membres de pharmacie */}
+      {auth && managesPharmacy && myPharmacies?.[0]?.id && (
+        <PharmacySearchAlert pharmacyId={myPharmacies![0].id} />
+      )}
     </div>
   )
 }

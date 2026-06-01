@@ -34,9 +34,7 @@ describe("MongoProfileRepository", () => {
     const profile = Profile.reconstitute({
       id: "profile-id",
       accountId: "acc-id",
-      firstName: "John",
-      lastName: "Doe",
-      dateOfBirth: new Date(),
+      fullName: "John Doe",
       relationship: Relationship.create("self"),
     });
 
@@ -51,9 +49,7 @@ describe("MongoProfileRepository", () => {
   it("should save new profile (create)", async () => {
     const profile = Profile.reconstitute({
       accountId: "acc-id",
-      firstName: "John",
-      lastName: "Doe",
-      dateOfBirth: new Date(),
+      fullName: "John Doe",
       relationship: Relationship.create("self"),
     });
 
@@ -68,9 +64,7 @@ describe("MongoProfileRepository", () => {
     const doc = {
       _id: "profile-id",
       accountId: "acc-id",
-      firstName: "John",
-      lastName: "Doe",
-      dateOfBirth: new Date(),
+      fullName: "John Doe",
       relationship: "self",
     };
     mockProfileModel.findById.mockReturnValue({
@@ -88,9 +82,7 @@ describe("MongoProfileRepository", () => {
       {
         _id: "p1",
         accountId: "acc-id",
-        firstName: "P1",
-        lastName: "D",
-        dateOfBirth: new Date(),
+        fullName: "P1 D",
         relationship: "self",
       },
     ];

@@ -17,9 +17,7 @@ describe("AddHouseholdMember", () => {
   it("should create and save a new profile", async () => {
     const data = {
       accountId: "account-id",
-      firstName: "Child",
-      lastName: "Doe",
-      dateOfBirth: new Date(),
+      fullName: "Child Doe",
       relationship: "child",
     };
 
@@ -28,7 +26,7 @@ describe("AddHouseholdMember", () => {
     const result = await addHouseholdMember.execute(data);
 
     expect(result).toBeInstanceOf(Profile);
-    expect(result.firstName).toBe(data.firstName);
+    expect(result.fullName).toBe(data.fullName);
     expect(mockProfileRepository.save).toHaveBeenCalled();
   });
 });

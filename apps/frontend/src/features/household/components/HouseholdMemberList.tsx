@@ -88,22 +88,19 @@ export const HouseholdMemberList = ({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {members.map((member) => {
-          const avatarUrl = member.avatarUrl || `https://api.dicebear.com/9.x/glass/svg?seed=${member.firstName}`;
-          
+          const avatarUrl = member.avatarUrl || `https://api.dicebear.com/9.x/glass/svg?seed=${member.fullName}`;
+
           return (
             <Card key={member.id} className="relative mx-auto w-full max-w-sm pt-0 group/member transition-all hover:shadow-xl hover:shadow-primary/5">
               <img
                 src={avatarUrl}
-                alt={`${member.firstName} ${member.lastName}`}
+                alt={member.fullName}
                 className="relative z-20 aspect-video w-full object-cover transition-transform duration-500 group-hover/member:scale-105"
               />
               <CardHeader>
-                <CardTitle >{member.firstName} {member.lastName}</CardTitle>
+                <CardTitle>{member.fullName}</CardTitle>
                 <CardDescription className="flex items-center gap-2">
                   <Badge variant="secondary" className="rounded-full">{getRelationshipLabel(member.relationship)}</Badge>
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground/60">
-                    Né(e) le  {formatDate(member.dateOfBirth)}
-                  </span>
                 </CardDescription>
               </CardHeader>
               <CardFooter className="flex flex-col gap-3">
@@ -169,7 +166,7 @@ export const HouseholdMemberList = ({
             open={listDialogOpen}
             onOpenChange={setListDialogOpen}
             profileId={selectedMember.id}
-            profileName={selectedMember.firstName}
+            profileName={selectedMember.fullName}
             onEdit={handleEditMedication}
           />
         </>

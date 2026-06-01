@@ -14,6 +14,7 @@ export class GetCurrentUser {
     return {
       id: user.id!,
       email: user.email.getValue(),
+      role: user.role,
       createdAt: user.props.createdAt?.toISOString() ?? new Date().toISOString(),
     };
   }

@@ -4,6 +4,13 @@ import { ResendMailer } from "@/core/services/mailing/ResendMailer";
 import { User } from "@/modules/identity/domain/entities/User";
 import authController from "@/modules/identity/infrastructure/controllers/AuthController";
 import householdController from "@/modules/identity/infrastructure/controllers/HouseholdController";
+import backofficeController from "@/modules/identity/infrastructure/controllers/BackofficeController";
+import pharmacyController from "@/modules/pharmacy/infrastructure/controllers/PharmacyController";
+import backofficePharmacyController from "@/modules/pharmacy/infrastructure/controllers/BackofficePharmacyController";
+import myPharmacyController from "@/modules/pharmacy/infrastructure/controllers/MyPharmacyController";
+import pharmacyInvitationController from "@/modules/pharmacy/infrastructure/controllers/PharmacyInvitationController";
+import pharmacyRequestController from "@/modules/pharmacy/infrastructure/controllers/PharmacyRequestController";
+import medSearchController from "@/modules/pharmacy/infrastructure/controllers/MedSearchController";
 import medicationController from "@/modules/medication_management/infrastructure/controllers/MedicationController";
 import notificationController from "@/modules/notification/infrastructure/controllers/NotificationController";
 import fileController from "@/modules/files/infrastructure/controllers/FileController";
@@ -116,7 +123,15 @@ app.onError((error, c) => {
 });
 
 // Routes, avec rate limiting différencié par type
-app.use("/auth/*", authLimiter);
+// authLimiter (10/15min) uniquement sur les routes sensibles au brute-force
+app.use("/auth/login", authLimiter);
+app.use("/auth/register", authLimiter);
+app.use("/auth/password/reset", authLimiter);
+app.use("/auth/password/confirm", authLimiter);
+// Les routes authentifiées (/me, /password/change, /email/change) utilisent apiLimiter
+app.use("/auth/me", apiLimiter);
+app.use("/auth/password/change", apiLimiter);
+app.use("/auth/email/change", apiLimiter);
 app.route("/auth", authController);
 
 app.use("/household/*", apiLimiter);
@@ -130,6 +145,25 @@ app.route("/notifications", notificationController);
 
 app.use("/files/*", uploadLimiter);
 app.route("/files", fileController);
+
+app.use("/backoffice/*", apiLimiter);
+app.route("/backoffice", backofficeController);
+app.route("/backoffice/pharmacies", backofficePharmacyController);
+
+app.use("/pharmacies/*", apiLimiter);
+app.route("/pharmacies", pharmacyController);
+
+app.use("/my/pharmacies/*", apiLimiter);
+app.route("/my/pharmacies", myPharmacyController);
+
+app.use("/pharmacy-invitations/*", apiLimiter);
+app.route("/pharmacy-invitations", pharmacyInvitationController);
+
+app.use("/pharmacy-requests/*", apiLimiter);
+app.route("/pharmacy-requests", pharmacyRequestController);
+
+app.use("/med-searches/*", apiLimiter);
+app.route("/med-searches", medSearchController);
 
 // Routes
 app.get("/", (c) => {

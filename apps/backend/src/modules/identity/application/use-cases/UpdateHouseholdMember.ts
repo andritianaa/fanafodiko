@@ -3,9 +3,7 @@ import { Profile } from "../../domain/entities/Profile";
 import { IProfileRepository } from "../../domain/repositories/IProfileRepository";
 
 export interface UpdateProfileDTO {
-  firstName?: string;
-  lastName?: string;
-  dateOfBirth?: Date;
+  fullName?: string;
   avatarUrl?: string;
 }
 

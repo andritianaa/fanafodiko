@@ -239,6 +239,7 @@ authController.openapi(meRoute, async (c) => {
     {
       id: currentUser.id,
       email: currentUser.email,
+      role: currentUser.role,
       message: "Profile retrieved",
     },
     200,

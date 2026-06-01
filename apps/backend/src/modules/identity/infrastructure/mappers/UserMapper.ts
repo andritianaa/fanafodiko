@@ -1,10 +1,12 @@
 import { User } from "../../domain/entities/User";
 import { Email } from "../../domain/value-objects/Email";
+import { UserRole } from "../../domain/value-objects/UserRole";
 
 interface IUserPersistence {
   _id?: string;
   email: string;
   passwordHash: string;
+  role?: string;
   createdAt: Date;
 }
 
@@ -14,6 +16,7 @@ export class UserMapper {
       id: raw._id?.toString(),
       email: Email.create(raw.email),
       passwordHash: raw.passwordHash,
+      role: (raw.role as UserRole) ?? "user",
       createdAt: raw.createdAt,
     });
   }
@@ -23,6 +26,7 @@ export class UserMapper {
       _id: user.id,
       email: user.email.getValue(),
       passwordHash: user.passwordHash,
+      role: user.role,
       createdAt: user.props.createdAt || new Date(),
     };
   }

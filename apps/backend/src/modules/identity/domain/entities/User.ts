@@ -1,9 +1,11 @@
 import { Email } from "../value-objects/Email";
+import { UserRole } from "../value-objects/UserRole";
 
 export interface UserProps {
   id?: string;
   email: Email;
   passwordHash: string;
+  role?: UserRole;
   createdAt?: Date;
 }
 
@@ -13,6 +15,7 @@ export class User {
   static create(props: UserProps): User {
     return new User({
       ...props,
+      role: props.role ?? "user",
       createdAt: props.createdAt ?? new Date(),
     });
   }
@@ -24,8 +27,13 @@ export class User {
   get email() {
     return this.props.email;
   }
+
   get passwordHash() {
     return this.props.passwordHash;
+  }
+
+  get role(): UserRole {
+    return this.props.role ?? "user";
   }
 
   public static reconstitute(props: UserProps): User {

@@ -6,20 +6,15 @@ import type { Context } from "hono";
  * Priorité : x-forwarded-for (derrière un reverse-proxy) → CF-Connecting-IP → IP directe.
  */
 function keyFromIp(c: Context): string {
-  // En production : CF-Connecting-IP (Cloudflare) ou X-Real-IP (Nginx) — non spoofables.
+  // En production : CF-Connecting-IP (Cloudflare) ou X-Real-IP (Nginx),non spoofables.
   // X-Forwarded-For est ignoré en prod car un client peut le forger librement.
   if (process.env.NODE_ENV === "production") {
     return (
-      c.req.header("cf-connecting-ip") ??
-      c.req.header("x-real-ip") ??
-      "unknown"
+      c.req.header("cf-connecting-ip") ?? c.req.header("x-real-ip") ?? "unknown"
     );
   }
   // En dev : X-Forwarded-For acceptable (aucun risque réel localement)
-  return (
-    c.req.header("x-forwarded-for")?.split(",")[0].trim() ??
-    "unknown"
-  );
+  return c.req.header("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
 }
 
 // ─── Limites par palier ────────────────────────────────────────────────────────

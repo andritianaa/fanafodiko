@@ -4,9 +4,7 @@ import { Relationship } from "../../domain/value-objects/Relationship";
 interface IProfilePersistence {
   _id?: string;
   accountId: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: Date;
+  fullName: string;
   relationship: string;
   avatarUrl?: string;
   createdAt: Date;
@@ -18,9 +16,7 @@ export class ProfileMapper {
     return Profile.reconstitute({
       id: raw._id?.toString(),
       accountId: raw.accountId.toString(),
-      firstName: raw.firstName,
-      lastName: raw.lastName,
-      dateOfBirth: raw.dateOfBirth,
+      fullName: raw.fullName,
       relationship: Relationship.create(raw.relationship),
       avatarUrl: raw.avatarUrl,
       createdAt: raw.createdAt,
@@ -32,9 +28,7 @@ export class ProfileMapper {
     return {
       _id: profile.id,
       accountId: profile.accountId,
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      dateOfBirth: profile.dateOfBirth,
+      fullName: profile.fullName,
       relationship: profile.relationship.getValue(),
       avatarUrl: profile.avatarUrl,
       createdAt: profile.createdAt || new Date(),

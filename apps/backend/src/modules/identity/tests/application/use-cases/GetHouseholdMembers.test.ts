@@ -20,17 +20,13 @@ describe("GetHouseholdMembers", () => {
       Profile.reconstitute({
         id: "p1",
         accountId: "acc-1",
-        firstName: "John",
-        lastName: "Doe",
-        dateOfBirth: new Date(),
+        fullName: "John Doe",
         relationship: Relationship.create("self"),
       }),
       Profile.reconstitute({
         id: "p2",
         accountId: "acc-1",
-        firstName: "Jane",
-        lastName: "Doe",
-        dateOfBirth: new Date(),
+        fullName: "Jane Doe",
         relationship: Relationship.create("spouse"),
       }),
     ];

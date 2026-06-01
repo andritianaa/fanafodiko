@@ -13,7 +13,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field, FieldLabel, FieldContent, FieldError } from '@/components/ui/field';
-import { DateBirthPicker } from '@/components/ui/date-birth-picker';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
   Select,
@@ -56,37 +55,31 @@ export const HouseholdMemberDialog = ({
   } = useForm<CreateHouseholdMemberInput>({
     resolver: zodResolver(CreateHouseholdMemberSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      dateOfBirth: '',
+      fullName: '',
       relationship: '',
       avatarUrl: '',
     },
   });
 
   const avatarUrl = watch("avatarUrl")
-  const firstName = watch("firstName")
+  const fullName = watch("fullName")
 
   const displayAvatarUrl =
     avatarUrl ||
-    (firstName
-      ? `https://api.dicebear.com/9.x/glass/svg?seed=${firstName}`
+    (fullName
+      ? `https://api.dicebear.com/9.x/glass/svg?seed=${fullName}`
       : undefined)
 
   useEffect(() => {
     if (member) {
       reset({
-        firstName: member.firstName,
-        lastName: member.lastName,
-        dateOfBirth: member.dateOfBirth,
+        fullName: member.fullName,
         relationship: member.relationship,
         avatarUrl: member.avatarUrl || '',
       });
     } else {
       reset({
-        firstName: '',
-        lastName: '',
-        dateOfBirth: '',
+        fullName: '',
         relationship: '',
         avatarUrl: '',
       });
@@ -160,7 +153,7 @@ export const HouseholdMemberDialog = ({
                 
                   <AvatarImage src={displayAvatarUrl} alt="Avatar" />
                   <AvatarFallback className="bg-primary/5 text-primary text-2xl font-bold">
-                    {firstName ? firstName[0] : <UserIcon className="size-10" />}
+                    {fullName ? fullName[0] : <UserIcon className="size-10" />}
                   </AvatarFallback>
                 </Avatar>
                 <div className="absolute inset-x-0 bottom-0 top-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -182,30 +175,17 @@ export const HouseholdMemberDialog = ({
               <p className="text-xs text-muted-foreground">Cliquez pour changer la photo</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Field>
-                <FieldLabel htmlFor="firstName">Prénom</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="firstName"
-                    placeholder="Alice"
-                    {...register('firstName')}
-                  />
-                </FieldContent>
-                <FieldError errors={[errors.firstName]} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="lastName">Nom</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="lastName"
-                    placeholder="Doe"
-                    {...register('lastName')}
-                  />
-                </FieldContent>
-                <FieldError errors={[errors.lastName]} />
-              </Field>
-            </div>
+            <Field>
+              <FieldLabel htmlFor="fullName">Nom complet</FieldLabel>
+              <FieldContent>
+                <Input
+                  id="fullName"
+                  placeholder="Alice Doe"
+                  {...register('fullName')}
+                />
+              </FieldContent>
+              <FieldError errors={[errors.fullName]} />
+            </Field>
 
             <Field>
               <FieldLabel htmlFor="relationship">Relation</FieldLabel>
@@ -236,23 +216,6 @@ export const HouseholdMemberDialog = ({
               <FieldError errors={[errors.relationship]} />
             </Field>
 
-            <Field>
-              <FieldLabel htmlFor="dateOfBirth">Date de naissance</FieldLabel>
-              <FieldContent>
-                <Controller
-                  control={control}
-                  name="dateOfBirth"
-                  render={({ field }) => (
-                    <DateBirthPicker
-                      date={field.value ? new Date(field.value) : undefined}
-                      setDate={(date) => field.onChange(date?.toISOString())}
-                      placeholder="Sélectionner une date"
-                    />
-                  )}
-                />
-              </FieldContent>
-              <FieldError errors={[errors.dateOfBirth]} />
-            </Field>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isAdding || isUpdating || isUploading}>

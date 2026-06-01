@@ -23,10 +23,10 @@ describe("UpdateHouseholdMember", () => {
     mockProfileRepository.findById.mockResolvedValue(profileMock);
     mockProfileRepository.save.mockResolvedValue(undefined);
 
-    const updates = { firstName: "NewName" };
+    const updates = { fullName: "New Name" };
     const result = await updateHouseholdMember.execute("acc-id", "pid", updates);
 
-    expect(result.firstName).toBe("NewName");
+    expect(result.fullName).toBe("New Name");
     expect(mockProfileRepository.findById).toHaveBeenCalledWith("pid");
     expect(mockProfileRepository.save).toHaveBeenCalled();
   });

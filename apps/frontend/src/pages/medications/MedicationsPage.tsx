@@ -120,17 +120,17 @@ export default function MedicationsPage() {
                     </div>
                   </SelectItem>
                   {members?.map((member) => {
-                    const initials = `${member.firstName.charAt(0)}${member.lastName.charAt(0)}`.toUpperCase();
+                    const initials = member.fullName.charAt(0).toUpperCase();
                     return (
                       <SelectItem key={member.id} value={member.id} className="rounded-lg">
                         <div className="flex items-center gap-2">
                           <Avatar size="sm">
-                            {member.avatarUrl && <AvatarImage src={member.avatarUrl} alt={`${member.firstName} ${member.lastName}`} />}
+                            {member.avatarUrl && <AvatarImage src={member.avatarUrl} alt={member.fullName} />}
                             <AvatarFallback className="text-[10px] font-semibold">
                               {initials}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-sm">{member.firstName}</span>
+                          <span className="text-sm">{member.fullName}</span>
                         </div>
                       </SelectItem>
                     );
@@ -180,7 +180,7 @@ export default function MedicationsPage() {
               </EmptyMedia>
               <EmptyTitle>
                 Aucun traitement trouvé{' '}
-                {searchQuery ? `pour "${searchQuery}"` : `pour ${selectedMember?.firstName}`}.
+                {searchQuery ? `pour "${searchQuery}"` : `pour ${selectedMember?.fullName}`}.
               </EmptyTitle>
             </EmptyHeader>
             <EmptyContent className="flex-row justify-center gap-2">

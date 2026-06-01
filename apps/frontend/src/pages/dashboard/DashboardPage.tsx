@@ -71,7 +71,7 @@ const HistoryItem = ({ task, medication, member }: HistoryItemProps) => {
         <div>
           <p className="font-bold text-slate-900">{medication?.name || 'Inconnu'}</p>
           <p className="text-xs text-slate-500">
-            {member?.firstName} •{' '}
+            {member?.fullName} •{' '}
             {format(new Date(task.scheduledAt), "d MMMM 'à' HH:mm", { locale: fr })}
           </p>
         </div>
@@ -174,7 +174,7 @@ export default function DashboardPage() {
             <SelectContent>
               <SelectItem value="all">Tout le foyer</SelectItem>
               {members?.map(m => (
-                <SelectItem key={m.id} value={m.id}>{m.firstName}</SelectItem>
+                <SelectItem key={m.id} value={m.id}>{m.fullName}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -305,10 +305,10 @@ export default function DashboardPage() {
                     <div key={m.id} className="flex items-center gap-4 bg-slate-50 p-3 transition-colors border border-border ">
                       <Avatar className="size-10 border-2 border-white shadow-sm">
                         {m.avatarUrl && <AvatarImage src={m.avatarUrl} />}
-                        <AvatarFallback className="bg-blue-100 text-blue-700 font-bold">{m.firstName[0]}</AvatarFallback>
+                        <AvatarFallback className="bg-blue-100 text-blue-700 font-bold">{m.fullName[0]}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p>{m.firstName} {m.lastName}</p>
+                        <p>{m.fullName}</p>
                         <p className="text-muted-foreground">{activeMeds} traitement{activeMeds > 1 ? 's' : ''}</p>
                       </div>
                     </div>

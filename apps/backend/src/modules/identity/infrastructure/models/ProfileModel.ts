@@ -3,9 +3,7 @@ import { RelationshipType } from "../../domain/value-objects/Relationship";
 
 interface IProfileDoc {
   accountId: Schema.Types.ObjectId;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: Date;
+  fullName: string;
   relationship: RelationshipType;
   avatarUrl?: string;
   createdAt: Date;
@@ -15,9 +13,7 @@ interface IProfileDoc {
 const profileSchema = new Schema<IProfileDoc>(
   {
     accountId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    firstName: { type: String, required: true, trim: true },
-    lastName: { type: String, required: true, trim: true },
-    dateOfBirth: { type: Date, required: true },
+    fullName: { type: String, required: true, trim: true },
     relationship: {
       type: String,
       required: true,
