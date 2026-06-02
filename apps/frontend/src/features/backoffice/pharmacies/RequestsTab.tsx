@@ -377,7 +377,7 @@ export function RequestsTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {pending.length > 0 && (
         <div className="space-y-3">
           <h3 className="text-sm font-semibold flex items-center gap-2">

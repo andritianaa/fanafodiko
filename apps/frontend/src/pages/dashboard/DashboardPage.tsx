@@ -149,7 +149,7 @@ export default function DashboardPage() {
   const activeTreatmentsCount = medications?.filter(m => m.isActive).length || 0;
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-0 max-w-7xl mx-auto space-y-8">
       
       <div className="space-y-2">
         <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
@@ -201,8 +201,8 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-8 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-8 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                
@@ -277,7 +277,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Sidebar: Active Members & Quick Context */}
-        <div className="space-y-6">
+        <div className="space-y-4">
            <Card className="bg-blue-50/50 border-blue-100 ">
             <CardContent className="space-y-3">
               <div className="flex items-center gap-2 text-blue-900 font-bold">

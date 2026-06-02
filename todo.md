@@ -1,2 +1,3 @@
 - il faut une page details de pharmacies ou on peut tout voir, emplacement, details, images et calendrier. La page est accessible en clickant sur le nom de la pharmacie n'importe ou dans la map et ajouter un bouton pour visiter dans le popup de la pharmacie dans la map et reduire les infos affiché dans le popup car trop chargé juste le nom, bouton itineraire qui va sur google map, region ville, contact, status "garde, ouvert, 24/7" et bouton voir plus
 - je voudrais que le frontend mette en cache les images fetch par la map pour ne pas avoir a refetch tout le temps, mettre en cache 1 mois minimum
+- 

@@ -39,7 +39,7 @@ export default function SchedulePage() {
   const { data: medications } = useMedications(selectedProfileId === 'all' ? 'all' : selectedProfileId);
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto max-w-4xl">
       
       {/* ── Filtrer par membre + liens rapides ────────────────────────────── */}
       <div className="bg-background/60 backdrop-blur-xl border border-border mb-8 rounded-2xl overflow-hidden">

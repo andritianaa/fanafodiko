@@ -59,7 +59,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 py-4">
+    <div className="max-w-2xl mx-auto space-y-4">
       <div>
         <h1 className="text-2xl font-bold">Mon compte</h1>
         <p className="text-muted-foreground text-sm mt-1">Gérez vos informations et préférences</p>

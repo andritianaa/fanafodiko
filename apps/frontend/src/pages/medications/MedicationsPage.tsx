@@ -75,7 +75,7 @@ export default function MedicationsPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <div className="container mx-auto max-w-6xl">
       <div className="flex justify-between items-center mb-10 max-md:flex-col max-md:items-start max-md:gap-4">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight">

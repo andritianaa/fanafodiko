@@ -448,7 +448,7 @@ export default function BackofficePage() {
     requestsData?.requests.filter((r) => r.status === 'pending').length ?? 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center gap-3">
         <ShieldIcon size={28} weight="duotone" className="text-orange-600" />
         <div>

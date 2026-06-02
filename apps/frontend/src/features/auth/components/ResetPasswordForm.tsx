@@ -42,7 +42,7 @@ export const ResetPasswordForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {resetEmail && (
         <p className="text-sm text-muted-foreground text-center">
           Code envoyé à <span className="font-medium text-foreground">{resetEmail}</span>

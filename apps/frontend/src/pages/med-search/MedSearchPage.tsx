@@ -39,6 +39,7 @@ export default function MedSearchPage() {
   // ── Détection automatique de l'état de permission GPS ───────────────────────
   useEffect(() => {
     if (!navigator.geolocation) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setGeoState('denied');
       return;
     }
@@ -103,7 +104,7 @@ export default function MedSearchPage() {
   };
 
   return (
-    <div className="max-w-lg mx-auto py-8 px-4">
+    <div className="max-w-lg mx-auto ">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3">
@@ -142,7 +143,7 @@ export default function MedSearchPage() {
         </div>
       </Link>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Medication name */}
         <div className="space-y-2">
           <Label htmlFor="med-name" className="text-sm font-medium">

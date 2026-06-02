@@ -30,7 +30,7 @@ export default function MyPharmacyListPage() {
   }, [isLoading, pharmacies, navigate]);
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
+    <div className="space-y-4 max-w-2xl mx-auto">
       <div className="flex items-center gap-3">
         <StorefrontIcon size={28} weight="duotone" className="text-primary" />
         <div>

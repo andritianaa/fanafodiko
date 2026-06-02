@@ -62,7 +62,7 @@ export default function CguPage() {
           </div>
           <p className="text-sm text-gray-400 mb-8">Dernière mise à jour : {LAST_UPDATE}</p>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {articles.map((article) => (
               <section key={article.title}>
                 <h2 className="text-base font-semibold text-gray-800 mb-2">{article.title}</h2>
