@@ -8,6 +8,10 @@ import type {
   InviteMemberInput,
   UpdatePharmacyInfoInput,
   UpdatePharmacyHoursInput,
+  CreateExceptionalScheduleInput,
+  UpdateExceptionalScheduleInput,
+  CreatePharmacyGuardInput,
+  UpdatePharmacyGuardInput,
 } from '@ext/schemas';
 
 type MyPharmacyDetail = Pharmacy & { myRole: PharmacyRole };
@@ -95,6 +99,65 @@ export interface PharmacySearchHistoryItem {
 export const getPharmacySearchHistory = async (id: string): Promise<PharmacySearchHistoryItem[]> => {
   const res = await apiClient.get<{ history: PharmacySearchHistoryItem[] }>(`/my/pharmacies/${id}/search-history`);
   return res.data.history;
+};
+
+// ─── Ouvertures / fermetures exceptionnelles ──────────────────────────────────
+
+export const addExceptionalSchedule = async (
+  id: string,
+  data: CreateExceptionalScheduleInput
+) => {
+  const res = await apiClient.post(`/my/pharmacies/${id}/exceptional`, data);
+  return res.data;
+};
+
+export const updateExceptionalSchedule = async (
+  id: string,
+  scheduleId: string,
+  data: UpdateExceptionalScheduleInput
+) => {
+  const res = await apiClient.patch(
+    `/my/pharmacies/${id}/exceptional/${scheduleId}`,
+    data
+  );
+  return res.data;
+};
+
+export const deleteExceptionalSchedule = async (
+  id: string,
+  scheduleId: string
+) => {
+  const res = await apiClient.delete(
+    `/my/pharmacies/${id}/exceptional/${scheduleId}`
+  );
+  return res.data;
+};
+
+// ─── Gardes déclarées par la pharmacie ────────────────────────────────────────
+
+export const addPharmacyGuard = async (
+  id: string,
+  data: CreatePharmacyGuardInput
+) => {
+  const res = await apiClient.post(`/my/pharmacies/${id}/guards`, data);
+  return res.data;
+};
+
+export const updatePharmacyGuard = async (
+  id: string,
+  guardId: string,
+  data: UpdatePharmacyGuardInput
+) => {
+  const res = await apiClient.patch(
+    `/my/pharmacies/${id}/guards/${guardId}`,
+    data
+  );
+  return res.data;
+};
+
+export const deletePharmacyGuard = async (id: string, guardId: string) => {
+  const res = await apiClient.delete(`/my/pharmacies/${id}/guards/${guardId}`);
+  return res.data;
 };
 
 export type { MyPharmacyDetail };

@@ -5,6 +5,7 @@ import type {
   CreatePharmacyInput,
   UpdatePharmacyInput,
   BatchGuardInput,
+  Pharmacy,
 } from '@ext/schemas';
 import { z } from 'zod';
 import {
@@ -31,6 +32,11 @@ export const searchPharmacies = async (q: string): Promise<SearchResponse> => {
 // Backoffice
 export const getBackofficePharmacies = async (): Promise<ListResponse> => {
   const res = await apiClient.get<ListResponse>('/backoffice/pharmacies');
+  return res.data;
+};
+
+export const getBackofficePharmacy = async (id: string): Promise<Pharmacy> => {
+  const res = await apiClient.get<Pharmacy>(`/backoffice/pharmacies/${id}`);
   return res.data;
 };
 

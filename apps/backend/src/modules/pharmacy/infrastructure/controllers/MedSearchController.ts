@@ -17,6 +17,10 @@ import { streamSSE } from "hono/streaming";
 import { CreateMedSearchSchema, RespondToSearchSchema } from "@ext/schemas";
 import { ResendMailer } from "@/core/services/mailing/ResendMailer";
 import { medSearchEmailTemplate } from "@/core/services/mailing/emailTemplates";
+import { ProfileModel } from "@/modules/identity/infrastructure/models/ProfileModel";
+import { MongoInAppNotificationRepository } from "@/modules/notification/infrastructure/repositories/MongoInAppNotificationRepository";
+import { InAppNotification } from "@/modules/notification/domain/entities/InAppNotification";
+import { expoPushService } from "@/core/services/push/ExpoPushService";
 
 const ctrl = createController();
 
@@ -27,6 +31,7 @@ const tokenService = new JwtTokenService(
 const searchRepo = new MongoMedSearchRepository();
 const membershipRepo = new MongoPharmacyMembershipRepository();
 const mailer = new ResendMailer(process.env.RESEND_API_KEY || "re_xxx");
+const notifRepo = new MongoInAppNotificationRepository();
 
 const APP_URL = process.env.SOURCE_URL || "http://localhost:5173";
 
@@ -64,15 +69,16 @@ ctrl.openapi(createRoute_, async (c) => {
   const useCase = new CreateMedSearch(searchRepo);
   const search = await useCase.execute(input, user.id!);
 
-  // Envoyer des emails aux membres des pharmacies à proximité (fire-and-forget)
+  // Envoyer emails + push aux membres des pharmacies à proximité (fire-and-forget)
   const pharmacyIds = search.props.nearbyPharmacies.map((p) => p.id);
   if (pharmacyIds.length > 0) {
-    sendMemberEmails(
+    sendMemberNotifications(
       pharmacyIds,
+      search.id!,
       search.props.medicationName,
       input.note,
       input.radiusKm,
-    ).catch((err) => console.error("[MedSearch] email error:", err));
+    ).catch((err) => console.error("[MedSearch] notification error:", err));
   }
 
   return c.json(
@@ -85,31 +91,30 @@ ctrl.openapi(createRoute_, async (c) => {
   );
 });
 
-/** Récupère les emails de tous les membres des pharmacies concernées et envoie une notif. */
-async function sendMemberEmails(
+/** Envoie emails et push aux membres des pharmacies concernées par la recherche. */
+async function sendMemberNotifications(
   pharmacyIds: string[],
+  searchId: string,
   medicationName: string,
   note: string | undefined,
   radiusKm: number,
 ): Promise<void> {
-  // Memberships de toutes les pharmacies en une seule requête
   const memberships = await PharmacyMembershipModel.find({
     pharmacyId: { $in: pharmacyIds },
   }).lean();
 
   if (memberships.length === 0) return;
 
-  // Dédupliquer les userIds
   const userIds = [...new Set(memberships.map((m) => m.userId))];
 
-  // Récupérer les emails des membres
   const users = await UserModel.find({ _id: { $in: userIds } })
-    .select("_id email")
+    .select("_id email pushTokens")
     .lean();
 
-  const emailMap = new Map(users.map((u) => [u._id.toString(), u.email]));
+  const userMap = new Map(
+    users.map((u) => [u._id.toString(), { email: u.email, pushTokens: u.pushTokens ?? [] }]),
+  );
 
-  // Nom de pharmacie par pharmacyId (pour personnaliser l'email)
   const pharmacies = await PharmacyModel.find({ _id: { $in: pharmacyIds } })
     .select("_id name")
     .lean();
@@ -117,10 +122,22 @@ async function sendMemberEmails(
     pharmacies.map((p) => [p._id.toString(), p.name]),
   );
 
-  // Envoyer un email par membre (en parallèle, limité à 10 à la fois)
+  // Collecter tous les tokens pour le push (une seule requête Expo)
+  const allTokens = users.flatMap((u) => u.pushTokens ?? []);
+  if (allTokens.length > 0) {
+    expoPushService
+      .sendPush(allTokens, "💊 Demande de médicament", `${medicationName} – rayon ${radiusKm} km`, {
+        type: "new_med_search",
+        searchId,
+        medicationName,
+      })
+      .catch(() => {});
+  }
+
+  // Envoyer un email par membre
   const sends = memberships.map(async (m) => {
-    const email = emailMap.get(m.userId);
-    if (!email) return;
+    const userData = userMap.get(m.userId);
+    if (!userData?.email) return;
     const pharmacyName = pharmacyNameMap.get(m.pharmacyId) ?? "votre pharmacie";
     const { subject, html } = medSearchEmailTemplate({
       pharmacyName,
@@ -129,10 +146,9 @@ async function sendMemberEmails(
       radiusKm,
       manageUrl: `${APP_URL}/my-pharmacy`,
     });
-    await mailer.sendEmail(email, subject, html);
+    await mailer.sendEmail(userData.email, subject, html);
   });
 
-  // Batch de 10 envois max en parallèle
   for (let i = 0; i < sends.length; i += 10) {
     await Promise.allSettled(sends.slice(i, i + 10));
   }
@@ -301,6 +317,9 @@ ctrl.post("/:id/respond/:pharmacyId", async (c) => {
     body.note,
   );
 
+  // Notifier l'utilisateur qui a lancé la recherche (fire-and-forget)
+  notifySearcher(search.props.userId, search.props.medicationName, pharmacyName, body.hasStock, searchId).catch(() => {});
+
   return c.json({ message: "Réponse enregistrée" }, 200);
 });
 
@@ -350,5 +369,40 @@ ctrl.get("/pharmacy-stream/:pharmacyId", async (c) => {
     unsub();
   });
 });
+
+/** Crée une notification in-app + push pour l'utilisateur qui a lancé la recherche. */
+async function notifySearcher(
+  userId: string,
+  medicationName: string,
+  pharmacyName: string,
+  hasStock: boolean,
+  searchId: string,
+): Promise<void> {
+  const profile = await ProfileModel.findOne({ accountId: userId, relationship: "self" }).lean();
+  if (!profile) return;
+
+  const notification = InAppNotification.createSearchResponse({
+    profileId: profile._id.toString(),
+    medicationName,
+    pharmacyName,
+    hasStock,
+    searchId,
+  });
+
+  await notifRepo.save(notification);
+
+  // Push vers les appareils de l'utilisateur
+  const userDoc = await UserModel.findById(userId).select("pushTokens").lean();
+  if (userDoc?.pushTokens?.length) {
+    expoPushService
+      .sendPush(
+        userDoc.pushTokens,
+        hasStock ? "✅ Disponible" : "❌ Indisponible",
+        `${pharmacyName} — ${medicationName}`,
+        { type: "search_response", searchId },
+      )
+      .catch(() => {});
+  }
+}
 
 export default ctrl;

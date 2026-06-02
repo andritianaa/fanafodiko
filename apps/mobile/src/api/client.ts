@@ -103,6 +103,13 @@ export const authApi = {
     ),
   logout: () => api.post("/auth/logout"),
   me: () => api.get<{ id: string; email: string }>("/auth/me"),
+  registerPushToken: (token: string) =>
+    api.post<{ message: string }>("/auth/push-token", { token }),
+  removePushToken: (token: string) =>
+    request<{ message: string }>("/auth/push-token", {
+      method: "DELETE",
+      body: JSON.stringify({ token }),
+    }),
 };
 
 export const householdsApi = {
@@ -155,4 +162,66 @@ export const tasksApi = {
     ),
   markTaken: (id: string) => api.patch(`/notifications/tasks/${id}/take`),
   markSkipped: (id: string) => api.patch(`/notifications/tasks/${id}/skip`),
+};
+
+export const pharmacyApi = {
+  list: (filter?: 'open' | 'guard' | '24h') =>
+    api.get<{ pharmacies: import("../types").Pharmacy[]; total: number }>(
+      `/pharmacies${filter ? `?filter=${filter}` : ""}`,
+    ),
+  get: (id: string) =>
+    api.get<import("../types").Pharmacy>(`/pharmacies/${id}`),
+};
+
+export const medSearchApi = {
+  create: (data: {
+    medicationName: string;
+    coordinates: { lat: number; lng: number };
+    radiusKm: number;
+    note?: string;
+  }) =>
+    api.post<{ id: string; nearbyCount: number; expiresAt: string }>(
+      "/med-searches",
+      data,
+    ),
+  get: (id: string) =>
+    api.get<import("../types").MedSearch>(`/med-searches/${id}`),
+  myHistory: () =>
+    api.get<{ history: import("../types").MedSearchHistoryItem[] }>(
+      "/med-searches/my",
+    ),
+  pharmacyPending: (pharmacyId: string) =>
+    api.get<import("../types").PendingSearch[]>(
+      `/med-searches/pharmacy/${pharmacyId}/pending`,
+    ),
+  respond: (
+    searchId: string,
+    pharmacyId: string,
+    data: { hasStock: boolean; note?: string },
+  ) => api.post(`/med-searches/${searchId}/respond/${pharmacyId}`, data),
+};
+
+export const myPharmacyApi = {
+  list: () =>
+    api.get<import("../types").Pharmacy[]>("/my/pharmacies"),
+  get: (id: string) =>
+    api.get<import("../types").Pharmacy>(`/my/pharmacies/${id}`),
+  members: (id: string) =>
+    api.get<Array<{ userId: string; email: string; role: string }>>(
+      `/my/pharmacies/${id}/members`,
+    ),
+  pendingRequests: (id: string) =>
+    api.get<Array<{ id: string; userId: string; email: string; createdAt: string }>>(
+      `/my/pharmacies/${id}/requests`,
+    ),
+};
+
+export const preferencesApi = {
+  get: () =>
+    api.get<import("../types").NotificationPreferences>("/auth/preferences"),
+  update: (prefs: Partial<import("../types").NotificationPreferences>) =>
+    api.patch<import("../types").NotificationPreferences>(
+      "/auth/preferences",
+      prefs,
+    ),
 };

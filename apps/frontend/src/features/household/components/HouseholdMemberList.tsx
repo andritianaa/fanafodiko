@@ -1,4 +1,5 @@
 import { TrashIcon, PencilIcon, PillIcon, ListIcon, CalendarIcon, DotsThreeVerticalIcon } from "@phosphor-icons/react"
+import { MemberAvatar } from './MemberAvatar'
 import {
   Card,
   CardDescription,
@@ -88,14 +89,21 @@ export const HouseholdMemberList = ({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {members.map((member) => {
-          const avatarUrl = member.avatarUrl || `https://api.dicebear.com/9.x/glass/svg?seed=${member.fullName}`;
+          const cardAvatarUrl = member.avatarUrl || `https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(member.fullName)}`;
 
           return (
             <Card key={member.id} className="relative mx-auto w-full max-w-sm pt-0 group/member transition-all hover:shadow-xl hover:shadow-primary/5">
               <img
-                src={avatarUrl}
+                src={cardAvatarUrl}
                 alt={member.fullName}
                 className="relative z-20 aspect-video w-full object-cover transition-transform duration-500 group-hover/member:scale-105"
+                onError={(e) => {
+                  // Si l'image uploadée échoue, basculer sur dicebear
+                  const fallback = `https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(member.fullName)}`;
+                  if ((e.currentTarget as HTMLImageElement).src !== fallback) {
+                    (e.currentTarget as HTMLImageElement).src = fallback;
+                  }
+                }}
               />
               <CardHeader>
                 <CardTitle>{member.fullName}</CardTitle>

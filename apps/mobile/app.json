@@ -23,11 +23,20 @@
         "VIBRATE",
         "POST_NOTIFICATIONS",
         "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.WAKE_LOCK"
+        "android.permission.WAKE_LOCK",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
       ]
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Fanafodiko utilise votre position pour trouver les pharmacies proches.",
+          "locationWhenInUsePermission": "Fanafodiko utilise votre position pour trouver les pharmacies proches."
+        }
+      ],
       [
         "expo-notifications",
         {
@@ -37,6 +46,7 @@
           "iosDisplayInForeground": true
         }
       ],
+      "react-native-maps",
       "expo-background-fetch",
       "expo-task-manager",
       [

@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useMyPharmacies } from '@/features/myPharmacy/api/hooks';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +19,15 @@ const ROLE_VARIANTS: Record<PharmacyRole, 'default' | 'secondary' | 'outline'> =
 };
 
 export default function MyPharmacyListPage() {
+  const navigate = useNavigate();
   const { data: pharmacies, isLoading } = useMyPharmacies();
+
+  // Redirect directly if only one pharmacy
+  useEffect(() => {
+    if (!isLoading && pharmacies && pharmacies.length === 1) {
+      navigate(`/my-pharmacy/${pharmacies[0].id}`, { replace: true });
+    }
+  }, [isLoading, pharmacies, navigate]);
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">

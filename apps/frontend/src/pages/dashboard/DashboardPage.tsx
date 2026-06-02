@@ -3,7 +3,7 @@ import { useHouseholdMembers } from '@/features/household/api/hooks';
 import { useTasks } from '@/features/notification/api/hooks';
 import { useMedications } from '@/features/medication/api/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { MemberAvatar } from '@/features/household/components/MemberAvatar';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { 
@@ -303,10 +303,7 @@ export default function DashboardPage() {
                   const activeMeds = medications?.filter(med => med.profileId === m.id && med.isActive).length || 0;
                   return (
                     <div key={m.id} className="flex items-center gap-4 bg-slate-50 p-3 transition-colors border border-border ">
-                      <Avatar className="size-10 border-2 border-white shadow-sm">
-                        {m.avatarUrl && <AvatarImage src={m.avatarUrl} />}
-                        <AvatarFallback className="bg-blue-100 text-blue-700 font-bold">{m.fullName[0]}</AvatarFallback>
-                      </Avatar>
+                      <MemberAvatar fullName={m.fullName} avatarUrl={m.avatarUrl} className="size-10 border-2 border-white shadow-sm" />
                       <div>
                         <p>{m.fullName}</p>
                         <p className="text-muted-foreground">{activeMeds} traitement{activeMeds > 1 ? 's' : ''}</p>

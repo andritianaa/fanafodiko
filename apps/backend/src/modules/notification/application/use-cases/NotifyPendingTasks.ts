@@ -3,6 +3,8 @@ import { INotificationService } from "../../domain/services/INotificationService
 import { IMedicationRepository } from "@/modules/medication_management/domain/repositories/IMedicationRepository";
 import { IProfileRepository } from "@/modules/identity/domain/repositories/IProfileRepository";
 import { IUserRepository } from "@/modules/identity/domain/repositories/IUserRepository";
+import { UserModel } from "@/modules/identity/infrastructure/models/UserModel";
+import { expoPushService } from "@/core/services/push/ExpoPushService";
 
 export class NotifyPendingTasks {
   constructor(
@@ -47,6 +49,23 @@ export class NotifyPendingTasks {
           profileEmail,
           utcOffsetMinutes: medication.utcOffsetMinutes,
         });
+
+        // Push vers les appareils de l'utilisateur (fire-and-forget)
+        if (user) {
+          const userDoc = await UserModel.findById(profile.accountId)
+            .select("pushTokens")
+            .lean();
+          if (userDoc?.pushTokens?.length) {
+            expoPushService
+              .sendPush(
+                userDoc.pushTokens,
+                `💊 ${medication.name}`,
+                `Rappel : ${medication.dosage}`,
+                { type: "medication", taskId: task.id, profileId: task.profileId },
+              )
+              .catch(() => {});
+          }
+        }
 
         // Mark as notified so it is never sent again regardless of cron frequency.
         task.markAsNotified();

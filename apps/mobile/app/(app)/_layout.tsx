@@ -26,6 +26,22 @@ export default function AppLayout() {
         name="member/[id]"
         options={{ animation: 'slide_from_right' }}
       />
+      <Stack.Screen
+        name="pharmacy/[id]"
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="med-search/[id]"
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="med-search/history"
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="my-pharmacy/[id]"
+        options={{ animation: 'slide_from_right' }}
+      />
     </Stack>
   );
 }

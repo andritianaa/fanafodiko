@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authApi, householdsApi, medicationsApi, tasksApi, ApiError } from '../api/client';
+import { authApi, householdsApi, medicationsApi, tasksApi, pharmacyApi, myPharmacyApi, ApiError } from '../api/client';
 import {
   upsertProfiles,
   upsertMedications,
@@ -9,6 +9,8 @@ import {
   markActionSynced,
   clearSyncedActions,
   setSyncMeta,
+  getSyncMeta,
+  upsertPharmacies,
 } from '../db/database';
 import { scheduleAllNotifications, needsReschedule } from '../notifications/scheduler';
 import { useStore } from '../store/useStore';
@@ -101,6 +103,26 @@ async function pullTasks(profiles: Profile[]): Promise<Task[]> {
   return all;
 }
 
+async function pullPharmacies(): Promise<void> {
+  try {
+    const data = await pharmacyApi.list();
+    await upsertPharmacies(data.pharmacies);
+    useStore.getState().setPharmacies(data.pharmacies);
+    await setSyncMeta('lastPharmacySync', Date.now().toString());
+  } catch {
+    // Ignore pharmacy sync errors — app works offline with cached data
+  }
+}
+
+async function pullMyPharmacies(): Promise<void> {
+  try {
+    const pharmacies = await myPharmacyApi.list();
+    useStore.getState().setMyPharmacies(pharmacies);
+  } catch {
+    // Not a staff user or error — silently ignore
+  }
+}
+
 export async function fullSync(): Promise<{ profiles: Profile[]; medications: Medication[]; tasks: Task[] }> {
   const store = useStore.getState();
 
@@ -124,6 +146,15 @@ export async function fullSync(): Promise<{ profiles: Profile[]; medications: Me
       const activeMeds = medications.filter((m) => m.isActive);
       await scheduleAllNotifications(activeMeds);
     }
+
+    // Sync pharmacies once every 24h
+    const lastPharmSync = await getSyncMeta('lastPharmacySync');
+    if (!lastPharmSync || Date.now() - Number(lastPharmSync) > 24 * 3600 * 1000) {
+      await pullPharmacies();
+    }
+
+    // Sync my pharmacies (for staff) on every full sync
+    await pullMyPharmacies();
 
     return { profiles, medications, tasks };
   } catch (err) {

@@ -3,6 +3,7 @@ import { Stack, router } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import { AppState, Platform, View, Text } from 'react-native';
 import { useFonts } from 'expo-font';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   setupNotificationChannel,
   requestNotificationPermissions,
@@ -12,6 +13,7 @@ import {
   scheduleAllNotifications,
 } from '../src/notifications/scheduler';
 import { loadFromLocal } from '../src/sync/syncService';
+import { authApi } from '../src/api/client';
 import { IS_EXPO_GO } from '../src/config/env';
 
 export default function RootLayout() {
@@ -37,6 +39,11 @@ export default function RootLayout() {
       await loadFromLocal();
       if (hasPermission && (await needsReschedule())) {
         scheduleAllNotifications().catch(() => {});
+      }
+
+      // Enregistrer le push token Expo (fire-and-forget)
+      if (hasPermission && !IS_EXPO_GO) {
+        registerExpoPushToken().catch(() => {});
       }
 
       // Cold start : si l'app a été ouverte depuis une notification
@@ -93,25 +100,32 @@ export default function RootLayout() {
   );
 }
 
-/**
- * Navigation au tap d'une notification de médicament.
- *
- * Si on a un profileId → détail du membre (liste des médicaments + prises).
- * Sinon → dashboard (vue des prises du jour).
- *
- * Le `setTimeout` laisse le temps au navigateur de s'initialiser
- * en cas de cold start.
- */
+async function registerExpoPushToken(): Promise<void> {
+  try {
+    const tokenData = await Notifications.getExpoPushTokenAsync();
+    const token = tokenData.data;
+    await AsyncStorage.setItem('expo_push_token', token);
+    await authApi.registerPushToken(token);
+  } catch {
+    // Ignore — push token registration is best-effort
+  }
+}
+
 function handleNotificationNavigation(data: Record<string, unknown>) {
+  const type = data?.type as string | undefined;
   const profileId = data?.profileId as string | undefined;
+  const searchId = data?.searchId as string | undefined;
+  const pharmacyId = data?.pharmacyId as string | undefined;
 
   setTimeout(() => {
     try {
-      if (profileId) {
-        // Navigue vers le détail du membre concerné
+      if (type === 'search_response' && searchId) {
+        router.push({ pathname: '/(app)/med-search/[id]', params: { id: searchId } });
+      } else if (type === 'new_med_search' && pharmacyId) {
+        router.push({ pathname: '/(app)/my-pharmacy/[id]', params: { id: pharmacyId } });
+      } else if (profileId) {
         router.push({ pathname: '/(app)/member/[id]', params: { id: profileId } });
       } else {
-        // Fallback → dashboard (prises du jour)
         router.navigate('/(app)/(tabs)/');
       }
     } catch {

@@ -18,10 +18,12 @@ import { ContactsEditor } from '@/features/backoffice/pharmacies/ContactsEditor'
 import { PharmacyImagesEditor } from '@/features/backoffice/pharmacies/PharmacyImagesEditor';
 import { LocationPickerMap } from '@/features/pharmacy/components/LocationPickerMap';
 import { MembersTab } from '@/features/myPharmacy/components/MembersTab';
-import { CaretLeftIcon, CheckCircleIcon, XCircleIcon, ClockIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
+import { ExceptionalSchedulesTab } from '@/features/myPharmacy/components/ExceptionalSchedulesTab';
+import { CaretLeftIcon, CheckCircleIcon, XCircleIcon, ClockIcon, MagnifyingGlassIcon, StorefrontIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { PharmacyStatusBadge } from '@/features/pharmacy/components/PharmacyStatusBadge';
 import type {
   OpeningHour,
   PharmacyContact,
@@ -83,14 +85,20 @@ export default function MyPharmacyManagePage() {
         <Badge variant="secondary">{ROLE_LABELS[myRole]}</Badge>
       </div>
 
-      <Tabs defaultValue="hours">
+      <Tabs defaultValue="overview">
         <TabsList className="flex-wrap h-auto">
+          <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
           {canEditInfo && <TabsTrigger value="info">Infos</TabsTrigger>}
           <TabsTrigger value="hours">Horaires</TabsTrigger>
+          <TabsTrigger value="calendar">Calendrier</TabsTrigger>
           <TabsTrigger value="images">Images</TabsTrigger>
           <TabsTrigger value="members">Membres</TabsTrigger>
           <TabsTrigger value="history">Historique</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="overview" className="mt-4">
+          <OverviewTab pharmacy={pharmacy} myRole={myRole} />
+        </TabsContent>
 
         {canEditInfo && (
           <TabsContent value="info" className="mt-4">
@@ -100,6 +108,15 @@ export default function MyPharmacyManagePage() {
 
         <TabsContent value="hours" className="mt-4">
           <HoursTab id={id} pharmacy={pharmacy} />
+        </TabsContent>
+
+        <TabsContent value="calendar" className="mt-4">
+          <ExceptionalSchedulesTab
+            pharmacyId={id}
+            schedules={pharmacy.exceptionalSchedules ?? []}
+            pharmacyGuards={pharmacy.pharmacyGuards ?? []}
+            openingHours={pharmacy.openingHours ?? []}
+          />
         </TabsContent>
 
         <TabsContent value="images" className="mt-4">
@@ -114,6 +131,85 @@ export default function MyPharmacyManagePage() {
           <SearchHistoryTab pharmacyId={id} />
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+/* ─── Vue d'ensemble ─── */
+function OverviewTab({ pharmacy, myRole }: { pharmacy: any; myRole: PharmacyRole }) {
+  const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+  const today = new Date().getDay();
+  const todayHours = (pharmacy.openingHours ?? []).find((h: any) => h.day === today);
+  const activeGuards = (pharmacy.pharmacyGuards ?? []).filter((g: any) => g.isActive).length;
+
+  return (
+    <div className="space-y-4">
+      {/* Statut en temps réel */}
+      <div className="flex items-center gap-3 p-4 border rounded-xl bg-muted/20">
+        <PharmacyStatusBadge pharmacy={pharmacy} />
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-sm">{pharmacy.address}</p>
+          <p className="text-xs text-muted-foreground">{pharmacy.city}{pharmacy.region ? `, ${pharmacy.region}` : ''}</p>
+        </div>
+        <Badge variant="secondary">{ROLE_LABELS[myRole]}</Badge>
+      </div>
+
+      {/* Horaires du jour */}
+      <div className="border rounded-xl p-4 space-y-2">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+          <ClockIcon size={13} /> Aujourd'hui
+        </p>
+        {pharmacy.isOpen24h ? (
+          <p className="text-sm font-medium text-sky-600">Ouvert 24h/24</p>
+        ) : todayHours ? (
+          todayHours.isClosed ? (
+            <p className="text-sm text-destructive">Fermé</p>
+          ) : (
+            <p className="text-sm font-medium">{todayHours.open} – {todayHours.close}</p>
+          )
+        ) : (
+          <p className="text-sm text-muted-foreground">Horaires non définis</p>
+        )}
+      </div>
+
+      {/* Résumé rapide */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="border rounded-xl p-3 text-center">
+          <p className="text-2xl font-bold">{(pharmacy.openingHours ?? []).filter((h: any) => !h.isClosed).length}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">jours d'ouverture / semaine</p>
+        </div>
+        <div className="border rounded-xl p-3 text-center">
+          <p className="text-2xl font-bold">{activeGuards}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">garde(s) active(s)</p>
+        </div>
+        <div className="border rounded-xl p-3 text-center">
+          <p className="text-2xl font-bold">{(pharmacy.exceptionalSchedules ?? []).length}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">exception(s) d'horaire</p>
+        </div>
+        <div className="border rounded-xl p-3 text-center">
+          <p className="text-2xl font-bold">{(pharmacy.images ?? []).length}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">photo(s)</p>
+        </div>
+      </div>
+
+      {/* Horaires semaine */}
+      {!pharmacy.isOpen24h && (pharmacy.openingHours ?? []).length > 0 && (
+        <div className="border rounded-xl p-4 space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Planning habituel</p>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+            {[...(pharmacy.openingHours ?? [])].sort((a: any, b: any) => a.day - b.day).map((h: any) => (
+              <div key={h.day} className={`flex justify-between text-xs ${h.day === today ? 'font-bold text-primary' : ''}`}>
+                <span className="text-muted-foreground w-8 shrink-0">{DAYS[h.day]}</span>
+                {h.isClosed ? (
+                  <span className="text-destructive">Fermé</span>
+                ) : (
+                  <span>{h.open}–{h.close}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

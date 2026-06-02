@@ -26,6 +26,14 @@ export function serializePharmacy(
         g.endDate instanceof Date ? g.endDate.toISOString() : String(g.endDate),
       isActive: g.isActive,
     })),
+    exceptionalSchedules: (p.props.exceptionalSchedules ?? []),
+    pharmacyGuards: (p.props.pharmacyGuards ?? []).map((g) => ({
+      id: g.id,
+      startDate: g.startDate instanceof Date ? g.startDate.toISOString() : String(g.startDate),
+      endDate: g.endDate instanceof Date ? g.endDate.toISOString() : String(g.endDate),
+      label: g.label,
+      isActive: g.isActive,
+    })),
     ...(computed?.isOpenNow !== undefined ? { isOpenNow: computed.isOpenNow } : {}),
     ...(computed?.isOnGuard !== undefined ? { isOnGuard: computed.isOnGuard } : {}),
   };

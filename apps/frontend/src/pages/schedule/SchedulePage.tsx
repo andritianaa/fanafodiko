@@ -3,17 +3,23 @@ import { useHouseholdMembers } from '@/features/household/api/hooks';
 import { useTasks, useDailyProgress } from '@/features/notification/api/hooks';
 import { useMedications } from '@/features/medication/api/hooks';
 import { TaskCard } from '@/features/notification/components/TaskCard';
+import { HouseholdMemberDialog } from '@/features/household/components/HouseholdMemberDialog';
+import { MemberAvatar } from '@/features/household/components/MemberAvatar';
+import { MedicationDialog } from '@/features/medication/components/MedicationDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { PillIcon, ClockIcon, UsersIcon } from '@phosphor-icons/react';
+import { Button } from '@/components/ui/button';
+import { PillIcon, ClockIcon, UsersIcon, PlusIcon, ArrowRightIcon } from '@phosphor-icons/react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+
 
 export default function SchedulePage() {
   const { data: members } = useHouseholdMembers();
   const location = useLocation();
   const [selectedProfileId, setSelectedProfileId] = useState<string>('all');
+  const [addMemberOpen, setAddMemberOpen] = useState(false);
+  const [addMedicationOpen, setAddMedicationOpen] = useState(false);
   
   useEffect(() => {
     const hash = location.hash.replace('#', '');
@@ -35,8 +41,9 @@ export default function SchedulePage() {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       
-      <div className="bg-background/60 backdrop-blur-xl border border-border mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-5 p-6">
+      {/* ── Filtrer par membre + liens rapides ────────────────────────────── */}
+      <div className="bg-background/60 backdrop-blur-xl border border-border mb-8 rounded-2xl overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5">
           <div className="flex items-center gap-3 min-w-fit">
             <div className="p-2 bg-primary/10 rounded-xl">
               <UsersIcon className="size-5 text-primary" weight="bold" />
@@ -45,9 +52,9 @@ export default function SchedulePage() {
               Filtrer par membre
             </span>
           </div>
-          <div className="flex-1 sm:max-w-sm">
+          <div className="flex flex-1 items-center gap-2">
             <Select value={selectedProfileId} onValueChange={setSelectedProfileId}>
-              <SelectTrigger className="w-full h-11 rounded-xl bg-background/80 border-border/60 hover:border-primary/30 transition-colors">
+              <SelectTrigger className="flex-1 h-10 rounded-xl bg-background/80 border-border/60 hover:border-primary/30 transition-colors">
                 <SelectValue placeholder="Tout le monde" />
               </SelectTrigger>
               <SelectContent className="rounded-xl">
@@ -59,27 +66,58 @@ export default function SchedulePage() {
                     <span>Tout le monde</span>
                   </div>
                 </SelectItem>
-                {members?.map((member) => {
-                  const initials = member.fullName.charAt(0).toUpperCase();
-                  return (
-                    <SelectItem key={member.id} value={member.id} className="rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <Avatar size="sm">
-                          {member.avatarUrl && <AvatarImage src={member.avatarUrl} alt={member.fullName} />}
-                          <AvatarFallback className="text-xs font-semibold">
-                            {initials}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span>{member.fullName}</span>
-                      </div>
-                    </SelectItem>
-                  );
-                })}
+                {members?.map((member) => (
+                  <SelectItem key={member.id} value={member.id} className="rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <MemberAvatar fullName={member.fullName} avatarUrl={member.avatarUrl} className="size-6" />
+                      <span>{member.fullName}</span>
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
+            {/* Bouton ajouter un membre */}
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              className="h-10 w-10 shrink-0 rounded-xl"
+              title="Ajouter un membre du foyer"
+              onClick={() => setAddMemberOpen(true)}
+            >
+              <PlusIcon size={16} />
+            </Button>
           </div>
         </div>
+
+        {/* Liens rapides vers Foyer et Médicaments */}
+        <div className="border-t flex divide-x">
+          <Link
+            to="/household"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors"
+          >
+            <UsersIcon size={13} />
+            Gérer le foyer
+            <ArrowRightIcon size={11} />
+          </Link>
+          <Link
+            to="/medications"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors"
+          >
+            <PillIcon size={13} />
+            Gérer les médicaments
+            <ArrowRightIcon size={11} />
+          </Link>
+        </div>
       </div>
+
+      {/* Dialogs */}
+      <HouseholdMemberDialog open={addMemberOpen} onOpenChange={setAddMemberOpen} />
+      <MedicationDialog
+        open={addMedicationOpen}
+        onOpenChange={setAddMedicationOpen}
+        defaultProfileId={selectedProfileId === 'all' ? undefined : selectedProfileId}
+      />
 
       <div className="space-y-8">
         {progress && (
@@ -116,9 +154,18 @@ export default function SchedulePage() {
           )}
 
           {!isLoadingTasks && tasks?.length === 0 && (
-            <div className="text-center py-12 bg-muted/10 rounded-3xl border border-dashed">
-              <PillIcon className="size-12 text-muted-foreground/20 mx-auto mb-3" />
-              <p className="text-muted-foreground">Aucune prise prévue pour aujourd'hui.</p>
+            <div className="text-center py-12 bg-muted/10 rounded-3xl border border-dashed space-y-3">
+              <PillIcon className="size-12 text-muted-foreground/20 mx-auto" />
+              <p className="text-muted-foreground text-sm">Aucune prise prévue pour aujourd'hui.</p>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                onClick={() => setAddMedicationOpen(true)}
+              >
+                <PlusIcon size={13} />
+                Nouveau traitement
+              </Button>
             </div>
           )}
 

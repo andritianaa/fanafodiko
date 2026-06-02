@@ -15,6 +15,7 @@ import { JwtTokenService } from "../security/JwtTokenService";
 import { RequestPasswordReset } from "../../application/use-cases/RequestPasswordReset";
 import { ConfirmPasswordReset } from "../../application/use-cases/ConfirmPasswordReset";
 import { MongoResetPasswordRepository } from "../repositories/ResetPasswordRepository";
+import { UserModel } from "../models/UserModel";
 
 import { GetCurrentUser } from "../../application/use-cases/GetCurrentUser";
 import {
@@ -31,6 +32,10 @@ import {
   ChangePasswordResponseSchema,
   ChangeEmailSchema,
   ChangeEmailResponseSchema,
+  PushTokenSchema,
+  PushTokenResponseSchema,
+  NotificationPreferencesUpdateSchema,
+  NotificationPreferencesResponseSchema,
 } from "@ext/schemas";
 
 const authController = createController();
@@ -224,6 +229,8 @@ const meRoute = createRoute({
 authController.use("/me", authMiddleware(tokenService, userRepository));
 authController.use("/password/change", authMiddleware(tokenService, userRepository));
 authController.use("/email/change", authMiddleware(tokenService, userRepository));
+authController.use("/push-token", authMiddleware(tokenService, userRepository));
+authController.use("/preferences", authMiddleware(tokenService, userRepository));
 
 authController.openapi(meRoute, async (c) => {
   const user = c.get("user");
@@ -293,6 +300,129 @@ authController.openapi(changeEmailRoute, async (c) => {
   const useCase = new ChangeEmail(userRepository, passwordHasher);
   const email = await useCase.execute(user.id!, newEmail, currentPassword);
   return c.json({ email, message: "Email modifié avec succès." }, 200);
+});
+
+// ── POST /push-token ─────────────────────────────────────────────────────────
+const registerPushTokenRoute = createRoute({
+  method: "post",
+  path: "/push-token",
+  security: [{ AuthorizationApiKey: [] }],
+  request: {
+    body: { content: { "application/json": { schema: PushTokenSchema } } },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: PushTokenResponseSchema } },
+      description: "Token enregistré",
+    },
+  },
+});
+
+authController.openapi(registerPushTokenRoute, async (c) => {
+  const user = c.get("user");
+  const { token } = c.req.valid("json");
+  await UserModel.updateOne(
+    { _id: user.id },
+    { $addToSet: { pushTokens: token } },
+  );
+  return c.json({ message: "Token enregistré" }, 200);
+});
+
+// ── DELETE /push-token ────────────────────────────────────────────────────────
+const removePushTokenRoute = createRoute({
+  method: "delete",
+  path: "/push-token",
+  security: [{ AuthorizationApiKey: [] }],
+  request: {
+    body: { content: { "application/json": { schema: PushTokenSchema } } },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: PushTokenResponseSchema } },
+      description: "Token supprimé",
+    },
+  },
+});
+
+authController.openapi(removePushTokenRoute, async (c) => {
+  const user = c.get("user");
+  const { token } = c.req.valid("json");
+  await UserModel.updateOne(
+    { _id: user.id },
+    { $pull: { pushTokens: token } },
+  );
+  return c.json({ message: "Token supprimé" }, 200);
+});
+
+// ── GET /preferences ──────────────────────────────────────────────────────────
+const getPreferencesRoute = createRoute({
+  method: "get",
+  path: "/preferences",
+  security: [{ AuthorizationApiKey: [] }],
+  responses: {
+    200: {
+      content: {
+        "application/json": { schema: NotificationPreferencesResponseSchema },
+      },
+      description: "Préférences de notification",
+    },
+  },
+});
+
+authController.openapi(getPreferencesRoute, async (c) => {
+  const user = c.get("user");
+  const doc = await UserModel.findById(user.id)
+    .select("notificationPreferences")
+    .lean();
+  const prefs = doc?.notificationPreferences ?? {
+    emailMedicationReminders: true,
+    emailMedSearchResponse: true,
+    emailPharmacyInvitation: true,
+  };
+  return c.json(prefs, 200);
+});
+
+// ── PATCH /preferences ────────────────────────────────────────────────────────
+const updatePreferencesRoute = createRoute({
+  method: "patch",
+  path: "/preferences",
+  security: [{ AuthorizationApiKey: [] }],
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: NotificationPreferencesUpdateSchema },
+      },
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": { schema: NotificationPreferencesResponseSchema },
+      },
+      description: "Préférences mises à jour",
+    },
+  },
+});
+
+authController.openapi(updatePreferencesRoute, async (c) => {
+  const user = c.get("user");
+  const updates = c.req.valid("json");
+  const setFields: Record<string, boolean> = {};
+  for (const [k, v] of Object.entries(updates)) {
+    if (v !== undefined) setFields[`notificationPreferences.${k}`] = v as boolean;
+  }
+  if (Object.keys(setFields).length > 0) {
+    await UserModel.updateOne({ _id: user.id }, { $set: setFields });
+  }
+  const doc = await UserModel.findById(user.id)
+    .select("notificationPreferences")
+    .lean();
+  const prefs = doc?.notificationPreferences ?? {
+    emailMedicationReminders: true,
+    emailMedSearchResponse: true,
+    emailPharmacyInvitation: true,
+  };
+  return c.json(prefs, 200);
 });
 
 export default authController;

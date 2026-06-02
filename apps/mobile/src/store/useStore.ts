@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { AuthUser, Profile, Medication, Task, AppState } from '../types';
+import type { AuthUser, Profile, Medication, Task, AppState, Pharmacy, NotificationPreferences } from '../types';
 
 interface AuthSlice {
   user: AuthUser | null;
@@ -33,6 +33,18 @@ interface SyncSlice {
   setSyncResult: (success: boolean, error?: string) => void;
 }
 
+interface PharmacySlice {
+  pharmacies: Pharmacy[];
+  myPharmacies: Pharmacy[];
+  setPharmacies: (pharmacies: Pharmacy[]) => void;
+  setMyPharmacies: (pharmacies: Pharmacy[]) => void;
+}
+
+interface PreferencesSlice {
+  notificationPreferences: NotificationPreferences | null;
+  setNotificationPreferences: (prefs: NotificationPreferences) => void;
+}
+
 interface SettingsSlice {
   apiUrl: string;
   setApiUrl: (url: string) => void;
@@ -40,7 +52,7 @@ interface SettingsSlice {
   setNotificationsEnabled: (enabled: boolean) => void;
 }
 
-type StoreState = AuthSlice & DataSlice & SyncSlice & SettingsSlice;
+type StoreState = AuthSlice & DataSlice & SyncSlice & PharmacySlice & PreferencesSlice & SettingsSlice;
 
 export const useStore = create<StoreState>()(
   persist(
@@ -138,6 +150,16 @@ export const useStore = create<StoreState>()(
           },
         })),
 
+      // Pharmacies
+      pharmacies: [],
+      myPharmacies: [],
+      setPharmacies: (pharmacies) => set({ pharmacies }),
+      setMyPharmacies: (myPharmacies) => set({ myPharmacies }),
+
+      // Notification Preferences
+      notificationPreferences: null,
+      setNotificationPreferences: (prefs) => set({ notificationPreferences: prefs }),
+
       // Settings
       apiUrl: 'http://10.0.2.2:3000',
       setApiUrl: (url) => set({ apiUrl: url }),
@@ -166,3 +188,5 @@ export const selectMedications = (s: StoreState) => s.medications;
 export const selectTodayTasks = (s: StoreState) => s.todayTasks;
 export const selectAppState = (s: StoreState) => s.appState;
 export const selectSelectedProfileId = (s: StoreState) => s.selectedProfileId;
+export const selectPharmacies = (s: StoreState) => s.pharmacies;
+export const selectMyPharmacies = (s: StoreState) => s.myPharmacies;

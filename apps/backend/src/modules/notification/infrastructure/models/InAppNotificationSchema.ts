@@ -2,10 +2,14 @@ import { Schema, model, Document } from "mongoose";
 
 export interface IInAppNotificationDocument extends Document {
   profileId: string;
+  type?: 'medication_reminder' | 'search_response';
   taskId?: string;
   medicationName: string;
-  dosage: string;
-  scheduledAt: Date;
+  dosage?: string;
+  scheduledAt?: Date;
+  pharmacyName?: string;
+  hasStock?: boolean;
+  searchId?: string;
   message: string;
   read: boolean;
   createdAt: Date;
@@ -15,10 +19,14 @@ export interface IInAppNotificationDocument extends Document {
 const InAppNotificationSchema = new Schema<IInAppNotificationDocument>(
   {
     profileId: { type: String, required: true, index: true },
+    type: { type: String, enum: ['medication_reminder', 'search_response'], default: 'medication_reminder' },
     taskId: { type: String, required: false },
     medicationName: { type: String, required: true },
-    dosage: { type: String, required: true },
-    scheduledAt: { type: Date, required: true },
+    dosage: { type: String, required: false },
+    scheduledAt: { type: Date, required: false },
+    pharmacyName: { type: String, required: false },
+    hasStock: { type: Boolean, required: false },
+    searchId: { type: String, required: false },
     message: { type: String, required: true },
     read: { type: Boolean, required: true, default: false },
     readAt: { type: Date, required: false },

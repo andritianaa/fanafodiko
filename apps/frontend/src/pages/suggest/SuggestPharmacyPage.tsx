@@ -7,17 +7,30 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 import { OpeningHoursEditor } from '@/features/backoffice/pharmacies/OpeningHoursEditor';
 import { ContactsEditor } from '@/features/backoffice/pharmacies/ContactsEditor';
 import { PharmacyImagesEditor } from '@/features/backoffice/pharmacies/PharmacyImagesEditor';
 import { LocationPickerMap } from '@/features/pharmacy/components/LocationPickerMap';
 import { useSubmitPharmacyRequest } from '@/features/pharmacyRequest/api/hooks';
 import { toast } from 'sonner';
+import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import type {
   CreatePharmacyRequestInput,
   OpeningHour,
   PharmacyContact,
 } from '@ext/schemas';
+
+// ─── Ordre des étapes ──────────────────────────────────────────────────────────
+const STEPS = ['info', 'location', 'contacts', 'hours'] as const;
+type Step = (typeof STEPS)[number];
+
+const STEP_LABELS: Record<Step, string> = {
+  info: 'Infos',
+  location: 'Localisation',
+  contacts: 'Contacts',
+  hours: 'Horaires',
+};
 
 function defaultOpeningHours(): OpeningHour[] {
   return Array.from({ length: 7 }, (_, day) => ({
@@ -28,10 +41,13 @@ function defaultOpeningHours(): OpeningHour[] {
   }));
 }
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function SuggestPharmacyPage() {
   const navigate = useNavigate();
   const { mutate, isPending } = useSubmitPharmacyRequest();
   const [proofImages, setProofImages] = useState<string[]>([]);
+  const [currentStep, setCurrentStep] = useState<Step>('info');
 
   const { register, handleSubmit, control, watch, setValue } =
     useForm<CreatePharmacyRequestInput>({
@@ -39,7 +55,7 @@ export default function SuggestPharmacyPage() {
         name: '',
         address: '',
         landmark: '',
-        coordinates: { lat: -18.9, lng: 47.5 },
+        coordinates: { lat: 0, lng: 0 },
         contacts: [],
         city: '',
         region: '',
@@ -52,6 +68,18 @@ export default function SuggestPharmacyPage() {
 
   const isOpen24h = watch('isOpen24h');
   const wantsToManage = watch('wantsToManage');
+
+  const currentIndex = STEPS.indexOf(currentStep);
+  const isFirst = currentIndex === 0;
+  const isLast = currentIndex === STEPS.length - 1;
+  const progress = ((currentIndex + 1) / STEPS.length) * 100;
+
+  const goNext = () => {
+    if (!isLast) setCurrentStep(STEPS[currentIndex + 1]);
+  };
+  const goPrev = () => {
+    if (!isFirst) setCurrentStep(STEPS[currentIndex - 1]);
+  };
 
   const onSubmit = (data: CreatePharmacyRequestInput) => {
     if (data.wantsToManage && proofImages.length === 0) {
@@ -82,23 +110,43 @@ export default function SuggestPharmacyPage() {
         </p>
       </div>
 
+      {/* Barre de progression */}
+      <div className="space-y-2">
+        <div className="flex justify-between text-xs text-muted-foreground">
+          {STEPS.map((step, i) => (
+            <button
+              key={step}
+              type="button"
+              onClick={() => setCurrentStep(step)}
+              className={`font-medium transition-colors ${
+                step === currentStep
+                  ? 'text-primary'
+                  : i < currentIndex
+                  ? 'text-foreground'
+                  : 'text-muted-foreground'
+              }`}
+            >
+              {i + 1}. {STEP_LABELS[step]}
+            </button>
+          ))}
+        </div>
+        <Progress value={progress} className="h-1.5" />
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card>
-          <CardContent className="pt-6">
-            <Tabs defaultValue="info">
-              <TabsList className="flex-wrap h-auto">
-                <TabsTrigger value="info">Infos</TabsTrigger>
-                <TabsTrigger value="location">Localisation</TabsTrigger>
-                <TabsTrigger value="contacts">Contacts</TabsTrigger>
-                <TabsTrigger value="hours" disabled={isOpen24h}>
-                  Horaires
-                </TabsTrigger>
-              </TabsList>
+          <CardContent>
+            <Tabs value={currentStep} onValueChange={(v) => setCurrentStep(v as Step)}>
+              
 
+              {/* ── Étape 1 : Infos ── */}
               <TabsContent value="info" className="space-y-3 mt-4">
                 <div>
                   <Label>Nom *</Label>
-                  <Input {...register('name', { required: true })} placeholder="Pharmacie du Centre" />
+                  <Input
+                    {...register('name', { required: true })}
+                    placeholder="Pharmacie du Centre"
+                  />
                 </div>
                 <div>
                   <Label>Adresse *</Label>
@@ -118,16 +166,9 @@ export default function SuggestPharmacyPage() {
                     <Input {...register('region')} />
                   </div>
                 </div>
-                <div className="flex items-center gap-3 border rounded-lg px-3 py-2">
-                  <Switch
-                    checked={isOpen24h}
-                    onCheckedChange={(v) => setValue('isOpen24h', v)}
-                    id="o24"
-                  />
-                  <Label htmlFor="o24" className="cursor-pointer">Ouvert 24h/24</Label>
-                </div>
               </TabsContent>
 
+              {/* ── Étape 2 : Localisation ── */}
               <TabsContent value="location" className="mt-4">
                 <Controller
                   control={control}
@@ -138,6 +179,7 @@ export default function SuggestPharmacyPage() {
                 />
               </TabsContent>
 
+              {/* ── Étape 3 : Contacts ── */}
               <TabsContent value="contacts" className="mt-4">
                 <Controller
                   control={control}
@@ -151,23 +193,35 @@ export default function SuggestPharmacyPage() {
                 />
               </TabsContent>
 
-              <TabsContent value="hours" className="mt-4">
-                <Controller
-                  control={control}
-                  name="openingHours"
-                  render={({ field }) => (
-                    <OpeningHoursEditor
-                      value={field.value as OpeningHour[]}
-                      onChange={field.onChange}
-                    />
-                  )}
-                />
+              {/* ── Étape 4 : Horaires ── */}
+              <TabsContent value="hours" className="mt-4 space-y-4">
+                {/* Ouvert 24h/24 déplacé ici */}
+                <div className="flex items-center gap-3 border rounded-lg px-3 py-2">
+                  <Switch
+                    checked={isOpen24h}
+                    onCheckedChange={(v) => setValue('isOpen24h', v)}
+                    id="o24"
+                  />
+                  <Label htmlFor="o24" className="cursor-pointer">Ouvert 24h/24</Label>
+                </div>
+                {!isOpen24h && (
+                  <Controller
+                    control={control}
+                    name="openingHours"
+                    render={({ field }) => (
+                      <OpeningHoursEditor
+                        value={field.value as OpeningHour[]}
+                        onChange={field.onChange}
+                      />
+                    )}
+                  />
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
 
-        {/* Demande de gestion */}
+        {/* Demande de gestion (visible sur toutes les étapes) */}
         <Card className="mt-4">
           <CardHeader>
             <CardTitle className="text-base">Gérer cette pharmacie ?</CardTitle>
@@ -200,13 +254,28 @@ export default function SuggestPharmacyPage() {
           </CardContent>
         </Card>
 
+        {/* ── Navigation bas de page ── */}
         <div className="flex gap-3 mt-4">
-          <Button type="button" variant="outline" onClick={() => navigate('/map')}>
-            Annuler
+          <Button
+            type="button"
+            variant="outline"
+            onClick={isFirst ? () => navigate('/map') : goPrev}
+            className="gap-1.5"
+          >
+            <CaretLeftIcon size={15} />
+            {isFirst ? 'Annuler' : 'Précédent'}
           </Button>
-          <Button type="submit" disabled={isPending} className="flex-1">
-            {isPending ? 'Envoi…' : 'Envoyer la demande'}
-          </Button>
+
+          {isLast ? (
+            <Button type="submit" disabled={isPending} className="flex-1">
+              {isPending ? 'Envoi…' : 'Envoyer la demande'}
+            </Button>
+          ) : (
+            <Button type="button" onClick={goNext} className="flex-1 gap-1.5">
+              Suivant
+              <CaretRightIcon size={15} />
+            </Button>
+          )}
         </div>
       </form>
     </div>

@@ -1,22 +1,56 @@
-import { Link, Outlet, useNavigate, useLocation } from "react-router-dom"
+import { useState } from "react"
+import { Link, NavLink, Outlet, useNavigate, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { logout } from "@/features/auth/api/fetchers"
 import { useMe } from "@/features/auth/api/hooks"
 import { useHouseholdMembers } from "@/features/household/api/hooks"
 import { useMyPharmacies } from "@/features/myPharmacy/api/hooks"
 import { NotificationBell } from "@/features/notification/components/NotificationBell"
-import { PharmacySearchNotifications } from "@/features/medSearch/components/PharmacySearchNotifications"
 import { PharmacySearchAlert } from "@/features/medSearch/components/PharmacySearchAlert"
-import { CheckFatIcon, HospitalIcon, LayoutIcon, MapPinIcon, MagnifyingGlassIcon, PillIcon, ShieldIcon, UsersIcon } from "@phosphor-icons/react"
+import {
+  CheckFatIcon,
+  HospitalIcon,
+  LayoutIcon,
+  MapPinIcon,
+  MagnifyingGlassIcon,
+  PillIcon,
+  ShieldIcon,
+  UsersIcon,
+  GearIcon,
+  DotsThreeIcon,
+  SignOutIcon,
+} from "@phosphor-icons/react"
 import { useFontSize } from "@/contexts/FontSizeContext"
+import { cn } from "@/lib/utils"
+
+// ── Nav items desktop ─────────────────────────────────────────────────────────
+
+const primaryNav = [
+  { to: "/dashboard",   label: "Tableau de bord" },
+  { to: "/schedule",    label: "Planning" },
+  { to: "/medications", label: "Médicaments" },
+  { to: "/map",         label: "Carte" },
+  { to: "/med-search",  label: "Recherche" },
+]
+
+// ── Mobile bottom nav items ───────────────────────────────────────────────────
+
+const mobileNav = [
+  { to: "/dashboard",  label: "Accueil",   Icon: LayoutIcon },
+  { to: "/schedule",   label: "Planning",  Icon: CheckFatIcon },
+  { to: "/med-search", label: "Recherche", Icon: MagnifyingGlassIcon },
+  { to: "/map",        label: "Carte",     Icon: MapPinIcon },
+]
 
 export default function MainLayout() {
   const navigate = useNavigate()
@@ -26,212 +60,262 @@ export default function MainLayout() {
   const { data: members } = useHouseholdMembers()
   const { data: myPharmacies } = useMyPharmacies()
   const { iconSize } = useFontSize()
-  const managesPharmacy = (myPharmacies?.length ?? 0) > 0
 
+  const [moreOpen, setMoreOpen] = useState(false)
+
+  const managesPharmacy = (myPharmacies?.length ?? 0) > 0
+  const managedPharmacies = (myPharmacies ?? []).map((p) => ({ id: p.id, name: p.name }))
   const activeProfileId = members?.[0]?.id || ""
+  const isAdmin = user?.role === "admin" || user?.role === "support"
 
   const handleLogout = async () => {
     await logout()
     navigate("/login")
   }
 
+  const isFullscreen = ["/map"].some((r) => location.pathname.startsWith(r))
+
   return (
     <div className="min-h-screen flex flex-col bg-muted/50 text-foreground">
-      <header className="border-b bg-white fixed w-full z-50">
+
+      {/* ── Header ───────────────────────────────────────────────────────────── */}
+      <header className="border-b bg-background fixed w-full z-50 shadow-sm">
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
-          <div className="flex items-center gap-6">
-            <Link to="/" className="text-xl font-bold">
-              Fanafodiko
-            </Link>
-            <nav className="hidden md:flex items-center gap-4 text-sm font-medium">
-              <Link to="/dashboard" className="transition-colors hover:text-primary">
-                Tableau de bord
-              </Link>
-              <Link to="/schedule" className="transition-colors hover:text-primary">
-                Planning
-              </Link>
-              <Link to="/medications" className="transition-colors hover:text-primary">
-                Médicaments
-              </Link>
-              <Link to="/household" className="transition-colors hover:text-primary">
-                Foyer
-              </Link>
-              <Link to="/map" className="transition-colors hover:text-primary">
-                Carte
-              </Link>
-              <Link to="/med-search" className="transition-colors hover:text-primary">
-                Recherche médicament
-              </Link>
-              {managesPharmacy && (
-                <Link to="/my-pharmacy" className="transition-colors hover:text-primary">
-                  Ma pharmacie
-                </Link>
-              )}
-              {(user?.role === "admin" || user?.role === "support") && (
-                <Link
-                  to="/backoffice"
-                  className="flex items-center gap-1 transition-colors hover:text-primary text-orange-600"
-                >
-                  <ShieldIcon size={14} weight="fill" />
-                  Backoffice
-                </Link>
-              )}
-            </nav>
-          </div>
+
+          {/* Logo + nom */}
+          <Link to="/dashboard" className="flex items-center gap-2 shrink-0">
+            <img src="/logo.png" alt="Fanafodiko" className="h-8 w-8 rounded-lg object-contain" />
+            <span className="font-bold text-lg hidden sm:block">Fanafodiko</span>
+          </Link>
+
+          {/* Nav principale desktop */}
+          <nav className="hidden lg:flex items-center gap-1">
+            {primaryNav.map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  cn(
+                    "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
+            {managesPharmacy && (
+              <NavLink
+                to="/my-pharmacy"
+                className={({ isActive }) =>
+                  cn(
+                    "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5",
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )
+                }
+              >
+                <HospitalIcon size={14} />
+                Ma pharmacie
+              </NavLink>
+            )}
+          </nav>
+
+          {/* Droite : actions */}
           <div className="flex items-center gap-2">
+            {/* Cloche notifications */}
             {auth && activeProfileId && (
               <NotificationBell profileId={activeProfileId} />
             )}
-            {auth && managesPharmacy && myPharmacies?.[0]?.id && (
-              <PharmacySearchNotifications pharmacyId={myPharmacies![0].id} />
+
+            {/* Backoffice badge */}
+            {isAdmin && (
+              <Link
+                to="/backoffice"
+                className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors text-xs font-semibold"
+              >
+                <ShieldIcon size={13} weight="fill" />
+                Admin
+              </Link>
             )}
+
+            {/* Avatar dropdown */}
             {auth ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="/avatars/01.png" alt="User" />
-                      <AvatarFallback>
+                      <AvatarFallback className="text-xs">
                         {user?.email?.charAt(0).toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuItem onClick={() => navigate("/account")}>
-                    Paramètres
+                <DropdownMenuContent className="w-52" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/account")} className="gap-2">
+                    <GearIcon size={14} /> Mon compte
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/household")} className="gap-2">
+                    <UsersIcon size={14} /> Foyer
                   </DropdownMenuItem>
                   {managesPharmacy && (
-                    <DropdownMenuItem onClick={() => navigate("/my-pharmacy")}>
-                      Ma pharmacie
+                    <DropdownMenuItem onClick={() => navigate("/my-pharmacy")} className="gap-2">
+                      <HospitalIcon size={14} /> Ma pharmacie
                     </DropdownMenuItem>
                   )}
-                  {(user?.role === "admin" || user?.role === "support") && (
+                  {isAdmin && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => navigate("/backoffice")}
-                        className="text-orange-600 focus:text-orange-700"
+                        className="gap-2 text-orange-600 focus:text-orange-700 focus:bg-orange-50"
                       >
-                        Backoffice
+                        <ShieldIcon size={14} weight="fill" /> Backoffice
                       </DropdownMenuItem>
                     </>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-700">
-                    Déconnexion
+                  <DropdownMenuItem onClick={handleLogout} className="gap-2 text-red-600 focus:text-red-700 focus:bg-red-50">
+                    <SignOutIcon size={14} /> Déconnexion
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <>
-                <Button variant="ghost" asChild>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" asChild>
                   <Link to="/login">Connexion</Link>
                 </Button>
-                <Button asChild>
+                <Button size="sm" asChild>
                   <Link to="/register">Inscription</Link>
                 </Button>
-              </>
+              </div>
             )}
           </div>
         </div>
       </header>
-      <main className={
-        // Routes plein-écran : pas de container ni de padding horizontal/bas
-        // La carte et autres pages full-viewport gèrent elles-mêmes leur layout
-        ['/map'].some(r => location.pathname.startsWith(r))
-          ? 'flex-1 flex flex-col pt-16 overflow-hidden'
-          : 'flex-1 container mx-auto p-4 pt-16 pb-32'
-      }>
+
+      {/* ── Contenu principal ────────────────────────────────────────────────── */}
+      <main
+        className={
+          isFullscreen
+            ? "flex-1 flex flex-col pt-16 overflow-hidden"
+            : "flex-1 container mx-auto p-4 pt-24 pb-28 md:pb-8"
+        }
+      >
         <Outlet />
       </main>
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
-        <nav className="bg-white border-t border-gray-200 shadow-lg px-2 py-1 flex items-center justify-around">
-            <Link
-              to="/dashboard"
-              className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
-                  location.pathname === '/dashboard'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-slate-100'
-              }`}
-            >
-              <LayoutIcon size={iconSize} weight={location.pathname === '/dashboard' ? "fill" : "regular"} />
-            </Link>
 
-            <Link
-              to="/schedule"
-              className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
-                  location.pathname === '/schedule'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-slate-100'
-              }`}
-            >
-              <CheckFatIcon size={iconSize} weight={location.pathname === '/schedule' ? "fill" : "regular"} />
-            </Link>
-
-            <Link
-              to="/medications"
-              className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
-                  location.pathname === '/medications'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-slate-100'
-              }`}
-            >
-              <PillIcon size={iconSize} weight={location.pathname === '/medications' ? "fill" : "regular"} />
-            </Link>
-
-            <Link
-              to="/household"
-              className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
-                  location.pathname === '/household'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-slate-100'
-              }`}
-            >
-              <UsersIcon size={iconSize} weight={location.pathname === '/household' ? "fill" : "regular"} />
-            </Link>
-
-            <Link
-              to="/map"
-              className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
-                  location.pathname === '/map'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-slate-100'
-              }`}
-            >
-              <MapPinIcon size={iconSize} weight={location.pathname === '/map' ? "fill" : "regular"} />
-            </Link>
-
-            <Link
-              to="/med-search"
-              className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
-                  location.pathname.startsWith('/med-search')
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-slate-100'
-              }`}
-            >
-              <MagnifyingGlassIcon size={iconSize} weight={location.pathname.startsWith('/med-search') ? "fill" : "regular"} />
-            </Link>
-
-            {/* Accès rapide "Ma pharmacie" pour les membres,mobile */}
-            {managesPharmacy && (
+      {/* ── Bottom nav mobile ─────────────────────────────────────────────────── */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
+        <nav className="bg-background border-t shadow-lg px-2 py-1 flex items-center justify-around safe-bottom">
+          {mobileNav.map(({ to, label, Icon }) => {
+            const isActive = location.pathname === to || (to !== "/dashboard" && location.pathname.startsWith(to))
+            return (
               <Link
-                to="/my-pharmacy"
-                className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
-                  location.pathname.startsWith('/my-pharmacy')
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-slate-100'
-                }`}
+                key={to}
+                to={to}
+                className={cn(
+                  "flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-200 min-w-[56px]",
+                  to === "/med-search"
+                    ? isActive
+                      ? "bg-primary text-primary-foreground scale-105"
+                      : "bg-primary/10 text-primary"
+                    : isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted"
+                )}
               >
-                <HospitalIcon size={iconSize} weight={location.pathname.startsWith('/my-pharmacy') ? "fill" : "regular"} />
+                <Icon size={iconSize} weight={isActive ? "fill" : "regular"} />
+                <span className="text-[10px] mt-0.5 font-medium leading-none">{label}</span>
               </Link>
+            )
+          })}
+
+          {/* Bouton "Plus" */}
+          <button
+            type="button"
+            onClick={() => setMoreOpen(true)}
+            className={cn(
+              "flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-200 min-w-[56px]",
+              moreOpen ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
             )}
+          >
+            <DotsThreeIcon size={iconSize} weight={moreOpen ? "fill" : "regular"} />
+            <span className="text-[10px] mt-0.5 font-medium leading-none">Plus</span>
+          </button>
         </nav>
       </div>
 
-      {/* Alerte plein-écran pour les membres de pharmacie */}
-      {auth && managesPharmacy && myPharmacies?.[0]?.id && (
-        <PharmacySearchAlert pharmacyId={myPharmacies![0].id} />
+      {/* ── Sheet "Plus" mobile ──────────────────────────────────────────────── */}
+      <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl pb-safe">
+          <SheetHeader className="mb-4">
+            <SheetTitle className="text-sm text-muted-foreground font-medium">Plus de fonctionnalités</SheetTitle>
+          </SheetHeader>
+          <div className="grid grid-cols-3 gap-3 pb-4">
+            {[
+              { to: "/medications", label: "Médicaments", Icon: PillIcon },
+              { to: "/household",   label: "Foyer",       Icon: UsersIcon },
+              { to: "/account",     label: "Mon compte",  Icon: GearIcon },
+              ...(managesPharmacy
+                ? [{ to: "/my-pharmacy", label: "Ma pharmacie", Icon: HospitalIcon }]
+                : []),
+              ...(isAdmin
+                ? [{ to: "/backoffice", label: "Backoffice", Icon: ShieldIcon }]
+                : []),
+            ].map(({ to, label, Icon }) => (
+              <Link
+                key={to}
+                to={to}
+                onClick={() => setMoreOpen(false)}
+                className={cn(
+                  "flex flex-col items-center gap-2 p-3 rounded-xl border bg-background hover:bg-muted transition-colors",
+                  to === "/backoffice" && "border-orange-200 bg-orange-50",
+                  location.pathname.startsWith(to) && "border-primary/40 bg-primary/5"
+                )}
+              >
+                <Icon
+                  size={24}
+                  weight="duotone"
+                  className={cn(
+                    "text-muted-foreground",
+                    to === "/backoffice" && "text-orange-600",
+                    location.pathname.startsWith(to) && "text-primary"
+                  )}
+                />
+                <span className={cn(
+                  "text-xs font-medium text-center leading-tight",
+                  to === "/backoffice" && "text-orange-700"
+                )}>
+                  {label}
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          {/* Déconnexion */}
+          <button
+            type="button"
+            onClick={() => { setMoreOpen(false); handleLogout(); }}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-red-600 text-sm font-medium hover:bg-red-50 transition-colors mt-1"
+          >
+            <SignOutIcon size={16} />
+            Déconnexion
+          </button>
+        </SheetContent>
+      </Sheet>
+
+      {/* ── Alerte pharmacie (staff) ─────────────────────────────────────────── */}
+      {auth && managesPharmacy && (
+        <PharmacySearchAlert pharmacies={managedPharmacies} />
       )}
     </div>
   )

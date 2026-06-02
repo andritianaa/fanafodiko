@@ -12,6 +12,25 @@ export interface GuardSchedule {
   isActive: boolean;
 }
 
+export interface ExceptionalSchedule {
+  id: string;
+  type: "opening" | "closure";
+  label?: string;
+  startDate: string; // "YYYY-MM-DD"
+  endDate: string;   // "YYYY-MM-DD"
+  startTime?: string; // "HH:MM"
+  endTime?: string;   // "HH:MM"
+  reason?: string;
+}
+
+export interface PharmacyGuardEntry {
+  id: string;       // MongoDB ObjectId string
+  startDate: Date;
+  endDate: Date;
+  label?: string;
+  isActive: boolean;
+}
+
 export type PharmacyContactType =
   | "phone"
   | "email"
@@ -39,6 +58,8 @@ export interface PharmacyProps {
   isOpen24h: boolean;
   openingHours: OpeningHour[];
   guardSchedules: GuardSchedule[];
+  exceptionalSchedules?: ExceptionalSchedule[];
+  pharmacyGuards?: PharmacyGuardEntry[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -51,13 +72,19 @@ export class Pharmacy {
       ...props,
       contacts: props.contacts ?? [],
       images: props.images ?? [],
+      exceptionalSchedules: props.exceptionalSchedules ?? [],
+      pharmacyGuards: props.pharmacyGuards ?? [],
       createdAt: props.createdAt ?? new Date(),
       updatedAt: props.updatedAt ?? new Date(),
     });
   }
 
   static reconstitute(props: PharmacyProps): Pharmacy {
-    return new Pharmacy(props);
+    return new Pharmacy({
+      ...props,
+      exceptionalSchedules: props.exceptionalSchedules ?? [],
+      pharmacyGuards: props.pharmacyGuards ?? [],
+    });
   }
 
   get id() { return this.props.id; }

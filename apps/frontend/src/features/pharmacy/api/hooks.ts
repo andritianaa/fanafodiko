@@ -3,6 +3,7 @@ import {
   getPharmacies,
   searchPharmacies,
   getBackofficePharmacies,
+  getBackofficePharmacy,
   createPharmacy,
   updatePharmacy,
   deletePharmacy,
@@ -32,6 +33,13 @@ export const useBackofficePharmacies = () =>
     queryFn: getBackofficePharmacies,
   });
 
+export const useBackofficePharmacy = (id: string) =>
+  useQuery({
+    queryKey: ['backoffice', 'pharmacies', id],
+    queryFn: () => getBackofficePharmacy(id),
+    enabled: !!id,
+  });
+
 export const useCreatePharmacy = () => {
   const qc = useQueryClient();
   return useMutation({
@@ -45,7 +53,10 @@ export const useUpdatePharmacy = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdatePharmacyInput }) =>
       updatePharmacy(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['backoffice', 'pharmacies'] }),
+    onSuccess: (_d, { id }) => {
+      qc.invalidateQueries({ queryKey: ['backoffice', 'pharmacies'] });
+      qc.invalidateQueries({ queryKey: ['backoffice', 'pharmacies', id] });
+    },
   });
 };
 

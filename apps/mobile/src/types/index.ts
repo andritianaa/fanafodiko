@@ -85,3 +85,123 @@ export interface AppState {
   lastSyncAt: string | null;
   syncError: string | null;
 }
+
+// ── Pharmacy ──────────────────────────────────────────────────────────────────
+
+export type PharmacyContactType = 'phone' | 'email' | 'whatsapp' | 'facebook' | 'other';
+
+export interface PharmacyContact {
+  type: PharmacyContactType;
+  label?: string;
+  value: string;
+}
+
+export interface OpeningHour {
+  day: number; // 0=Sunday … 6=Saturday
+  open?: string; // "08:00"
+  close?: string; // "17:00"
+  isClosed: boolean;
+}
+
+export interface GuardSchedule {
+  weekIdentifier: string; // "2026-W22"
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+}
+
+export interface ExceptionalSchedule {
+  id: string;
+  type: 'opening' | 'closure';
+  label?: string;
+  startDate: string; // "YYYY-MM-DD"
+  endDate: string;
+  startTime?: string; // "HH:MM"
+  endTime?: string;
+  reason?: string;
+}
+
+export interface PharmacyGuard {
+  id: string;
+  startDate: string;
+  endDate: string;
+  label?: string;
+  isActive: boolean;
+}
+
+export interface Pharmacy {
+  id: string;
+  name: string;
+  address: string;
+  landmark?: string;
+  coordinates: { lat: number; lng: number };
+  phone?: string;
+  contacts: PharmacyContact[];
+  images: string[];
+  city: string;
+  region?: string;
+  isOpen24h: boolean;
+  openingHours: OpeningHour[];
+  guardSchedules: GuardSchedule[];
+  exceptionalSchedules: ExceptionalSchedule[];
+  pharmacyGuards: PharmacyGuard[];
+  isOpenNow?: boolean;
+  isOnGuard?: boolean;
+  updatedAt?: string;
+}
+
+export interface PharmacyMembership {
+  pharmacyId: string;
+  pharmacyName: string;
+  role: string;
+}
+
+// ── MedSearch ─────────────────────────────────────────────────────────────────
+
+export interface MedSearchResponse {
+  pharmacyId: string;
+  pharmacyName: string;
+  hasStock: boolean;
+  note?: string;
+  distance?: number;
+  respondedAt?: string;
+}
+
+export interface MedSearch {
+  id: string;
+  medicationName: string;
+  coordinates: { lat: number; lng: number };
+  radiusKm: number;
+  note?: string;
+  status: 'active' | 'closed';
+  nearbyPharmacies: Array<{ id: string; name: string }>;
+  responses: MedSearchResponse[];
+  expiresAt: string;
+  createdAt?: string;
+}
+
+export interface MedSearchHistoryItem {
+  id: string;
+  medicationName: string;
+  status: 'active' | 'closed';
+  nearbyPharmacies: Array<{ id: string; name: string }>;
+  responses: MedSearchResponse[];
+  expiresAt: string;
+  createdAt?: string;
+}
+
+export interface PendingSearch {
+  searchId: string;
+  medicationName: string;
+  note?: string;
+  radiusKm: number;
+  createdAt?: string;
+}
+
+// ── Notification Preferences ──────────────────────────────────────────────────
+
+export interface NotificationPreferences {
+  emailMedicationReminders: boolean;
+  emailMedSearchResponse: boolean;
+  emailPharmacyInvitation: boolean;
+}

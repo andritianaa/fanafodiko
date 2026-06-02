@@ -1,5 +1,5 @@
 import * as SQLite from 'expo-sqlite';
-import type { Medication, Profile, Task, OfflineQueueAction } from '../types';
+import type { Medication, Profile, Task, OfflineQueueAction, Pharmacy } from '../types';
 
 let db: SQLite.SQLiteDatabase | null = null;
 
@@ -80,6 +80,30 @@ async function initSchema(db: SQLite.SQLiteDatabase): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_tasks_scheduled ON tasks (scheduledAt);
     CREATE INDEX IF NOT EXISTS idx_medications_profile ON medications (profileId);
     CREATE INDEX IF NOT EXISTS idx_notifications_medication ON scheduled_notifications (medicationId);
+
+    CREATE TABLE IF NOT EXISTS pharmacies (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      address TEXT NOT NULL,
+      landmark TEXT,
+      city TEXT NOT NULL,
+      region TEXT,
+      lat REAL NOT NULL,
+      lng REAL NOT NULL,
+      phone TEXT,
+      contacts TEXT NOT NULL DEFAULT '[]',
+      images TEXT NOT NULL DEFAULT '[]',
+      isOpen24h INTEGER NOT NULL DEFAULT 0,
+      openingHours TEXT NOT NULL DEFAULT '[]',
+      guardSchedules TEXT NOT NULL DEFAULT '[]',
+      exceptionalSchedules TEXT NOT NULL DEFAULT '[]',
+      pharmacyGuards TEXT NOT NULL DEFAULT '[]',
+      isOpenNow INTEGER,
+      isOnGuard INTEGER,
+      updatedAt TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_pharmacies_city ON pharmacies (city);
   `);
 }
 
@@ -347,4 +371,93 @@ export async function setSyncMeta(key: string, value: string): Promise<void> {
     'INSERT OR REPLACE INTO sync_meta (key, value) VALUES (?, ?)',
     [key, value]
   );
+}
+
+// ── Pharmacies ─────────────────────────────────────────────────────────────────
+
+function serializePharmacy(p: Pharmacy): unknown[] {
+  return [
+    p.id, p.name, p.address, p.landmark ?? null, p.city, p.region ?? null,
+    p.coordinates.lat, p.coordinates.lng,
+    p.phone ?? null,
+    JSON.stringify(p.contacts),
+    JSON.stringify(p.images),
+    p.isOpen24h ? 1 : 0,
+    JSON.stringify(p.openingHours),
+    JSON.stringify(p.guardSchedules),
+    JSON.stringify(p.exceptionalSchedules),
+    JSON.stringify(p.pharmacyGuards),
+    p.isOpenNow != null ? (p.isOpenNow ? 1 : 0) : null,
+    p.isOnGuard != null ? (p.isOnGuard ? 1 : 0) : null,
+    p.updatedAt ?? null,
+  ];
+}
+
+function deserializePharmacy(row: Record<string, unknown>): Pharmacy {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    address: row.address as string,
+    landmark: row.landmark as string | undefined,
+    city: row.city as string,
+    region: row.region as string | undefined,
+    coordinates: { lat: row.lat as number, lng: row.lng as number },
+    phone: row.phone as string | undefined,
+    contacts: JSON.parse(row.contacts as string),
+    images: JSON.parse(row.images as string),
+    isOpen24h: row.isOpen24h === 1,
+    openingHours: JSON.parse(row.openingHours as string),
+    guardSchedules: JSON.parse(row.guardSchedules as string),
+    exceptionalSchedules: JSON.parse(row.exceptionalSchedules as string),
+    pharmacyGuards: JSON.parse(row.pharmacyGuards as string),
+    isOpenNow: row.isOpenNow != null ? row.isOpenNow === 1 : undefined,
+    isOnGuard: row.isOnGuard != null ? row.isOnGuard === 1 : undefined,
+    updatedAt: row.updatedAt as string | undefined,
+  };
+}
+
+export async function upsertPharmacies(pharmacies: Pharmacy[]): Promise<void> {
+  const db = await getDb();
+  for (const p of pharmacies) {
+    await db.runAsync(
+      `INSERT OR REPLACE INTO pharmacies
+        (id, name, address, landmark, city, region, lat, lng, phone,
+         contacts, images, isOpen24h, openingHours, guardSchedules,
+         exceptionalSchedules, pharmacyGuards, isOpenNow, isOnGuard, updatedAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      serializePharmacy(p)
+    );
+  }
+}
+
+export async function getPharmacies(filter?: 'open' | 'guard' | '24h'): Promise<Pharmacy[]> {
+  const db = await getDb();
+  let query = 'SELECT * FROM pharmacies';
+  if (filter === 'open') query += ' WHERE isOpenNow = 1';
+  else if (filter === 'guard') query += ' WHERE isOnGuard = 1';
+  else if (filter === '24h') query += ' WHERE isOpen24h = 1';
+  query += ' ORDER BY name';
+  const rows = await db.getAllAsync<Record<string, unknown>>(query);
+  return rows.map(deserializePharmacy);
+}
+
+export async function getPharmacyById(id: string): Promise<Pharmacy | null> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<Record<string, unknown>>(
+    'SELECT * FROM pharmacies WHERE id = ?',
+    [id]
+  );
+  return row ? deserializePharmacy(row) : null;
+}
+
+export async function searchPharmacies(q: string): Promise<Pharmacy[]> {
+  const db = await getDb();
+  const like = `%${q}%`;
+  const rows = await db.getAllAsync<Record<string, unknown>>(
+    `SELECT * FROM pharmacies
+     WHERE name LIKE ? OR city LIKE ? OR address LIKE ?
+     ORDER BY name LIMIT 50`,
+    [like, like, like]
+  );
+  return rows.map(deserializePharmacy);
 }

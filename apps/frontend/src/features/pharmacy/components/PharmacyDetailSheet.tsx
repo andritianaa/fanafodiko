@@ -87,6 +87,15 @@ export function PharmacyDetailSheet({ pharmacy, onClose }: Props) {
     .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
     .slice(0, 5);
 
+  // Exception active aujourd'hui (date locale navigateur, proche EAT)
+  const todayStr = (() => {
+    const d = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+  })();
+  const todayException = (pharmacy.exceptionalSchedules ?? []).find(
+    (s) => s.startDate <= todayStr && s.endDate >= todayStr
+  );
+
   return (
     <Sheet open={!!pharmacy} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="bottom" className="h-[82vh] overflow-y-auto rounded-t-2xl">
@@ -151,6 +160,43 @@ export function PharmacyDetailSheet({ pharmacy, onClose }: Props) {
               </Button>
             ))}
           </div>
+        )}
+
+        {/* Bandeau exception du jour */}
+        {todayException && (
+          <>
+            <Separator className="mb-4" />
+            <div
+              className={`flex items-start gap-2 rounded-lg px-3 py-2 text-sm font-medium ${
+                todayException.type === 'closure'
+                  ? 'bg-red-50 text-red-700 border border-red-200'
+                  : 'bg-green-50 text-green-700 border border-green-200'
+              }`}
+            >
+              <WarningIcon size={16} className="mt-0.5 shrink-0" weight="fill" />
+              <div>
+                {todayException.type === 'closure' ? (
+                  <>
+                    <span>Fermeture exceptionnelle aujourd'hui</span>
+                    {todayException.label && <span> — {todayException.label}</span>}
+                    {todayException.reason && (
+                      <span className="block text-xs font-normal opacity-80">{todayException.reason}</span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <span>Ouverture exceptionnelle aujourd'hui</span>
+                    {todayException.label && <span> — {todayException.label}</span>}
+                    {todayException.startTime && todayException.endTime && (
+                      <span className="block text-xs font-normal opacity-80">
+                        {todayException.startTime} – {todayException.endTime}
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          </>
         )}
 
         {/* Horaires */}

@@ -12,7 +12,10 @@ import {
   CheckCircleIcon,
   WarningCircleIcon,
   ArrowSquareOutIcon,
+  ClockCounterClockwiseIcon,
+  CaretRightIcon,
 } from '@phosphor-icons/react';
+import { useMySearchHistory } from '@/features/medSearch/api/hooks';
 import { useCreateMedSearch } from '@/features/medSearch/api/hooks';
 import { toast } from 'sonner';
 import type { CreateMedSearchInput } from '@ext/schemas';
@@ -24,6 +27,7 @@ type GeoState = 'checking' | 'granted' | 'prompt' | 'loading' | 'denied';
 export default function MedSearchPage() {
   const navigate = useNavigate();
   const { mutate, isPending } = useCreateMedSearch();
+  const { data: history = [] } = useMySearchHistory();
   const [radius, setRadius] = useState(5);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoState, setGeoState] = useState<GeoState>('checking');
@@ -101,25 +105,42 @@ export default function MedSearchPage() {
   return (
     <div className="max-w-lg mx-auto py-8 px-4">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+      <div className="mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
             <PillIcon size={20} className="text-primary" weight="duotone" />
           </div>
-          <div className="flex-1">
+          <div>
             <h1 className="text-2xl font-bold tracking-tight">Trouver un médicament</h1>
             <p className="text-muted-foreground text-sm">
               Les pharmacies à proximité seront alertées en temps réel
             </p>
           </div>
-          <Link
-            to="/med-search/history"
-            className="text-xs text-primary underline-offset-2 hover:underline"
-          >
-            Mes recherches
-          </Link>
         </div>
       </div>
+
+      {/* Mes recherches — bouton mis en valeur */}
+      <Link to="/med-search/history" className="block mb-6">
+        <div className="flex items-center gap-3 rounded-xl border bg-muted/30 hover:bg-muted/60 hover:border-primary/30 transition-all px-4 py-3 group">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <ClockCounterClockwiseIcon size={18} weight="duotone" className="text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold">Mes recherches</p>
+            <p className="text-xs text-muted-foreground">
+              {history.length > 0
+                ? `${history.length} recherche${history.length > 1 ? 's' : ''} précédente${history.length > 1 ? 's' : ''}`
+                : 'Historique de vos recherches'}
+            </p>
+          </div>
+          {history.length > 0 && (
+            <span className="text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full shrink-0">
+              {history.length}
+            </span>
+          )}
+          <CaretRightIcon size={16} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+        </div>
+      </Link>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Medication name */}

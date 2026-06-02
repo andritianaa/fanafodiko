@@ -14,6 +14,49 @@ export const GuardScheduleSchema = z.object({
   isActive: z.boolean(),
 });
 
+// ─── Ouvertures / fermetures exceptionnelles ──────────────────────────────────
+
+export const ExceptionalScheduleSchema = z.object({
+  id: z.string(),
+  type: z.enum(["opening", "closure"]),
+  label: z.string().optional(),                          // intitulé libre
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),  // "YYYY-MM-DD"
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/).optional(), // "HH:MM" (ouvertures)
+  endTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  reason: z.string().optional(),                         // motif de fermeture
+});
+
+export const CreateExceptionalScheduleSchema = ExceptionalScheduleSchema.omit({ id: true });
+export const UpdateExceptionalScheduleSchema = CreateExceptionalScheduleSchema.partial();
+
+// ─── Gardes déclarées par la pharmacie (plages libres, pas semaine ISO) ───────
+
+export const PharmacyGuardSchema = z.object({
+  id: z.string(),
+  startDate: z.string(), // ISO string depuis Date
+  endDate: z.string(),
+  label: z.string().optional(),
+  isActive: z.boolean(),
+});
+
+export const CreatePharmacyGuardSchema = z.object({
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/), // heure locale EAT
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  endTime: z.string().regex(/^\d{2}:\d{2}$/),
+  label: z.string().optional(),
+});
+
+export const UpdatePharmacyGuardSchema = z.object({
+  isActive: z.boolean().optional(),
+  label: z.string().optional(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  endTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+});
+
 export const PHARMACY_CONTACT_TYPES = [
   "phone",
   "email",
@@ -42,6 +85,8 @@ export const PharmacySchema = z.object({
   isOpen24h: z.boolean(),
   openingHours: z.array(OpeningHourSchema),
   guardSchedules: z.array(GuardScheduleSchema),
+  exceptionalSchedules: z.array(ExceptionalScheduleSchema).default([]),
+  pharmacyGuards: z.array(PharmacyGuardSchema).default([]),
   // Computed fields returned by the API
   isOpenNow: z.boolean().optional(),
   isOnGuard: z.boolean().optional(),
@@ -112,3 +157,9 @@ export type UpdatePharmacyInput = z.infer<typeof UpdatePharmacySchema>;
 export type UpdatePharmacyHoursInput = z.infer<typeof UpdatePharmacyHoursSchema>;
 export type UpdatePharmacyInfoInput = z.infer<typeof UpdatePharmacyInfoSchema>;
 export type BatchGuardInput = z.infer<typeof BatchGuardSchema>;
+export type ExceptionalSchedule = z.infer<typeof ExceptionalScheduleSchema>;
+export type CreateExceptionalScheduleInput = z.infer<typeof CreateExceptionalScheduleSchema>;
+export type UpdateExceptionalScheduleInput = z.infer<typeof UpdateExceptionalScheduleSchema>;
+export type PharmacyGuard = z.infer<typeof PharmacyGuardSchema>;
+export type CreatePharmacyGuardInput = z.infer<typeof CreatePharmacyGuardSchema>;
+export type UpdatePharmacyGuardInput = z.infer<typeof UpdatePharmacyGuardSchema>;

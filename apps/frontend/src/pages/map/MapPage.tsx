@@ -17,8 +17,6 @@ import {
   FunnelSimpleIcon,
   MagnifyingGlassIcon,
   XIcon,
-  CaretLeftIcon,
-  CaretRightIcon,
   PlusCircleIcon,
   ShieldIcon,
   ClockIcon,
@@ -239,7 +237,6 @@ export default function MapPage() {
   const [localFilters, setLocalFilters] = useState<LocalFilters>("");
   const [selected, setSelected] = useState<Pharmacy | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false); // mobile sidebar sheet
 
   const { data, isLoading } = usePharmacies(statusFilter);
@@ -281,31 +278,15 @@ export default function MapPage() {
         donc on remplit simplement tout l'espace disponible.
       */}
       <div className="flex flex-1 overflow-hidden min-h-0">
-        {/* ── Desktop sidebar ───────────────────────────────────────────── */}
-        <div
-          className={`hidden md:flex flex-col border-r transition-all duration-300 shrink-0 ${
-            sidebarOpen ? "w-96" : "w-0 overflow-hidden border-r-0"
-          }`}
-        >
+        {/* ── Desktop sidebar (toujours visible) ───────────────────────── */}
+        <div className="hidden md:flex flex-col border-r shrink-0 w-96">
           <SidebarContent {...sidebarProps} />
         </div>
 
         {/* ── Map area ──────────────────────────────────────────────────── */}
         <div className="flex-1 relative min-w-0">
-          {/* Toggle sidebar button,desktop */}
-          <button
-            onClick={() => setSidebarOpen((v) => !v)}
-            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-[800] items-center justify-center w-5 h-12 bg-white border border-l-0 rounded-r-lg shadow-md hover:bg-muted transition-colors"
-            title={sidebarOpen ? "Réduire le panneau" : "Ouvrir le panneau"}
-          >
-            {sidebarOpen ? (
-              <CaretLeftIcon size={14} className="text-muted-foreground" />
-            ) : (
-              <CaretRightIcon size={14} className="text-muted-foreground" />
-            )}
-          </button>
 
-          {/* Mobile,bouton flottant bas droite */}
+          {/* Mobile — bouton flottant bas droite pour ouvrir le sheet */}
           {!sheetOpen && (
             <button
               onClick={() => setSheetOpen(true)}

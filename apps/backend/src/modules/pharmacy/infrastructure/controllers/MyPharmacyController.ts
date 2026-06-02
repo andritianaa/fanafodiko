@@ -21,6 +21,14 @@ import {
   RemoveMember,
 } from "../../application/use-cases/ManageMembers";
 import { InviteMember } from "../../application/use-cases/InviteMember";
+import {
+  AddExceptionalSchedule,
+  UpdateExceptionalSchedule,
+  DeleteExceptionalSchedule,
+  AddPharmacyGuard,
+  UpdatePharmacyGuard,
+  DeletePharmacyGuard,
+} from "../../application/use-cases/ManageExceptional";
 import { AppError } from "@/core/errors/AppError";
 import {
   MyPharmaciesResponseSchema,
@@ -30,6 +38,10 @@ import {
   UpdatePharmacyInfoSchema,
   UpdatePharmacyHoursSchema,
   PharmacyListResponseSchema,
+  CreateExceptionalScheduleSchema,
+  UpdateExceptionalScheduleSchema,
+  CreatePharmacyGuardSchema,
+  UpdatePharmacyGuardSchema,
 } from "@ext/schemas";
 
 const ctrl = createController();
@@ -55,6 +67,10 @@ ctrl.use("/:id/members", requirePharmacyRole(membershipRepo, "staff"));
 ctrl.use("/:id/invitations", requirePharmacyRole(membershipRepo, "admin"));
 ctrl.use("/:id/members/:userId", requirePharmacyRole(membershipRepo, "admin"));
 ctrl.use("/:id/members/:userId/role", requirePharmacyRole(membershipRepo, "superadmin"));
+ctrl.use("/:id/exceptional", requirePharmacyRole(membershipRepo, "staff"));
+ctrl.use("/:id/exceptional/:scheduleId", requirePharmacyRole(membershipRepo, "staff"));
+ctrl.use("/:id/guards", requirePharmacyRole(membershipRepo, "admin"));
+ctrl.use("/:id/guards/:guardId", requirePharmacyRole(membershipRepo, "admin"));
 
 const sec = [{ AuthorizationApiKey: [] }];
 
@@ -260,6 +276,126 @@ ctrl.openapi(
     const { role } = c.req.valid("json");
     await new UpdateMemberRole(membershipRepo).execute(id, userId, role);
     return c.json({ message: "Rôle mis à jour" }, 200);
+  }
+);
+
+// ─── Ouvertures / fermetures exceptionnelles (staff+) ─────────────────────────
+
+// POST /my/pharmacies/:id/exceptional
+ctrl.openapi(
+  createRoute({
+    method: "post",
+    path: "/:id/exceptional",
+    security: sec,
+    request: {
+      params: z.object({ id: z.string() }),
+      body: { content: { "application/json": { schema: CreateExceptionalScheduleSchema } } },
+    },
+    responses: { 201: { description: "Planning ajouté" } },
+  }),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const input = c.req.valid("json");
+    const entry = await new AddExceptionalSchedule(pharmacyRepo).execute(id, input);
+    return c.json({ entry }, 201);
+  }
+);
+
+// PATCH /my/pharmacies/:id/exceptional/:scheduleId
+ctrl.openapi(
+  createRoute({
+    method: "patch",
+    path: "/:id/exceptional/:scheduleId",
+    security: sec,
+    request: {
+      params: z.object({ id: z.string(), scheduleId: z.string() }),
+      body: { content: { "application/json": { schema: UpdateExceptionalScheduleSchema } } },
+    },
+    responses: { 200: { description: "Planning mis à jour" } },
+  }),
+  async (c) => {
+    const { id, scheduleId } = c.req.valid("param");
+    const input = c.req.valid("json");
+    const entry = await new UpdateExceptionalSchedule(pharmacyRepo).execute(id, scheduleId, input);
+    return c.json({ entry }, 200);
+  }
+);
+
+// DELETE /my/pharmacies/:id/exceptional/:scheduleId
+ctrl.openapi(
+  createRoute({
+    method: "delete",
+    path: "/:id/exceptional/:scheduleId",
+    security: sec,
+    request: {
+      params: z.object({ id: z.string(), scheduleId: z.string() }),
+    },
+    responses: { 200: { description: "Planning supprimé" } },
+  }),
+  async (c) => {
+    const { id, scheduleId } = c.req.valid("param");
+    await new DeleteExceptionalSchedule(pharmacyRepo).execute(id, scheduleId);
+    return c.json({ message: "Supprimé" }, 200);
+  }
+);
+
+// ─── Gardes déclarées par la pharmacie (admin+) ───────────────────────────────
+
+// POST /my/pharmacies/:id/guards
+ctrl.openapi(
+  createRoute({
+    method: "post",
+    path: "/:id/guards",
+    security: sec,
+    request: {
+      params: z.object({ id: z.string() }),
+      body: { content: { "application/json": { schema: CreatePharmacyGuardSchema } } },
+    },
+    responses: { 201: { description: "Garde ajoutée" } },
+  }),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const input = c.req.valid("json");
+    const guard = await new AddPharmacyGuard(pharmacyRepo).execute(id, input);
+    return c.json({ guard }, 201);
+  }
+);
+
+// PATCH /my/pharmacies/:id/guards/:guardId
+ctrl.openapi(
+  createRoute({
+    method: "patch",
+    path: "/:id/guards/:guardId",
+    security: sec,
+    request: {
+      params: z.object({ id: z.string(), guardId: z.string() }),
+      body: { content: { "application/json": { schema: UpdatePharmacyGuardSchema } } },
+    },
+    responses: { 200: { description: "Garde mise à jour" } },
+  }),
+  async (c) => {
+    const { id, guardId } = c.req.valid("param");
+    const input = c.req.valid("json");
+    await new UpdatePharmacyGuard(pharmacyRepo).execute(id, guardId, input);
+    return c.json({ message: "Garde mise à jour" }, 200);
+  }
+);
+
+// DELETE /my/pharmacies/:id/guards/:guardId
+ctrl.openapi(
+  createRoute({
+    method: "delete",
+    path: "/:id/guards/:guardId",
+    security: sec,
+    request: {
+      params: z.object({ id: z.string(), guardId: z.string() }),
+    },
+    responses: { 200: { description: "Garde supprimée" } },
+  }),
+  async (c) => {
+    const { id, guardId } = c.req.valid("param");
+    await new DeletePharmacyGuard(pharmacyRepo).execute(id, guardId);
+    return c.json({ message: "Supprimé" }, 200);
   }
 );
 

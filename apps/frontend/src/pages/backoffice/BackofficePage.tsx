@@ -1,8 +1,8 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useBackofficeUsers } from '@/features/backoffice/api/hooks';
 import {
   useBackofficePharmacies,
-  useToggleGuard,
   useDeletePharmacy,
   usePharmacySearch,
   useAssignPharmacyOwner,
@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import {
@@ -40,6 +39,7 @@ import {
   TrashIcon,
   PencilIcon,
   UserCirclePlusIcon,
+  UsersThreeIcon,
   TrayIcon,
 } from '@phosphor-icons/react';
 import { format } from 'date-fns';
@@ -48,9 +48,9 @@ import { toast } from 'sonner';
 import type { BackofficeUser, Pharmacy } from '@ext/schemas';
 import { BatchGuardDialog } from '@/features/backoffice/pharmacies/BatchGuardDialog';
 import { PharmacyFormDialog } from '@/features/backoffice/pharmacies/PharmacyFormDialog';
+import { PharmacyStaffDialog } from '@/features/backoffice/pharmacies/PharmacyStaffDialog';
 import { RequestsTab } from '@/features/backoffice/pharmacies/RequestsTab';
 import { usePharmacyRequests } from '@/features/pharmacyRequest/api/hooks';
-import { currentWeekIdentifier } from '@/features/pharmacy/utils/weekUtils';
 
 /* ─────────────────────────────────────────
    CONSTANTES
@@ -141,8 +141,8 @@ function UsersTab() {
    ONGLET PHARMACIES
 ───────────────────────────────────────── */
 function PharmaciesTab() {
+  const navigate = useNavigate();
   const { data, isLoading } = useBackofficePharmacies();
-  const { mutate: toggle } = useToggleGuard();
   const { mutate: remove, isPending: deleting } = useDeletePharmacy();
   const { mutate: assignOwner, isPending: assigning } = useAssignPharmacyOwner();
 
@@ -152,12 +152,12 @@ function PharmaciesTab() {
   const [deleteTarget, setDeleteTarget] = useState<Pharmacy | null>(null);
   const [ownerTarget, setOwnerTarget] = useState<Pharmacy | null>(null);
   const [ownerEmail, setOwnerEmail] = useState('');
+  const [staffTarget, setStaffTarget] = useState<Pharmacy | null>(null);
 
   // Recherche rapide : si ≥ 2 car → autocomplete API, sinon filtre local
   const [search, setSearch] = useState('');
   const { data: searchResults } = usePharmacySearch(search);
 
-  const weekId = currentWeekIdentifier();
   const allPharmacies = data?.pharmacies ?? [];
 
   // Si la recherche est active et l'API répond → utiliser ses IDs pour filtrer
@@ -173,21 +173,6 @@ function PharmaciesTab() {
             p.city.toLowerCase().includes(search.toLowerCase())
         )
       : allPharmacies;
-
-  const isOnGuardThisWeek = (p: Pharmacy) =>
-    p.guardSchedules?.some((g) => g.weekIdentifier === weekId && g.isActive) ??
-    false;
-
-  const handleGuardToggle = (p: Pharmacy, checked: boolean) => {
-    toggle(
-      { id: p.id, weekIdentifier: weekId, isActive: checked },
-      {
-        onSuccess: () =>
-          toast.success(checked ? 'Garde activée' : 'Garde désactivée'),
-        onError: () => toast.error('Erreur'),
-      }
-    );
-  };
 
   const handleDelete = () => {
     if (!deleteTarget) return;
@@ -258,12 +243,6 @@ function PharmaciesTab() {
         </Button>
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        Semaine en cours :{' '}
-        <strong className="text-foreground">{weekId}</strong> · Le switch
-        active/désactive la garde pour cette semaine uniquement.
-      </p>
-
       {/* Table */}
       <Card>
         <CardHeader>
@@ -291,9 +270,6 @@ function PharmaciesTab() {
                     <th className="text-left py-3 px-4 font-medium hidden lg:table-cell">
                       Téléphone
                     </th>
-                    <th className="text-center py-3 px-4 font-medium whitespace-nowrap">
-                      Garde {weekId}
-                    </th>
                     <th className="py-3 px-4" />
                   </tr>
                 </thead>
@@ -304,10 +280,16 @@ function PharmaciesTab() {
                       className="border-b last:border-0 hover:bg-muted/30 transition-colors"
                     >
                       <td className="py-3 px-4">
-                        <div className="font-medium">{p.name}</div>
-                        <div className="text-xs text-muted-foreground truncate max-w-[200px]">
-                          {p.address}
-                        </div>
+                        <button
+                          type="button"
+                          className="text-left hover:underline"
+                          onClick={() => navigate(`/backoffice/pharmacy/${p.id}`)}
+                        >
+                          <div className="font-medium">{p.name}</div>
+                          <div className="text-xs text-muted-foreground truncate max-w-[200px]">
+                            {p.address}
+                          </div>
+                        </button>
                       </td>
                       <td className="py-3 px-4 hidden md:table-cell text-muted-foreground">
                         {p.city}
@@ -315,16 +297,16 @@ function PharmaciesTab() {
                       <td className="py-3 px-4 hidden lg:table-cell text-muted-foreground">
                         {p.phone ?? '—'}
                       </td>
-                      <td className="py-3 px-4 text-center">
-                        <Switch
-                          checked={isOnGuardThisWeek(p)}
-                          onCheckedChange={(checked) =>
-                            handleGuardToggle(p, checked)
-                          }
-                        />
-                      </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-1 justify-end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            title="Gérer le staff"
+                            onClick={() => setStaffTarget(p)}
+                          >
+                            <UsersThreeIcon size={14} />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -371,6 +353,16 @@ function PharmaciesTab() {
           )}
         </CardContent>
       </Card>
+
+      {/* Staff dialog */}
+      {staffTarget && (
+        <PharmacyStaffDialog
+          open={!!staffTarget}
+          onClose={() => setStaffTarget(null)}
+          pharmacyId={staffTarget.id}
+          pharmacyName={staffTarget.name}
+        />
+      )}
 
       {/* Dialogs */}
       <BatchGuardDialog

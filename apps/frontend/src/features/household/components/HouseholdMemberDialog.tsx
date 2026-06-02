@@ -67,7 +67,7 @@ export const HouseholdMemberDialog = ({
   const displayAvatarUrl =
     avatarUrl ||
     (fullName
-      ? `https://api.dicebear.com/9.x/glass/svg?seed=${fullName}`
+      ? `https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(fullName)}`
       : undefined)
 
   useEffect(() => {

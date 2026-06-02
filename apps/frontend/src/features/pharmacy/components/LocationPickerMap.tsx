@@ -1,5 +1,6 @@
-import { useMemo, useState, useRef, useCallback } from 'react';
+import { useMemo, useState, useRef, useCallback, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import { MapLayerSelector, MAP_LAYERS, type LayerOption } from './MapLayerSelector';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Input } from '@/components/ui/input';
@@ -69,12 +70,30 @@ export function LocationPickerMap({ value, onChange }: Props) {
     Number.isFinite(value.lng) &&
     !(value.lat === 0 && value.lng === 0);
 
+  // Centre initial : position existante si connue, sinon Madagascar
   const center = useMemo<[number, number]>(
     () => (hasPosition ? [value.lat, value.lng] : MADAGASCAR_CENTER),
-    // Only on mount
+    // Calculé une seule fois au montage
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+
+  const [activeLayer, setActiveLayer] = useState<LayerOption>(MAP_LAYERS[0]);
+
+  // Si aucune position sélectionnée → centrer sur la géolocalisation de l'utilisateur
+  useEffect(() => {
+    if (hasPosition) return; // déjà positionné
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const target: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+        setFlyTarget(target);
+      },
+      () => { /* refus / indisponible → Madagascar center (déjà par défaut) */ },
+      { timeout: 6000, enableHighAccuracy: false }
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Geocoding via Nominatim — biais Madagascar (viewbox) sans restriction stricte
   const search = useCallback((q: string) => {
@@ -189,33 +208,43 @@ export function LocationPickerMap({ value, onChange }: Props) {
       </p>
 
       {/* Map */}
-      <MapContainer
-        center={center}
-        zoom={hasPosition ? 15 : 6}
-        className="h-[50vh] w-full rounded-lg border"
-        style={{ minHeight: 256 }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {/* Point bleu position actuelle,toujours visible */}
-        <UserLocationMarker autoCenter={!hasPosition} />
-        <MapController onChange={onChange} flyTarget={flyTarget} />
-        {hasPosition && (
-          <Marker
-            position={[value.lat, value.lng]}
-            draggable
-            eventHandlers={{
-              dragend: (e) => {
-                const m = e.target as L.Marker;
-                const pos = m.getLatLng();
-                onChange({ lat: pos.lat, lng: pos.lng });
-              },
-            }}
+      <div className="relative h-[50vh] w-full rounded-lg border overflow-hidden" style={{ minHeight: 256 }}>
+        <MapContainer
+          center={center}
+          zoom={hasPosition ? 15 : 6}
+          className="h-full w-full"
+          style={{ minHeight: 256 }}
+        >
+          <TileLayer
+            key={activeLayer.id}
+            attribution={activeLayer.attribution}
+            url={activeLayer.url}
           />
-        )}
-      </MapContainer>
+          {/* Point bleu position actuelle,toujours visible */}
+          <UserLocationMarker autoCenter={!hasPosition} />
+          <MapController onChange={onChange} flyTarget={flyTarget} />
+          {hasPosition && (
+            <Marker
+              position={[value.lat, value.lng]}
+              draggable
+              eventHandlers={{
+                dragend: (e) => {
+                  const m = e.target as L.Marker;
+                  const pos = m.getLatLng();
+                  onChange({ lat: pos.lat, lng: pos.lng });
+                },
+              }}
+            />
+          )}
+        </MapContainer>
+        {/* Layer selector */}
+        <div className="absolute bottom-3 right-3 z-[800]">
+          <MapLayerSelector
+            currentLayerId={activeLayer.id}
+            onLayerChange={setActiveLayer}
+          />
+        </div>
+      </div>
 
       {hasPosition && (
         <p className="text-xs text-muted-foreground font-mono">

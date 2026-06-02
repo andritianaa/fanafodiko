@@ -1,5 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
+import { MapLayerSelector, MAP_LAYERS, type LayerOption } from './MapLayerSelector';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { UserLocationMarker } from './UserLocationMarker';
@@ -56,7 +58,7 @@ function FlyToSelected({ selected }: { selected: Pharmacy | null }) {
   const map = useMap();
   useEffect(() => {
     if (selected) {
-      map.flyTo([selected.coordinates.lat, selected.coordinates.lng], 16, { duration: 1 });
+      map.flyTo([selected.coordinates.lat, selected.coordinates.lng], 18, { duration: 1.2 });
     }
   }, [selected, map]);
   return null;
@@ -268,34 +270,48 @@ const DEFAULT_ZOOM = 6;
 export function PharmacyMap({ pharmacies, selected, onSelect, onLocationUpdate, initialCenter }: Props) {
   const center: [number, number] = initialCenter ?? MADAGASCAR_CENTER;
   const zoom = initialCenter ? 14 : DEFAULT_ZOOM;
+  const [activeLayer, setActiveLayer] = useState<LayerOption>(MAP_LAYERS[0]);
 
   return (
-    <MapContainer
-      center={center}
-      zoom={zoom}
-      className="h-full w-full"
-      style={{ minHeight: 300 }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <div className="relative h-full w-full" style={{ minHeight: 300 }}>
+      <MapContainer
+        center={center}
+        zoom={zoom}
+        className="h-full w-full"
+        style={{ minHeight: 300 }}
+      >
+        <TileLayer
+          key={activeLayer.id}
+          attribution={activeLayer.attribution}
+          url={activeLayer.url}
+        />
 
-      <UserLocationMarker autoCenter={!initialCenter} onLocationUpdate={onLocationUpdate} />
-      <FlyToSelected selected={selected} />
+        <UserLocationMarker autoCenter={!initialCenter} onLocationUpdate={onLocationUpdate} />
+        <FlyToSelected selected={selected} />
 
-      {pharmacies.map((p) => (
-        <Marker
-          key={p.id}
-          position={[p.coordinates.lat, p.coordinates.lng]}
-          icon={getIcon(p)}
-          eventHandlers={{ click: () => onSelect(p) }}
-        >
-          <Popup minWidth={300} maxWidth={320} closeButton autoPan>
-            <PharmacyPopupContent pharmacy={p} />
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+        <MarkerClusterGroup chunkedLoading>
+          {pharmacies.map((p) => (
+            <Marker
+              key={p.id}
+              position={[p.coordinates.lat, p.coordinates.lng]}
+              icon={getIcon(p)}
+              eventHandlers={{ click: () => onSelect(p) }}
+            >
+              <Popup minWidth={300} maxWidth={320} closeButton autoPan>
+                <PharmacyPopupContent pharmacy={p} />
+              </Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
+      </MapContainer>
+
+      {/* Layer selector — top-right mobile, bottom-right desktop */}
+      <div className="absolute top-2 right-2 md:top-auto md:bottom-4 md:right-4 z-[800]">
+        <MapLayerSelector
+          currentLayerId={activeLayer.id}
+          onLayerChange={setActiveLayer}
+        />
+      </div>
+    </div>
   );
 }

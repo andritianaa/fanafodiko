@@ -20,6 +20,25 @@ const guardScheduleSchema = new Schema(
   { _id: false }
 );
 
+// Ouvertures / fermetures exceptionnelles (chaque entrée a son propre _id)
+const exceptionalScheduleSchema = new Schema({
+  type: { type: String, enum: ["opening", "closure"], required: true },
+  label: { type: String },
+  startDate: { type: String, required: true }, // "YYYY-MM-DD"
+  endDate: { type: String, required: true },
+  startTime: { type: String },
+  endTime: { type: String },
+  reason: { type: String },
+});
+
+// Gardes déclarées par la pharmacie (plages libres, chaque entrée a son _id)
+const pharmacyGuardEntrySchema = new Schema({
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  label: { type: String },
+  isActive: { type: Boolean, default: true },
+});
+
 const contactSchema = new Schema(
   {
     type: {
@@ -46,6 +65,23 @@ interface IPharmacyDoc {
   isOpen24h: boolean;
   openingHours: { day: number; open?: string; close?: string; isClosed: boolean }[];
   guardSchedules: { weekIdentifier: string; startDate: Date; endDate: Date; isActive: boolean }[];
+  exceptionalSchedules: {
+    _id: any;
+    type: "opening" | "closure";
+    label?: string;
+    startDate: string;
+    endDate: string;
+    startTime?: string;
+    endTime?: string;
+    reason?: string;
+  }[];
+  pharmacyGuards: {
+    _id: any;
+    startDate: Date;
+    endDate: Date;
+    label?: string;
+    isActive: boolean;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -67,6 +103,8 @@ const pharmacySchema = new Schema<IPharmacyDoc>(
     isOpen24h: { type: Boolean, default: false },
     openingHours: [openingHourSchema],
     guardSchedules: [guardScheduleSchema],
+    exceptionalSchedules: { type: [exceptionalScheduleSchema], default: [] },
+    pharmacyGuards: { type: [pharmacyGuardEntrySchema], default: [] },
   },
   { timestamps: true }
 );

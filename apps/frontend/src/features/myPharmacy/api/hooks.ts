@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getMyPharmacies,
   getMyPharmacy,
@@ -12,27 +12,37 @@ import {
   getInvitation,
   acceptInvitation,
   getPharmacySearchHistory,
-} from './fetchers';
+  addExceptionalSchedule,
+  updateExceptionalSchedule,
+  deleteExceptionalSchedule,
+  addPharmacyGuard,
+  updatePharmacyGuard,
+  deletePharmacyGuard,
+} from "./fetchers";
 import type {
   InviteMemberInput,
   PharmacyRole,
   UpdatePharmacyInfoInput,
   UpdatePharmacyHoursInput,
-} from '@ext/schemas';
+  CreateExceptionalScheduleInput,
+  UpdateExceptionalScheduleInput,
+  CreatePharmacyGuardInput,
+  UpdatePharmacyGuardInput,
+} from "@ext/schemas";
 
 export const useMyPharmacies = () =>
-  useQuery({ queryKey: ['my-pharmacies'], queryFn: getMyPharmacies });
+  useQuery({ queryKey: ["my-pharmacies"], queryFn: getMyPharmacies });
 
 export const useMyPharmacy = (id: string) =>
   useQuery({
-    queryKey: ['my-pharmacy', id],
+    queryKey: ["my-pharmacy", id],
     queryFn: () => getMyPharmacy(id),
     enabled: !!id,
   });
 
 export const usePharmacyMembers = (id: string) =>
   useQuery({
-    queryKey: ['my-pharmacy', id, 'members'],
+    queryKey: ["my-pharmacy", id, "members"],
     queryFn: () => getPharmacyMembers(id),
     enabled: !!id,
   });
@@ -41,15 +51,16 @@ export const useUpdatePharmacyInfo = (id: string) => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: UpdatePharmacyInfoInput) => updatePharmacyInfo(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['my-pharmacy', id] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-pharmacy", id] }),
   });
 };
 
 export const useUpdatePharmacyHours = (id: string) => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: UpdatePharmacyHoursInput) => updatePharmacyHours(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['my-pharmacy', id] }),
+    mutationFn: (data: UpdatePharmacyHoursInput) =>
+      updatePharmacyHours(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-pharmacy", id] }),
   });
 };
 
@@ -57,7 +68,7 @@ export const useUpdatePharmacyImages = (id: string) => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (images: string[]) => updatePharmacyImages(id, images),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['my-pharmacy', id] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-pharmacy", id] }),
   });
 };
 
@@ -66,7 +77,7 @@ export const useInviteMember = (id: string) => {
   return useMutation({
     mutationFn: (data: InviteMemberInput) => inviteMember(id, data),
     onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ['my-pharmacy', id, 'members'] }),
+      qc.invalidateQueries({ queryKey: ["my-pharmacy", id, "members"] }),
   });
 };
 
@@ -75,7 +86,7 @@ export const useRemoveMember = (id: string) => {
   return useMutation({
     mutationFn: (userId: string) => removeMember(id, userId),
     onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ['my-pharmacy', id, 'members'] }),
+      qc.invalidateQueries({ queryKey: ["my-pharmacy", id, "members"] }),
   });
 };
 
@@ -85,13 +96,13 @@ export const useUpdateMemberRole = (id: string) => {
     mutationFn: ({ userId, role }: { userId: string; role: PharmacyRole }) =>
       updateMemberRole(id, userId, role),
     onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ['my-pharmacy', id, 'members'] }),
+      qc.invalidateQueries({ queryKey: ["my-pharmacy", id, "members"] }),
   });
 };
 
 export const useInvitation = (token: string) =>
   useQuery({
-    queryKey: ['invitation', token],
+    queryKey: ["invitation", token],
     queryFn: () => getInvitation(token),
     enabled: !!token,
     retry: false,
@@ -99,7 +110,7 @@ export const useInvitation = (token: string) =>
 
 export const usePharmacySearchHistory = (id: string) =>
   useQuery({
-    queryKey: ['pharmacy-search-history', id],
+    queryKey: ["pharmacy-search-history", id],
     queryFn: () => getPharmacySearchHistory(id),
     enabled: !!id,
   });
@@ -108,6 +119,72 @@ export const useAcceptInvitation = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (token: string) => acceptInvitation(token),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['my-pharmacies'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-pharmacies"] }),
+  });
+};
+
+// ─── Ouvertures / fermetures exceptionnelles ──────────────────────────────────
+
+export const useAddExceptionalSchedule = (id: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateExceptionalScheduleInput) =>
+      addExceptionalSchedule(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-pharmacy", id] }),
+  });
+};
+
+export const useUpdateExceptionalSchedule = (id: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      scheduleId,
+      data,
+    }: {
+      scheduleId: string;
+      data: UpdateExceptionalScheduleInput;
+    }) => updateExceptionalSchedule(id, scheduleId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-pharmacy", id] }),
+  });
+};
+
+export const useDeleteExceptionalSchedule = (id: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (scheduleId: string) =>
+      deleteExceptionalSchedule(id, scheduleId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-pharmacy", id] }),
+  });
+};
+
+// ─── Gardes déclarées par la pharmacie ────────────────────────────────────────
+
+export const useAddPharmacyGuard = (id: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreatePharmacyGuardInput) => addPharmacyGuard(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-pharmacy", id] }),
+  });
+};
+
+export const useUpdatePharmacyGuard = (id: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      guardId,
+      data,
+    }: {
+      guardId: string;
+      data: UpdatePharmacyGuardInput;
+    }) => updatePharmacyGuard(id, guardId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-pharmacy", id] }),
+  });
+};
+
+export const useDeletePharmacyGuard = (id: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (guardId: string) => deletePharmacyGuard(id, guardId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-pharmacy", id] }),
   });
 };

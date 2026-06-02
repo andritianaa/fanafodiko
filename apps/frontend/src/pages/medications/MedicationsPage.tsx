@@ -16,7 +16,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { MemberAvatar } from '@/features/household/components/MemberAvatar';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils';
 import { DAY_MAP } from '@/features/medication/constants';
@@ -119,22 +119,14 @@ export default function MedicationsPage() {
                       <span className="text-sm">Tout le monde</span>
                     </div>
                   </SelectItem>
-                  {members?.map((member) => {
-                    const initials = member.fullName.charAt(0).toUpperCase();
-                    return (
-                      <SelectItem key={member.id} value={member.id} className="rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <Avatar size="sm">
-                            {member.avatarUrl && <AvatarImage src={member.avatarUrl} alt={member.fullName} />}
-                            <AvatarFallback className="text-[10px] font-semibold">
-                              {initials}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-sm">{member.fullName}</span>
-                        </div>
-                      </SelectItem>
-                    );
-                  })}
+                  {members?.map((member) => (
+                    <SelectItem key={member.id} value={member.id} className="rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <MemberAvatar fullName={member.fullName} avatarUrl={member.avatarUrl} className="size-6" />
+                        <span className="text-sm">{member.fullName}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

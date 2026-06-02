@@ -1,4 +1,4 @@
-import { BellIcon } from '@phosphor-icons/react';
+import { BellIcon, CheckCircleIcon, XCircleIcon, PillIcon } from '@phosphor-icons/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,30 +60,44 @@ export const NotificationBell = ({ profileId }: NotificationBellProps) => {
             </div>
           ) : (
             <div className="grid gap-1 p-1">
-              {notifications?.map((notification) => (
-                <button 
-                  type="button"
-                  key={notification.id}
-                  className={cn(
-                    "group flex flex-col gap-1 p-4 rounded-xl transition-all cursor-pointer",
-                    notification.read ? "bg-background" : "bg-primary/5 hover:bg-primary/10"
-                  )}
-                  onClick={() => !notification.read && markRead(notification.id)}
-                >
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-bold text-sm leading-tight pr-4">{notification.medicationName}</h4>
-                    {!notification.read && (
-                      <div className="size-2 rounded-full bg-primary mt-1 shrink-0" />
+              {notifications?.map((notification) => {
+                const isSearchResponse = notification.type === 'search_response';
+                return (
+                  <button
+                    type="button"
+                    key={notification.id}
+                    className={cn(
+                      "group flex flex-col gap-1 p-4 rounded-xl transition-all cursor-pointer text-left",
+                      notification.read ? "bg-background" : "bg-primary/5 hover:bg-primary/10"
                     )}
-                  </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2">
-                    {notification.message}
-                  </p>
-                  <span className="text-[10px] text-muted-foreground/60 uppercase font-medium mt-1">
-                    {formatDate(notification.createdAt)}
-                  </span>
-                </button>
-              ))}
+                    onClick={() => !notification.read && markRead(notification.id)}
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {isSearchResponse ? (
+                          notification.hasStock
+                            ? <CheckCircleIcon size={14} weight="fill" className="text-green-600 shrink-0" />
+                            : <XCircleIcon size={14} weight="fill" className="text-red-500 shrink-0" />
+                        ) : (
+                          <PillIcon size={14} weight="duotone" className="text-primary shrink-0" />
+                        )}
+                        <h4 className="font-bold text-sm leading-tight truncate">
+                          {notification.medicationName}
+                        </h4>
+                      </div>
+                      {!notification.read && (
+                        <div className="size-2 rounded-full bg-primary mt-1 shrink-0" />
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-2 pl-[22px]">
+                      {notification.message}
+                    </p>
+                    <span className="text-[10px] text-muted-foreground/60 uppercase font-medium mt-1 pl-[22px]">
+                      {formatDate(notification.createdAt)}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
         </ScrollArea>

@@ -65,3 +65,12 @@ export function madagascarNow(): { hours: number; minutes: number; dayOfWeek: nu
     dayOfWeek: eat.getUTCDay(),
   };
 }
+
+/** Current date in Madagascar (EAT, UTC+3) as "YYYY-MM-DD" string. */
+export function madagascarToday(): string {
+  const eat = new Date(new Date().getTime() + EAT_OFFSET_MS);
+  const y = eat.getUTCFullYear();
+  const m = String(eat.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(eat.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}

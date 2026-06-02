@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { Pharmacy, GuardSchedule, OpeningHour, PharmacyContact } from "../../domain/entities/Pharmacy";
+import { Pharmacy, GuardSchedule, OpeningHour, PharmacyContact, ExceptionalSchedule, PharmacyGuardEntry } from "../../domain/entities/Pharmacy";
 import { IPharmacyRepository, PharmacyFilter } from "../../domain/repositories/IPharmacyRepository";
 import { PharmacyModel } from "../models/PharmacyModel";
 
@@ -21,6 +21,23 @@ function docToDomain(doc: any): Pharmacy {
     isOpen24h: doc.isOpen24h ?? false,
     openingHours: (doc.openingHours ?? []) as OpeningHour[],
     guardSchedules: (doc.guardSchedules ?? []) as GuardSchedule[],
+    exceptionalSchedules: (doc.exceptionalSchedules ?? []).map((e: any) => ({
+      id: e._id?.toString() ?? e.id,
+      type: e.type,
+      label: e.label,
+      startDate: e.startDate,
+      endDate: e.endDate,
+      startTime: e.startTime,
+      endTime: e.endTime,
+      reason: e.reason,
+    })) as ExceptionalSchedule[],
+    pharmacyGuards: (doc.pharmacyGuards ?? []).map((g: any) => ({
+      id: g._id?.toString() ?? g.id,
+      startDate: g.startDate,
+      endDate: g.endDate,
+      label: g.label,
+      isActive: g.isActive,
+    })) as PharmacyGuardEntry[],
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   });
@@ -44,6 +61,23 @@ function domainToDoc(pharmacy: Pharmacy) {
     isOpen24h: pharmacy.props.isOpen24h,
     openingHours: pharmacy.props.openingHours,
     guardSchedules: pharmacy.props.guardSchedules,
+    exceptionalSchedules: (pharmacy.props.exceptionalSchedules ?? []).map((e) => ({
+      _id: e.id,
+      type: e.type,
+      label: e.label,
+      startDate: e.startDate,
+      endDate: e.endDate,
+      startTime: e.startTime,
+      endTime: e.endTime,
+      reason: e.reason,
+    })),
+    pharmacyGuards: (pharmacy.props.pharmacyGuards ?? []).map((g) => ({
+      _id: g.id,
+      startDate: g.startDate,
+      endDate: g.endDate,
+      label: g.label,
+      isActive: g.isActive,
+    })),
   };
 }
 
@@ -53,9 +87,11 @@ export class MongoPharmacyRepository implements IPharmacyRepository {
     if (filter?.only24h) query.isOpen24h = true;
     if (filter?.onlyGuard) {
       const now = new Date();
-      query["guardSchedules"] = {
-        $elemMatch: { isActive: true, startDate: { $lte: now }, endDate: { $gte: now } },
-      };
+      const guardMatch = { isActive: true, startDate: { $lte: now }, endDate: { $gte: now } };
+      query["$or"] = [
+        { guardSchedules: { $elemMatch: guardMatch } },
+        { pharmacyGuards: { $elemMatch: guardMatch } },
+      ];
     }
     const docs = await PharmacyModel.find(query).lean();
     return docs.map(docToDomain);
