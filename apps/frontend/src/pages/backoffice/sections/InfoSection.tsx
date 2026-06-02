@@ -62,7 +62,7 @@ export default function InfoSection() {
       <div>
         <Label>Localisation</Label>
         <LocationPickerMap
-          value={form.coordinates}
+          value={form.coordinates ? { lat: form.coordinates.lat ?? 0, lng: form.coordinates.lng ?? 0 } : { lat: 0, lng: 0 }}
           onChange={(coordinates) => setForm({ ...form, coordinates })}
         />
       </div>

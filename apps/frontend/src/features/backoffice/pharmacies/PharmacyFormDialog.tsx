@@ -193,7 +193,7 @@ export function PharmacyFormDialog({ open, onClose, pharmacy }: Props) {
                 control={control}
                 name="coordinates"
                 render={({ field }) => (
-                  <LocationPickerMap value={field.value} onChange={field.onChange} />
+                  <LocationPickerMap value={field.value ? { lat: field.value.lat ?? -18.9, lng: field.value.lng ?? 47.5 } : { lat: -18.9, lng: 47.5 }} onChange={field.onChange} />
                 )}
               />
               <div className="grid grid-cols-2 gap-3">

@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -288,7 +289,7 @@ function InfoTab({ id, pharmacy }: { id: string; pharmacy: Pharmacy }) {
       <div>
         <Label>Localisation</Label>
         <LocationPickerMap
-          value={form.coordinates}
+          value={form.coordinates ? { lat: form.coordinates.lat ?? 0, lng: form.coordinates.lng ?? 0 } : { lat: 0, lng: 0 }}
           onChange={(coordinates) => setForm({ ...form, coordinates })}
         />
       </div>

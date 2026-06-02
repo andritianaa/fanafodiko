@@ -179,6 +179,7 @@ medicationController.openapi(listByProfileRoute, async (c) => {
     startDate: med.startDate.toISOString(),
     endDate: med.endDate?.toISOString() || undefined,
     isActive: med.isActive,
+    utcOffsetMinutes: med.utcOffsetMinutes,
     createdAt: med.createdAt?.toISOString() || new Date().toISOString(),
     updatedAt: med.updatedAt?.toISOString() || new Date().toISOString(),
   }));

@@ -174,7 +174,7 @@ export default function SuggestPharmacyPage() {
                   control={control}
                   name="coordinates"
                   render={({ field }) => (
-                    <LocationPickerMap value={field.value} onChange={field.onChange} />
+                    <LocationPickerMap value={field.value ? { lat: field.value.lat ?? 0, lng: field.value.lng ?? 0 } : { lat: 0, lng: 0 }} onChange={field.onChange} />
                   )}
                 />
               </TabsContent>

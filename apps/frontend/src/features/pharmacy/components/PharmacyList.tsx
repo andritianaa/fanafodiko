@@ -28,8 +28,8 @@ export function PharmacyList({ pharmacies, selected, onSelect, userLocation }: P
   const sorted = userLocation
     ? [...pharmacies].sort(
         (a, b) =>
-          distanceKm(userLocation, a.coordinates) -
-          distanceKm(userLocation, b.coordinates)
+          distanceKm(userLocation, { lat: a.coordinates.lat ?? 0, lng: a.coordinates.lng ?? 0 }) -
+          distanceKm(userLocation, { lat: b.coordinates.lat ?? 0, lng: b.coordinates.lng ?? 0 })
       )
     : pharmacies;
 
@@ -45,7 +45,7 @@ export function PharmacyList({ pharmacies, selected, onSelect, userLocation }: P
     <div className="divide-y">
       {sorted.map((p) => {
         const dist = userLocation
-          ? distanceKm(userLocation, p.coordinates)
+          ? distanceKm(userLocation, { lat: p.coordinates.lat ?? 0, lng: p.coordinates.lng ?? 0 })
           : null;
 
         return (
