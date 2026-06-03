@@ -42,6 +42,7 @@ import {
   SignOutIcon,
   WarningCircleIcon,
   UserIcon,
+  QuestionIcon,
 } from "@phosphor-icons/react";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import { cn } from "@/lib/utils";
@@ -223,6 +224,12 @@ export default function MainLayout() {
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
+                    onClick={() => navigate("/help")}
+                    className="gap-2"
+                  >
+                    <QuestionIcon size={14} weight="fill" /> Aide & FAQ
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
                     onClick={() => setBugReportOpen(true)}
                     className="gap-2 text-amber-600 focus:text-amber-700 focus:bg-amber-50"
                   >
@@ -381,6 +388,19 @@ export default function MainLayout() {
               </Link>
             ))}
           </div>
+
+          {/* Aide & FAQ */}
+          <button
+            type="button"
+            onClick={() => {
+              setMoreOpen(false);
+              navigate("/help");
+            }}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-foreground text-sm font-medium hover:bg-muted transition-colors mt-1"
+          >
+            <QuestionIcon size={16} weight="fill" />
+            Aide & FAQ
+          </button>
 
           {/* Signaler un problème */}
           <button

@@ -79,6 +79,9 @@ importers:
       '@ext/schemas':
         specifier: workspace:^
         version: link:../../packages/schemas
+      '@ext/utils':
+        specifier: workspace:^
+        version: link:../../packages/utils
       '@fontsource-variable/geist':
         specifier: ^5.2.8
         version: 5.2.9

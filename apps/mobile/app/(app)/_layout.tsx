@@ -22,6 +22,7 @@ export default function AppLayout() {
   return (
     <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
       <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+      <Stack.Screen name="help" />
       <Stack.Screen name="member/[id]" />
       <Stack.Screen name="pharmacy/[id]" />
       <Stack.Screen name="med-search/[id]" />

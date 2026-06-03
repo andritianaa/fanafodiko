@@ -28,6 +28,7 @@ import {
   AlertTriangle,
   Camera,
   X,
+  HelpCircle,
 } from "lucide-react-native";
 import { useStore, selectAppState } from "../../../src/store/useStore";
 import { fullSync } from "../../../src/sync/syncService";
@@ -530,6 +531,13 @@ export default function SettingsScreen() {
 
         <Text style={styles.sectionTitle}>Aide</Text>
         <View style={styles.card}>
+          <SettingRow
+            icon={<HelpCircle size={18} color={colors.primary} />}
+            label="Centre d'aide & FAQ"
+            subtitle="Trouvez une réponse à vos questions"
+            onPress={() => router.push('/(app)/help')}
+          />
+          <View style={styles.div} />
           <SettingRow
             icon={<AlertTriangle size={18} color="#d97706" />}
             label="Signaler un problème"

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 
-const LAST_UPDATE = "30 mai 2026"
+const LAST_UPDATE = "3 juin 2026"
 
 const articles = [
   {
@@ -9,15 +9,15 @@ const articles = [
   },
   {
     title: "Article 2 – Objet",
-    content: `Fanafodiko est une application gratuite de suivi et de gestion des médicaments destinée aux patients et à leurs aidants. Elle permet de planifier des prises de médicaments, d'envoyer des rappels et de suivre l'historique des traitements au sein d'un foyer.`,
+    content: `Fanafodiko est une application gratuite destinée aux patients, à leurs aidants et aux professionnels de santé. Elle offre les fonctionnalités suivantes :\n\n• Suivi médicaments : planification des prises, rappels (push, email, in-app) et historique des traitements pour un ou plusieurs profils au sein d'un même foyer.\n\n• Réseau de pharmacies : consultation des pharmacies géolocalisées, de leurs horaires d'ouverture, de leurs gardes et de leurs coordonnées.\n\n• Recherche de médicaments (MedSearch) : localisation des médicaments disponibles dans les pharmacies proches selon un rayon de proximité choisi par l'utilisateur.\n\n• Gestion de pharmacie : pour les membres du réseau (staff, administrateurs), gestion des informations de l'établissement, des horaires exceptionnels et des réponses aux demandes de médicaments.`,
   },
   {
     title: "Article 3 – Accès et inscription",
-    content: `L'accès à l'Application est entièrement gratuit. La création d'un compte requiert la fourniture d'informations exactes (prénom, nom, adresse email). L'utilisateur est seul responsable de la confidentialité de ses identifiants de connexion et de toute activité réalisée depuis son compte.`,
+    content: `L'accès à l'Application est entièrement gratuit. La création d'un compte requiert la fourniture d'informations exactes (adresse email). L'utilisateur est seul responsable de la confidentialité de ses identifiants de connexion et de toute activité réalisée depuis son compte.\n\nLes utilisateurs souhaitant gérer une pharmacie peuvent soumettre une demande d'affiliation soumise à validation par l'éditeur. L'attribution d'un rôle (staff, administrateur, superadmin) relève de la décision de l'administrateur de la pharmacie concernée.`,
   },
   {
     title: "Article 4 – Données personnelles",
-    content: `Les données collectées (nom, email, informations relatives aux médicaments) sont utilisées pour le fonctionnement du service. Des données anonymisées peuvent être utilisées pour améliorer l'Application. Aucune donnée personnelle identifiable n'est vendue ni cédée à des tiers à des fins commerciales.\n\nConformément aux réglementations applicables en matière de protection des données, l'utilisateur dispose d'un droit d'accès, de rectification et de suppression de ses données en contactant : pro@andritiana.tech`,
+    content: `Les données collectées incluent :\n• Compte : adresse email, mot de passe (stocké sous forme hashée, jamais en clair)\n• Profils du foyer : prénom, nom, date de naissance des personnes suivies\n• Médicaments : nom, dosage, fréquence, horaires de prise, historique de prise\n• Localisation : position approximative utilisée lors des recherches MedSearch ou de pharmacies proches — non stockée de façon permanente\n• Notifications : tokens d'appareils mobiles pour l'envoi de notifications push\n• Pharmacie : pour les membres du réseau, données de l'établissement et rôles attribués\n• Signalements : description et informations techniques (OS, taille écran) lors de signalements de bugs\n\nCes données sont utilisées exclusivement pour le fonctionnement du service. Des données anonymisées peuvent être utilisées pour améliorer l'Application. Aucune donnée personnelle identifiable n'est vendue ni cédée à des tiers à des fins commerciales.\n\nConformément aux réglementations applicables, l'utilisateur dispose d'un droit d'accès, de rectification et de suppression de ses données en contactant : pro@andritiana.tech`,
   },
   {
     title: "Article 5 – Avertissement médical",
@@ -25,7 +25,7 @@ const articles = [
   },
   {
     title: "Article 6 – Responsabilité",
-    content: `L'éditeur s'efforce d'assurer la disponibilité et la fiabilité de l'Application mais ne peut garantir un fonctionnement sans interruption. L'éditeur ne saurait être tenu responsable de dommages directs ou indirects résultant d'une utilisation incorrecte de l'Application.`,
+    content: `L'éditeur s'efforce d'assurer la disponibilité et la fiabilité de l'Application mais ne peut garantir un fonctionnement sans interruption.\n\nLes informations relatives aux pharmacies (horaires, disponibilité de médicaments, coordonnées) sont renseignées par les membres du réseau et peuvent ne pas refléter la situation en temps réel. L'éditeur ne peut être tenu responsable de l'inexactitude de ces informations.\n\nL'éditeur ne saurait être tenu responsable de dommages directs ou indirects résultant d'une utilisation incorrecte de l'Application ou de données inexactes transmises par des tiers.`,
   },
   {
     title: "Article 7 – Propriété intellectuelle",

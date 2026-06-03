@@ -38,6 +38,7 @@ import MedSearchResultsPage from "@/pages/med-search/MedSearchResultsPage"
 import MedSearchHistoryPage from "@/pages/med-search/MedSearchHistoryPage"
 import InvitationPage from "@/pages/pharmacy-invitation/InvitationPage"
 import CguPage from "@/pages/legal/CguPage"
+import HelpPage from "@/pages/help/HelpPage"
 import { FontSizeProvider } from "@/contexts/FontSizeContext"
 import { useMe } from "@/features/auth/api/hooks"
 
@@ -126,6 +127,7 @@ function App() {
 
         {/* Open Routes */}
         <Route path="/cgu" element={<CguPage />} />
+        <Route path="/help" element={<HelpPage />} />
         <Route path="/pharmacy-invitation/:token" element={<InvitationPage />} />
       </Routes>
     </BrowserRouter>
