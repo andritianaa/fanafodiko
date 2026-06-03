@@ -295,7 +295,7 @@ export default function MapPage() {
           {!sheetOpen && (
             <button
               onClick={() => setSheetOpen(true)}
-              className="cursor-pointer md:hidden absolute bottom-28 right-4 z-800 w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-xl flex items-center justify-center active:scale-95 transition-transform"
+              className="cursor-pointer md:hidden absolute bottom-28 right-4 z-800 size-12 bg-primary text-primary-foreground rounded-2xl shadow-xl flex items-center justify-center active:scale-95 transition-transform"
             >
               <FunnelSimpleIcon size={22} weight="bold" />
               {activeFilterCount > 0 && (
