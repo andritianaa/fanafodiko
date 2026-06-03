@@ -5,4 +5,5 @@ export interface IPharmacyRequestRepository {
   findAll(status?: RequestStatus): Promise<PharmacyRequest[]>;
   save(request: PharmacyRequest): Promise<PharmacyRequest>;
   update(request: PharmacyRequest): Promise<PharmacyRequest>;
+  delete(id: string): Promise<void>;
 }

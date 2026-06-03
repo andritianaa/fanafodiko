@@ -1,25 +1,60 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-  View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity, Alert,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Switch,
+  TouchableOpacity,
+  Alert,
+  Modal,
+  TextInput,
+  Platform,
+  Dimensions,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-  Server, Bell, LogOut, RefreshCw, ChevronRight, Info, WifiOff, Database, Mail,
-} from 'lucide-react-native';
-import { useStore, selectAppState } from '../../../src/store/useStore';
-import { fullSync } from '../../../src/sync/syncService';
-import { scheduleAllNotifications, requestNotificationPermissions } from '../../../src/notifications/scheduler';
-import { setApiUrl as saveApiUrl } from '../../../src/api/client';
-import { authApi, preferencesApi } from '../../../src/api/client';
-import { Button } from '../../../components/ui/Button';
-import { Input } from '../../../components/ui/Input';
-import { colors, spacing, radius, shadows } from '../../../src/theme';
-import type { NotificationPreferences } from '../../../src/types';
+  Server,
+  Bell,
+  LogOut,
+  RefreshCw,
+  ChevronRight,
+  Info,
+  WifiOff,
+  Database,
+  Mail,
+  AlertTriangle,
+  Camera,
+  X,
+} from "lucide-react-native";
+import { useStore, selectAppState } from "../../../src/store/useStore";
+import { fullSync } from "../../../src/sync/syncService";
+import { bugReportApi } from "../../../src/api/client";
+import {
+  scheduleAllNotifications,
+  requestNotificationPermissions,
+} from "../../../src/notifications/scheduler";
+import { setApiUrl as saveApiUrl } from "../../../src/api/client";
+import { authApi, preferencesApi } from "../../../src/api/client";
+import { Button } from "../../../components/ui/Button";
+import { Input } from "../../../components/ui/Input";
+import { colors, spacing, radius, shadows } from "../../../src/theme";
+import type { NotificationPreferences } from "../../../src/types";
 
-function SettingRow({ icon, label, subtitle, onPress, right }: {
-  icon: React.ReactNode; label: string; subtitle?: string; onPress?: () => void; right?: React.ReactNode;
+function SettingRow({
+  icon,
+  label,
+  subtitle,
+  onPress,
+  right,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  subtitle?: string;
+  onPress?: () => void;
+  right?: React.ReactNode;
 }) {
   const Wrapper = onPress ? TouchableOpacity : View;
   return (
@@ -29,7 +64,8 @@ function SettingRow({ icon, label, subtitle, onPress, right }: {
         <Text style={styles.rowLabel}>{label}</Text>
         {subtitle && <Text style={styles.rowSub}>{subtitle}</Text>}
       </View>
-      {right ?? (onPress ? <ChevronRight size={18} color={colors.textMuted} /> : null)}
+      {right ??
+        (onPress ? <ChevronRight size={18} color={colors.textMuted} /> : null)}
     </Wrapper>
   );
 }
@@ -47,17 +83,26 @@ export default function SettingsScreen() {
   const [editingUrl, setEditingUrl] = useState(false);
   const [urlInput, setUrlInput] = useState(apiUrl);
   const [syncing, setSyncing] = useState(false);
-  const [emailPrefs, setEmailPrefs] = useState<NotificationPreferences | null>(null);
+  const [emailPrefs, setEmailPrefs] = useState<NotificationPreferences | null>(
+    null,
+  );
   const [prefsLoading, setPrefsLoading] = useState(false);
+  const [bugReportOpen, setBugReportOpen] = useState(false);
+  const [bugDesc, setBugDesc] = useState("");
+  const [bugSending, setBugSending] = useState(false);
 
   useEffect(() => {
     if (!appState.isOnline) return;
-    preferencesApi.get()
+    preferencesApi
+      .get()
       .then(setEmailPrefs)
       .catch(() => {});
   }, [appState.isOnline]);
 
-  const handleTogglePref = async (key: keyof NotificationPreferences, value: boolean) => {
+  const handleTogglePref = async (
+    key: keyof NotificationPreferences,
+    value: boolean,
+  ) => {
     if (!emailPrefs || !appState.isOnline) return;
     const updated = { ...emailPrefs, [key]: value };
     setEmailPrefs(updated);
@@ -73,7 +118,7 @@ export default function SettingsScreen() {
   };
 
   const handleSaveUrl = async () => {
-    const cleaned = urlInput.replace(/\/$/, '');
+    const cleaned = urlInput.replace(/\/$/, "");
     setStoreApiUrl(cleaned);
     await saveApiUrl(cleaned);
     setEditingUrl(false);
@@ -81,47 +126,105 @@ export default function SettingsScreen() {
 
   const handleSync = async () => {
     setSyncing(true);
-    try { await fullSync(); } catch {}
+    try {
+      await fullSync();
+    } catch {}
     setSyncing(false);
   };
 
   const handleReschedule = async () => {
     const ok = await requestNotificationPermissions();
-    if (!ok) { Alert.alert('Permissions', 'Activez les notifications dans les réglages de l\'appareil.'); return; }
+    if (!ok) {
+      Alert.alert(
+        "Permissions",
+        "Activez les notifications dans les réglages de l'appareil.",
+      );
+      return;
+    }
     const count = await scheduleAllNotifications();
-    Alert.alert('Planifié', `${count} notifications programmées pour les 30 prochains jours.`);
+    Alert.alert(
+      "Planifié",
+      `${count} notifications programmées pour les 30 prochains jours.`,
+    );
+  };
+
+  const handleSendBugReport = async () => {
+    if (bugDesc.trim().length < 10) {
+      Alert.alert(
+        "Description trop courte",
+        "Décrivez le problème en au moins 10 caractères.",
+      );
+      return;
+    }
+    setBugSending(true);
+    try {
+      const screen = Dimensions.get("screen");
+      await bugReportApi.create({
+        description: bugDesc.trim(),
+        screenshots: [],
+        deviceInfo: {
+          platform: Platform.OS as "ios" | "android",
+          osVersion: String(Platform.Version),
+          screenSize: `${Math.round(screen.width)}x${Math.round(screen.height)}`,
+          language: "fr",
+        },
+      });
+      Alert.alert(
+        "Merci !",
+        "Votre signalement a bien été envoyé. Notre équipe l'examinera.",
+      );
+      setBugDesc("");
+      setBugReportOpen(false);
+    } catch {
+      Alert.alert(
+        "Erreur",
+        "Impossible d'envoyer le signalement. Vérifiez votre connexion.",
+      );
+    } finally {
+      setBugSending(false);
+    }
   };
 
   const handleLogout = () => {
-    Alert.alert('Déconnexion', 'Voulez-vous vous déconnecter ?', [
-      { text: 'Annuler', style: 'cancel' },
+    Alert.alert("Déconnexion", "Voulez-vous vous déconnecter ?", [
+      { text: "Annuler", style: "cancel" },
       {
-        text: 'Se déconnecter', style: 'destructive',
+        text: "Se déconnecter",
+        style: "destructive",
         onPress: async () => {
           // Supprimer le push token avant de déconnecter
           try {
-            const token = await AsyncStorage.getItem('expo_push_token');
+            const token = await AsyncStorage.getItem("expo_push_token");
             if (token) await authApi.removePushToken(token).catch(() => {});
           } catch {}
           clearAuth();
-          router.replace('/(auth)/login');
+          router.replace("/(auth)/login");
         },
       },
     ]);
   };
 
   const lastSync = appState.lastSyncAt
-    ? new Date(appState.lastSyncAt).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-    : 'Jamais';
+    ? new Date(appState.lastSyncAt).toLocaleString("fr-FR", {
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Jamais";
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <View style={styles.topBar}><Text style={styles.screenTitle}>Réglages</Text></View>
+    <SafeAreaView style={styles.safe} edges={["top"]}>
+      <View style={styles.topBar}>
+        <Text style={styles.screenTitle}>Réglages</Text>
+      </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
           <View style={styles.profileCard}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarLetter}>{user?.email[0]?.toUpperCase() ?? '?'}</Text>
+              <Text style={styles.avatarLetter}>
+                {user?.email[0]?.toUpperCase() ?? "?"}
+              </Text>
             </View>
             <View>
               <Text style={styles.email}>{user?.email}</Text>
@@ -133,9 +236,24 @@ export default function SettingsScreen() {
         <Text style={styles.sectionTitle}>Synchronisation</Text>
         <View style={styles.card}>
           <SettingRow
-            icon={<View style={[styles.dot, { backgroundColor: appState.isOnline ? colors.success : colors.error }]} />}
-            label={appState.isOnline ? 'En ligne' : 'Hors ligne'}
-            subtitle={appState.isOnline ? 'Connecté au serveur' : 'Mode hors ligne actif'}
+            icon={
+              <View
+                style={[
+                  styles.dot,
+                  {
+                    backgroundColor: appState.isOnline
+                      ? colors.success
+                      : colors.error,
+                  },
+                ]}
+              />
+            }
+            label={appState.isOnline ? "En ligne" : "Hors ligne"}
+            subtitle={
+              appState.isOnline
+                ? "Connecté au serveur"
+                : "Mode hors ligne actif"
+            }
           />
           <View style={styles.div} />
           <SettingRow
@@ -143,7 +261,19 @@ export default function SettingsScreen() {
             label="Synchroniser maintenant"
             subtitle={`Dernière sync : ${lastSync}`}
             onPress={handleSync}
-            right={syncing ? <Text style={{ fontFamily: 'Nunito_600SemiBold', fontSize: 12, color: colors.primary }}>…</Text> : undefined}
+            right={
+              syncing ? (
+                <Text
+                  style={{
+                    fontFamily: "Nunito_600SemiBold",
+                    fontSize: 12,
+                    color: colors.primary,
+                  }}
+                >
+                  …
+                </Text>
+              ) : undefined
+            }
           />
         </View>
 
@@ -160,9 +290,23 @@ export default function SettingsScreen() {
                 autoCorrect={false}
                 hint="IP de votre machine hébergeant le backend"
               />
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button label="Annuler" onPress={() => { setEditingUrl(false); setUrlInput(apiUrl); }} variant="outline" size="sm" style={{ flex: 1 }} />
-                <Button label="Enregistrer" onPress={handleSaveUrl} size="sm" style={{ flex: 1 }} />
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <Button
+                  label="Annuler"
+                  onPress={() => {
+                    setEditingUrl(false);
+                    setUrlInput(apiUrl);
+                  }}
+                  variant="outline"
+                  size="sm"
+                  style={{ flex: 1 }}
+                />
+                <Button
+                  label="Enregistrer"
+                  onPress={handleSaveUrl}
+                  size="sm"
+                  style={{ flex: 1 }}
+                />
               </View>
             </View>
           ) : (
@@ -186,7 +330,7 @@ export default function SettingsScreen() {
                 value={notifEnabled}
                 onValueChange={setNotifEnabled}
                 trackColor={{ false: colors.border, true: colors.primaryLight }}
-                thumbColor={notifEnabled ? colors.primary : '#FFF'}
+                thumbColor={notifEnabled ? colors.primary : "#FFF"}
               />
             }
           />
@@ -199,7 +343,9 @@ export default function SettingsScreen() {
           />
         </View>
 
-        <Text style={styles.sectionTitle}>Notifications email</Text>
+        <Text style={styles.sectionTitle}>
+          Notifications email, Utilisateur
+        </Text>
         <View style={styles.card}>
           {!appState.isOnline ? (
             <View style={[styles.row, { gap: 10 }]}>
@@ -213,53 +359,152 @@ export default function SettingsScreen() {
               <SettingRow
                 icon={<Mail size={18} color={colors.primary} />}
                 label="Rappels médicaments"
-                subtitle="Recevoir des emails de rappel de prise"
+                subtitle="Email de rappel lors d'une prise programmée"
                 right={
                   <Switch
                     value={emailPrefs.emailMedicationReminders}
-                    onValueChange={(v) => handleTogglePref('emailMedicationReminders', v)}
+                    onValueChange={(v) =>
+                      handleTogglePref("emailMedicationReminders", v)
+                    }
                     disabled={prefsLoading}
-                    trackColor={{ false: colors.border, true: colors.primaryLight }}
-                    thumbColor={emailPrefs.emailMedicationReminders ? colors.primary : '#FFF'}
+                    trackColor={{
+                      false: colors.border,
+                      true: colors.primaryLight,
+                    }}
+                    thumbColor={
+                      emailPrefs.emailMedicationReminders
+                        ? colors.primary
+                        : "#FFF"
+                    }
                   />
                 }
               />
               <View style={styles.div} />
               <SettingRow
                 icon={<Mail size={18} color={colors.primary} />}
-                label="Réponses recherche"
-                subtitle="Recevoir un email à chaque réponse pharmacie"
+                label="Décision demande de pharmacie"
+                subtitle="Email lors de l'approbation ou du refus de votre demande"
                 right={
                   <Switch
-                    value={emailPrefs.emailMedSearchResponse}
-                    onValueChange={(v) => handleTogglePref('emailMedSearchResponse', v)}
+                    value={emailPrefs.emailPharmacyRequestDecision}
+                    onValueChange={(v) =>
+                      handleTogglePref("emailPharmacyRequestDecision", v)
+                    }
                     disabled={prefsLoading}
-                    trackColor={{ false: colors.border, true: colors.primaryLight }}
-                    thumbColor={emailPrefs.emailMedSearchResponse ? colors.primary : '#FFF'}
+                    trackColor={{
+                      false: colors.border,
+                      true: colors.primaryLight,
+                    }}
+                    thumbColor={
+                      emailPrefs.emailPharmacyRequestDecision
+                        ? colors.primary
+                        : "#FFF"
+                    }
                   />
                 }
               />
               <View style={styles.div} />
               <SettingRow
                 icon={<Mail size={18} color={colors.primary} />}
-                label="Invitations pharmacie"
-                subtitle="Recevoir un email lors d'une invitation à rejoindre une pharmacie"
+                label="Mise à jour signalement"
+                subtitle="Email quand votre signalement de bug est traité"
                 right={
                   <Switch
-                    value={emailPrefs.emailPharmacyInvitation}
-                    onValueChange={(v) => handleTogglePref('emailPharmacyInvitation', v)}
+                    value={emailPrefs.emailBugReportUpdate}
+                    onValueChange={(v) =>
+                      handleTogglePref("emailBugReportUpdate", v)
+                    }
                     disabled={prefsLoading}
-                    trackColor={{ false: colors.border, true: colors.primaryLight }}
-                    thumbColor={emailPrefs.emailPharmacyInvitation ? colors.primary : '#FFF'}
+                    trackColor={{
+                      false: colors.border,
+                      true: colors.primaryLight,
+                    }}
+                    thumbColor={
+                      emailPrefs.emailBugReportUpdate ? colors.primary : "#FFF"
+                    }
                   />
                 }
               />
               <View style={[styles.row, { paddingTop: 4, paddingBottom: 0 }]}>
                 <View style={styles.rowIcon} />
-                <Text style={[styles.rowSub, { color: colors.textMuted, fontSize: 11 }]}>
-                  Les notifications push et in-app ne peuvent pas être désactivées.
+                <Text
+                  style={[
+                    styles.rowSub,
+                    { color: colors.textMuted, fontSize: 11 },
+                  ]}
+                >
+                  Les notifications push et in-app ne peuvent pas être
+                  désactivées.
                 </Text>
               </View>
+            </>
+          ) : (
+            <View style={styles.row}>
+              <Text style={styles.rowSub}>Chargement des préférences…</Text>
+            </View>
+          )}
+        </View>
+
+        <Text style={styles.sectionTitle}>
+          Notifications email, Membre de pharmacie
+        </Text>
+        <View style={styles.card}>
+          {!appState.isOnline ? (
+            <View style={[styles.row, { gap: 10 }]}>
+              <WifiOff size={16} color={colors.warning} />
+              <Text style={[styles.rowSub, { color: colors.warning }]}>
+                Connexion requise pour modifier les préférences email
+              </Text>
+            </View>
+          ) : emailPrefs ? (
+            <>
+              <SettingRow
+                icon={<Mail size={18} color={colors.primary} />}
+                label="Nouvelle demande de médicament"
+                subtitle="Email quand un patient recherche un médicament près de votre pharmacie"
+                right={
+                  <Switch
+                    value={emailPrefs.emailMedSearchResponse}
+                    onValueChange={(v) =>
+                      handleTogglePref("emailMedSearchResponse", v)
+                    }
+                    disabled={prefsLoading}
+                    trackColor={{
+                      false: colors.border,
+                      true: colors.primaryLight,
+                    }}
+                    thumbColor={
+                      emailPrefs.emailMedSearchResponse
+                        ? colors.primary
+                        : "#FFF"
+                    }
+                  />
+                }
+              />
+              <View style={styles.div} />
+              <SettingRow
+                icon={<Mail size={18} color={colors.primary} />}
+                label="Invitation à gérer une pharmacie"
+                subtitle="Email lors d'une invitation à rejoindre une pharmacie"
+                right={
+                  <Switch
+                    value={emailPrefs.emailPharmacyInvitation}
+                    onValueChange={(v) =>
+                      handleTogglePref("emailPharmacyInvitation", v)
+                    }
+                    disabled={prefsLoading}
+                    trackColor={{
+                      false: colors.border,
+                      true: colors.primaryLight,
+                    }}
+                    thumbColor={
+                      emailPrefs.emailPharmacyInvitation
+                        ? colors.primary
+                        : "#FFF"
+                    }
+                  />
+                }
+              />
             </>
           ) : (
             <View style={styles.row}>
@@ -283,6 +528,16 @@ export default function SettingsScreen() {
           />
         </View>
 
+        <Text style={styles.sectionTitle}>Aide</Text>
+        <View style={styles.card}>
+          <SettingRow
+            icon={<AlertTriangle size={18} color="#d97706" />}
+            label="Signaler un problème"
+            subtitle="Nous aider à améliorer l'application"
+            onPress={() => setBugReportOpen(true)}
+          />
+        </View>
+
         <Text style={styles.sectionTitle}>À propos</Text>
         <View style={styles.card}>
           <SettingRow
@@ -292,7 +547,13 @@ export default function SettingsScreen() {
           />
         </View>
 
-        <View style={{ paddingHorizontal: spacing.md, paddingBottom: spacing.xxl, marginTop: spacing.md }}>
+        <View
+          style={{
+            paddingHorizontal: spacing.md,
+            paddingBottom: spacing.xxl,
+            marginTop: spacing.md,
+          }}
+        >
           <Button
             label="Se déconnecter"
             onPress={handleLogout}
@@ -302,20 +563,95 @@ export default function SettingsScreen() {
           />
         </View>
       </ScrollView>
+
+      {/* ── Modal signalement ────────────────────────────────────────────────── */}
+      <Modal
+        visible={bugReportOpen}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setBugReportOpen(false)}
+      >
+        <SafeAreaView style={styles.modalSafe}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Signaler un problème</Text>
+            <TouchableOpacity
+              onPress={() => setBugReportOpen(false)}
+              style={styles.modalClose}
+            >
+              <X size={20} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
+          >
+            <Text style={styles.modalLabel}>Description *</Text>
+            <TextInput
+              style={styles.modalTextarea}
+              value={bugDesc}
+              onChangeText={setBugDesc}
+              placeholder="Décrivez le problème rencontré : ce que vous faisiez, ce qui s'est passé, comment le reproduire…"
+              placeholderTextColor={colors.textMuted}
+              multiline
+              numberOfLines={6}
+              textAlignVertical="top"
+            />
+            <Text style={styles.modalHint}>
+              {bugDesc.length} car. / min. 10
+            </Text>
+
+            <View style={styles.deviceInfoBox}>
+              <Text style={styles.deviceInfoTitle}>
+                Infos collectées automatiquement
+              </Text>
+              <Text style={styles.deviceInfoText}>
+                📱 {Platform.OS === "ios" ? "iOS" : "Android"}{" "}
+                {Platform.Version}
+                {"\n"}📐 {Math.round(Dimensions.get("screen").width)}×
+                {Math.round(Dimensions.get("screen").height)} px
+              </Text>
+            </View>
+          </ScrollView>
+
+          <View style={styles.modalFooter}>
+            <Button
+              label="Annuler"
+              onPress={() => setBugReportOpen(false)}
+              variant="outline"
+              style={{ flex: 1 }}
+            />
+            <Button
+              label={bugSending ? "Envoi…" : "Envoyer"}
+              onPress={handleSendBugReport}
+              disabled={bugSending || bugDesc.trim().length < 10}
+              style={{ flex: 1 }}
+            />
+          </View>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  topBar: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.sm },
-  screenTitle: { fontFamily: 'Nunito_800ExtraBold', fontSize: 26, color: colors.text },
+  topBar: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  screenTitle: {
+    fontFamily: "Nunito_800ExtraBold",
+    fontSize: 26,
+    color: colors.text,
+  },
   section: { paddingHorizontal: spacing.md, marginBottom: spacing.md },
   sectionTitle: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: "Nunito_700Bold",
     fontSize: 13,
     color: colors.textSecondary,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 0.8,
     paddingHorizontal: spacing.lg,
     paddingBottom: 6,
@@ -325,12 +661,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     marginHorizontal: spacing.md,
     borderRadius: radius.lg,
-    overflow: 'hidden',
+    overflow: "hidden",
     ...shadows.sm,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: spacing.md,
     paddingVertical: 14,
     gap: 14,
@@ -340,20 +676,92 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: radius.sm,
     backgroundColor: colors.primaryLighter,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   rowContent: { flex: 1 },
-  rowLabel: { fontFamily: 'Nunito_600SemiBold', fontSize: 15, color: colors.text },
-  rowSub: { fontFamily: 'Nunito_400Regular', fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  rowLabel: {
+    fontFamily: "Nunito_600SemiBold",
+    fontSize: 15,
+    color: colors.text,
+  },
+  rowSub: {
+    fontFamily: "Nunito_400Regular",
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
   div: { height: 1, backgroundColor: colors.divider, marginLeft: 64 },
   dot: { width: 10, height: 10, borderRadius: 5 },
+  modalSafe: { flex: 1, backgroundColor: colors.background },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalTitle: {
+    fontFamily: "Nunito_700Bold",
+    fontSize: 18,
+    color: colors.text,
+  },
+  modalClose: { padding: 4 },
+  modalLabel: {
+    fontFamily: "Nunito_700Bold",
+    fontSize: 14,
+    color: colors.text,
+    marginBottom: 4,
+  },
+  modalTextarea: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    fontFamily: "Nunito_400Regular",
+    fontSize: 14,
+    color: colors.text,
+    minHeight: 140,
+    backgroundColor: colors.surface,
+  },
+  modalHint: {
+    fontFamily: "Nunito_400Regular",
+    fontSize: 11,
+    color: colors.textMuted,
+    textAlign: "right",
+  },
+  deviceInfoBox: {
+    backgroundColor: colors.primaryLighter,
+    borderRadius: radius.md,
+    padding: spacing.md,
+  },
+  deviceInfoTitle: {
+    fontFamily: "Nunito_700Bold",
+    fontSize: 12,
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  deviceInfoText: {
+    fontFamily: "Nunito_400Regular",
+    fontSize: 12,
+    color: colors.primary,
+    lineHeight: 20,
+  },
+  modalFooter: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    padding: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
   profileCard: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     padding: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 14,
     ...shadows.sm,
   },
@@ -362,10 +770,19 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: radius.full,
     backgroundColor: colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
-  avatarLetter: { fontFamily: 'Nunito_800ExtraBold', fontSize: 24, color: colors.primary },
-  email: { fontFamily: 'Nunito_700Bold', fontSize: 15, color: colors.text },
-  userId: { fontFamily: 'Nunito_400Regular', fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  avatarLetter: {
+    fontFamily: "Nunito_800ExtraBold",
+    fontSize: 24,
+    color: colors.primary,
+  },
+  email: { fontFamily: "Nunito_700Bold", fontSize: 15, color: colors.text },
+  userId: {
+    fontFamily: "Nunito_400Regular",
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
 });

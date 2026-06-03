@@ -262,7 +262,13 @@ function InfoTab({ id, pharmacy }: { id: string; pharmacy: any }) {
         <Label>Localisation</Label>
         <LocationPickerMap
           value={form.coordinates}
-          onChange={(coordinates) => setForm({ ...form, coordinates })}
+          onChange={(coordinates) => setForm((f) => ({ ...f, coordinates }))}
+          onGeocode={(geo) => setForm((f) => ({
+            ...f,
+            address: geo.address || f.address,
+            city:    geo.city    || f.city,
+            region:  geo.region  || f.region,
+          }))}
         />
       </div>
       <div>
@@ -272,8 +278,8 @@ function InfoTab({ id, pharmacy }: { id: string; pharmacy: any }) {
           onChange={(contacts) => setForm({ ...form, contacts })}
         />
       </div>
-      <Button onClick={save} disabled={isPending} className="w-full">
-        {isPending ? 'Enregistrement…' : 'Enregistrer les infos'}
+      <Button onClick={save} loading={isPending} className="w-full">
+        Enregistrer les infos
       </Button>
     </div>
   );
@@ -304,8 +310,8 @@ function HoursTab({ id, pharmacy }: { id: string; pharmacy: any }) {
         <Label htmlFor="o24" className="cursor-pointer">Ouvert 24h/24</Label>
       </div>
       {!isOpen24h && <OpeningHoursEditor value={hours} onChange={setHours} />}
-      <Button onClick={save} disabled={isPending} className="w-full">
-        {isPending ? 'Enregistrement…' : 'Enregistrer les horaires'}
+      <Button onClick={save} loading={isPending} className="w-full">
+        Enregistrer les horaires
       </Button>
     </div>
   );
@@ -432,8 +438,8 @@ function ImagesTab({ id, pharmacy }: { id: string; pharmacy: any }) {
   return (
     <div className="space-y-4">
       <PharmacyImagesEditor value={images} onChange={setImages} />
-      <Button onClick={save} disabled={isPending} className="w-full">
-        {isPending ? 'Enregistrement…' : 'Enregistrer les images'}
+      <Button onClick={save} loading={isPending} className="w-full">
+        Enregistrer les images
       </Button>
     </div>
   );

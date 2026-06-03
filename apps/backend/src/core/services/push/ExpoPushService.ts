@@ -45,7 +45,7 @@ export class ExpoPushService {
           ticket.details?.error === "DeviceNotRegistered"
         ) {
           console.warn(
-            "[ExpoPushService] DeviceNotRegistered — token needs cleanup",
+            "[ExpoPushService] DeviceNotRegistered, token needs cleanup",
           );
         }
       }

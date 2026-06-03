@@ -2,6 +2,7 @@ import { AppError } from "@/core/errors/AppError";
 import { IMailer } from "@/core/services/mailing/IMailer";
 import { pharmacyRequestDecisionEmailTemplate } from "@/core/services/mailing/emailTemplates";
 import { IUserRepository } from "@/modules/identity/domain/repositories/IUserRepository";
+import { UserModel } from "@/modules/identity/infrastructure/models/UserModel";
 import { Pharmacy } from "../../domain/entities/Pharmacy";
 import { PharmacyMembership } from "../../domain/entities/PharmacyMembership";
 import { IPharmacyRepository } from "../../domain/repositories/IPharmacyRepository";
@@ -22,6 +23,8 @@ async function notifySubmitter(
   try {
     const user = await userRepo.findById(userId);
     if (!user) return;
+    const userDoc = await UserModel.findById(userId).select("notificationPreferences").lean();
+    if (userDoc?.notificationPreferences?.emailPharmacyRequestDecision === false) return;
     const { subject, html } = pharmacyRequestDecisionEmailTemplate(opts);
     await mailer.sendEmail(user.email.getValue(), subject, html);
   } catch (e) {
@@ -92,6 +95,8 @@ export class ApprovePharmacyRequest {
         createdPharmacyId: saved.id,
         reviewedBy: reviewerId,
         reviewedAt: new Date(),
+        // Si l'utilisateur souhaite gérer la pharmacie, passer managementStatus à "pending"
+        ...(request.props.wantsToManage && { managementStatus: "pending" }),
       })
     );
 

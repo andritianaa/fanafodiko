@@ -24,6 +24,7 @@ export default function SchedulePage() {
   useEffect(() => {
     const hash = location.hash.replace('#', '');
     if (hash && members?.some(m => m.id === hash)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedProfileId(hash);
     }
   }, [location.hash, members]);

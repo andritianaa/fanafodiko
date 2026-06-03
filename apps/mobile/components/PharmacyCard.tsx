@@ -107,7 +107,7 @@ export function PharmacyCard({ pharmacy, onViewDetails, onGetDirections, compact
           <Clock size={13} color={colors.textMuted} />
           <Text style={styles.hours}>
             {todayHour.isClosed
-              ? 'Fermé aujourd'hui'
+              ? "Fermé aujourd'hui"
               : `Aujourd'hui : ${todayHour.open} – ${todayHour.close}`}
           </Text>
         </View>

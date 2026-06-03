@@ -20,28 +20,14 @@ export default function AppLayout() {
   if (!token) return <Redirect href="/(auth)/login" />;
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen
-        name="member/[id]"
-        options={{ animation: 'slide_from_right' }}
-      />
-      <Stack.Screen
-        name="pharmacy/[id]"
-        options={{ animation: 'slide_from_right' }}
-      />
-      <Stack.Screen
-        name="med-search/[id]"
-        options={{ animation: 'slide_from_right' }}
-      />
-      <Stack.Screen
-        name="med-search/history"
-        options={{ animation: 'slide_from_right' }}
-      />
-      <Stack.Screen
-        name="my-pharmacy/[id]"
-        options={{ animation: 'slide_from_right' }}
-      />
+    <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+      <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+      <Stack.Screen name="member/[id]" />
+      <Stack.Screen name="pharmacy/[id]" />
+      <Stack.Screen name="med-search/[id]" />
+      <Stack.Screen name="med-search/history" />
+      <Stack.Screen name="my-pharmacy/index" />
+      <Stack.Screen name="my-pharmacy/[id]" />
     </Stack>
   );
 }

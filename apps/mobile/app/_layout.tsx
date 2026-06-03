@@ -107,7 +107,7 @@ async function registerExpoPushToken(): Promise<void> {
     await AsyncStorage.setItem('expo_push_token', token);
     await authApi.registerPushToken(token);
   } catch {
-    // Ignore — push token registration is best-effort
+    // Ignore, push token registration is best-effort
   }
 }
 

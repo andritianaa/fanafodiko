@@ -1,5 +1,13 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authApi, householdsApi, medicationsApi, tasksApi, pharmacyApi, myPharmacyApi, ApiError } from '../api/client';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  authApi,
+  householdsApi,
+  medicationsApi,
+  tasksApi,
+  pharmacyApi,
+  myPharmacyApi,
+  ApiError,
+} from "../api/client";
 import {
   upsertProfiles,
   upsertMedications,
@@ -11,20 +19,23 @@ import {
   setSyncMeta,
   getSyncMeta,
   upsertPharmacies,
-} from '../db/database';
-import { scheduleAllNotifications, needsReschedule } from '../notifications/scheduler';
-import { useStore } from '../store/useStore';
-import type { Profile, Medication, Task, OfflineQueueAction } from '../types';
+} from "../db/database";
+import {
+  scheduleAllNotifications,
+  needsReschedule,
+} from "../notifications/scheduler";
+import { useStore } from "../store/useStore";
+import type { Profile, Medication, Task, OfflineQueueAction } from "../types";
 
 async function replayOfflineAction(action: OfflineQueueAction): Promise<void> {
   switch (action.type) {
-    case 'TAKE_TASK':
+    case "TAKE_TASK":
       await tasksApi.markTaken(action.taskId);
       break;
-    case 'SKIP_TASK':
+    case "SKIP_TASK":
       await tasksApi.markSkipped(action.taskId);
       break;
-    case 'CREATE_MEDICATION':
+    case "CREATE_MEDICATION":
       await medicationsApi.create({
         profileId: action.data.profileId,
         name: action.data.name,
@@ -34,16 +45,16 @@ async function replayOfflineAction(action: OfflineQueueAction): Promise<void> {
         endDate: action.data.endDate ?? undefined,
       });
       break;
-    case 'UPDATE_MEDICATION':
+    case "UPDATE_MEDICATION":
       await medicationsApi.update(action.id, action.data);
       break;
-    case 'DELETE_MEDICATION':
+    case "DELETE_MEDICATION":
       await medicationsApi.remove(action.id);
       break;
-    case 'TOGGLE_MEDICATION':
+    case "TOGGLE_MEDICATION":
       await medicationsApi.toggleStatus(action.id, action.isActive);
       break;
-    case 'CREATE_MEMBER':
+    case "CREATE_MEMBER":
       await householdsApi.create({
         firstName: action.data.firstName,
         lastName: action.data.lastName,
@@ -52,10 +63,10 @@ async function replayOfflineAction(action: OfflineQueueAction): Promise<void> {
         avatarUrl: action.data.avatarUrl ?? undefined,
       });
       break;
-    case 'UPDATE_MEMBER':
+    case "UPDATE_MEMBER":
       await householdsApi.update(action.id, action.data);
       break;
-    case 'DELETE_MEMBER':
+    case "DELETE_MEMBER":
       await householdsApi.remove(action.id);
       break;
   }
@@ -93,7 +104,7 @@ async function pullMedications(profiles: Profile[]): Promise<Medication[]> {
 }
 
 async function pullTasks(profiles: Profile[]): Promise<Task[]> {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split("T")[0];
   const all: Task[] = [];
   for (const profile of profiles) {
     const tasks = await tasksApi.list(profile.id, today);
@@ -108,9 +119,9 @@ async function pullPharmacies(): Promise<void> {
     const data = await pharmacyApi.list();
     await upsertPharmacies(data.pharmacies);
     useStore.getState().setPharmacies(data.pharmacies);
-    await setSyncMeta('lastPharmacySync', Date.now().toString());
+    await setSyncMeta("lastPharmacySync", Date.now().toString());
   } catch {
-    // Ignore pharmacy sync errors — app works offline with cached data
+    // Ignore pharmacy sync errors, app works offline with cached data
   }
 }
 
@@ -119,11 +130,15 @@ async function pullMyPharmacies(): Promise<void> {
     const pharmacies = await myPharmacyApi.list();
     useStore.getState().setMyPharmacies(pharmacies);
   } catch {
-    // Not a staff user or error — silently ignore
+    // Not a staff user or error, silently ignore
   }
 }
 
-export async function fullSync(): Promise<{ profiles: Profile[]; medications: Medication[]; tasks: Task[] }> {
+export async function fullSync(): Promise<{
+  profiles: Profile[];
+  medications: Medication[];
+  tasks: Task[];
+}> {
   const store = useStore.getState();
 
   try {
@@ -140,7 +155,7 @@ export async function fullSync(): Promise<{ profiles: Profile[]; medications: Me
     store.setTodayTasks(tasks);
     store.setSyncResult(true);
 
-    await setSyncMeta('lastSync', new Date().toISOString());
+    await setSyncMeta("lastSync", new Date().toISOString());
 
     if (await needsReschedule()) {
       const activeMeds = medications.filter((m) => m.isActive);
@@ -148,8 +163,11 @@ export async function fullSync(): Promise<{ profiles: Profile[]; medications: Me
     }
 
     // Sync pharmacies once every 24h
-    const lastPharmSync = await getSyncMeta('lastPharmacySync');
-    if (!lastPharmSync || Date.now() - Number(lastPharmSync) > 24 * 3600 * 1000) {
+    const lastPharmSync = await getSyncMeta("lastPharmacySync");
+    if (
+      !lastPharmSync ||
+      Date.now() - Number(lastPharmSync) > 24 * 3600 * 1000
+    ) {
       await pullPharmacies();
     }
 
@@ -158,7 +176,8 @@ export async function fullSync(): Promise<{ profiles: Profile[]; medications: Me
 
     return { profiles, medications, tasks };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erreur de synchronisation';
+    const message =
+      err instanceof Error ? err.message : "Erreur de synchronisation";
     store.setSyncResult(false, message);
     throw err;
   }
@@ -170,7 +189,7 @@ export async function partialSync(profileId: string): Promise<void> {
     const meds = await medicationsApi.listByProfile(profileId);
     await upsertMedications(meds);
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const tasks = await tasksApi.list(profileId, today);
     await upsertTasks(tasks);
 
@@ -179,14 +198,16 @@ export async function partialSync(profileId: string): Promise<void> {
       .concat(meds);
     store.setMedications(allMeds);
 
-    const existingTasks = store.todayTasks.filter((t) => t.profileId !== profileId);
+    const existingTasks = store.todayTasks.filter(
+      (t) => t.profileId !== profileId,
+    );
     store.setTodayTasks([...existingTasks, ...tasks]);
   } catch {}
 }
 
 export async function loadFromLocal(): Promise<void> {
   const store = useStore.getState();
-  const profiles = await import('../db/database').then((m) => m.getProfiles());
+  const profiles = await import("../db/database").then((m) => m.getProfiles());
   store.setProfiles(profiles);
 
   if (profiles.length > 0) {
@@ -197,21 +218,23 @@ export async function loadFromLocal(): Promise<void> {
     }
     store.setMedications(allMeds);
 
-    const today = new Date().toISOString().split('T')[0];
-    const tasks = await import('../db/database').then((m) => m.getTasksByDate(today));
+    const today = new Date().toISOString().split("T")[0];
+    const tasks = await import("../db/database").then((m) =>
+      m.getTasksByDate(today),
+    );
     store.setTodayTasks(tasks);
   }
 }
 
 export async function isTokenValid(): Promise<boolean> {
-  const token = await AsyncStorage.getItem('auth_token');
+  const token = await AsyncStorage.getItem("auth_token");
   if (!token) return false;
   try {
     await authApi.me();
     return true;
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) {
-      await AsyncStorage.removeItem('auth_token');
+      await AsyncStorage.removeItem("auth_token");
       useStore.getState().clearAuth();
       return false;
     }

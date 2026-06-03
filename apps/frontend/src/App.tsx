@@ -13,6 +13,7 @@ import BackofficeDashboardLayout from "@/pages/backoffice/BackofficeDashboardLay
 import BOPharmaciesSection from "@/pages/backoffice/dashboard/PharmaciesSection"
 import BORequestsSection from "@/pages/backoffice/dashboard/RequestsSection"
 import BOUsersSection from "@/pages/backoffice/dashboard/UsersSection"
+import BOBugReportsSection from "@/pages/backoffice/dashboard/BugReportsSection"
 import BackofficePharmacyLayout from "@/pages/backoffice/BackofficePharmacyLayout"
 import BOOverviewSection from "@/pages/backoffice/sections/OverviewSection"
 import BOInfoSection from "@/pages/backoffice/sections/InfoSection"
@@ -21,6 +22,7 @@ import BOCalendarSection from "@/pages/backoffice/sections/CalendarSection"
 import BOImagesSection from "@/pages/backoffice/sections/ImagesSection"
 import BOStaffSection from "@/pages/backoffice/sections/StaffSection"
 import MapPage from "@/pages/map/MapPage"
+import PharmacyDetailPage from "@/pages/pharmacy/PharmacyDetailPage"
 import MyPharmacyListPage from "@/pages/my-pharmacy/MyPharmacyListPage"
 import MyPharmacyLayout from "@/pages/my-pharmacy/MyPharmacyLayout"
 import MyPharmacyOverviewSection from "@/pages/my-pharmacy/sections/OverviewSection"
@@ -73,6 +75,7 @@ function App() {
             <Route path="/household" element={<HouseholdPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/map" element={<MapPage />} />
+            <Route path="/pharmacy/:id" element={<PharmacyDetailPage />} />
             <Route path="/my-pharmacy" element={<MyPharmacyListPage />} />
             <Route path="/my-pharmacy/:id" element={<MyPharmacyLayout />}>
               <Route index element={<Navigate to="overview" replace />} />
@@ -97,6 +100,7 @@ function App() {
                 <Route path="/backoffice/pharmacies" element={<BOPharmaciesSection />} />
                 <Route path="/backoffice/requests" element={<BORequestsSection />} />
                 <Route path="/backoffice/users" element={<BOUsersSection />} />
+              <Route path="/backoffice/bug-reports" element={<BOBugReportsSection />} />
               </Route>
               {/* Détail pharmacie */}
               <Route path="/backoffice/pharmacy/:id" element={<BackofficePharmacyLayout />}>

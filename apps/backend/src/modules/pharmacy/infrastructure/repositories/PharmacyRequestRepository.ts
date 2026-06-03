@@ -79,4 +79,8 @@ export class MongoPharmacyRequestRepository
     await PharmacyRequestModel.updateOne({ _id: data._id }, { $set: data });
     return request;
   }
+
+  async delete(id: string): Promise<void> {
+    await PharmacyRequestModel.findByIdAndDelete(id);
+  }
 }

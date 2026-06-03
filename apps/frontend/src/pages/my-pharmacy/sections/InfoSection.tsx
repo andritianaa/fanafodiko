@@ -60,7 +60,13 @@ export default function InfoSection() {
         <Label>Localisation</Label>
         <LocationPickerMap
           value={form.coordinates}
-          onChange={(coordinates) => setForm({ ...form, coordinates })}
+          onChange={(coordinates) => setForm((f) => ({ ...f, coordinates }))}
+          onGeocode={(geo) => setForm((f) => ({
+            ...f,
+            address: geo.address || f.address,
+            city:    geo.city    || f.city,
+            region:  geo.region  || f.region,
+          }))}
         />
       </div>
       <div>
@@ -70,8 +76,8 @@ export default function InfoSection() {
           onChange={(contacts) => setForm({ ...form, contacts })}
         />
       </div>
-      <Button onClick={save} disabled={isPending} className="w-full">
-        {isPending ? 'Enregistrement…' : 'Enregistrer les infos'}
+      <Button onClick={save} loading={isPending} className="w-full">
+        Enregistrer les infos
       </Button>
     </div>
   );

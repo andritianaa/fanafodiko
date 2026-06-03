@@ -3,6 +3,8 @@ import { USER_ROLES } from "../../domain/value-objects/UserRole";
 
 export interface INotificationPreferences {
   emailMedicationReminders: boolean;
+  emailPharmacyRequestDecision: boolean;
+  emailBugReportUpdate: boolean;
   emailMedSearchResponse: boolean;
   emailPharmacyInvitation: boolean;
 }
@@ -24,11 +26,15 @@ const userSchema = new Schema<IUserDoc>({
   notificationPreferences: {
     type: {
       emailMedicationReminders: { type: Boolean, default: true },
+      emailPharmacyRequestDecision: { type: Boolean, default: true },
+      emailBugReportUpdate: { type: Boolean, default: true },
       emailMedSearchResponse: { type: Boolean, default: true },
       emailPharmacyInvitation: { type: Boolean, default: true },
     },
     default: () => ({
       emailMedicationReminders: true,
+      emailPharmacyRequestDecision: true,
+      emailBugReportUpdate: true,
       emailMedSearchResponse: true,
       emailPharmacyInvitation: true,
     }),

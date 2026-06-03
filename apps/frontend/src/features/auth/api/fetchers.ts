@@ -12,6 +12,8 @@ import type {
   ChangePasswordResponse,
   ChangeEmailInput,
   ChangeEmailResponse,
+  NotificationPreferences,
+  NotificationPreferencesUpdate,
 } from '../types';
 
 export const login = async (data: LoginInput): Promise<LoginResponse> => {
@@ -54,5 +56,15 @@ export const changePassword = async (data: ChangePasswordInput): Promise<ChangeP
 
 export const changeEmail = async (data: ChangeEmailInput): Promise<ChangeEmailResponse> => {
   const response = await apiClient.patch<ChangeEmailResponse>('/auth/email/change', data);
+  return response.data;
+};
+
+export const getNotificationPreferences = async (): Promise<NotificationPreferences> => {
+  const response = await apiClient.get<NotificationPreferences>('/auth/preferences');
+  return response.data;
+};
+
+export const updateNotificationPreferences = async (data: NotificationPreferencesUpdate): Promise<NotificationPreferences> => {
+  const response = await apiClient.patch<NotificationPreferences>('/auth/preferences', data);
   return response.data;
 };

@@ -201,7 +201,11 @@ export interface PendingSearch {
 // ── Notification Preferences ──────────────────────────────────────────────────
 
 export interface NotificationPreferences {
+  // Groupe : en tant qu'utilisateur
   emailMedicationReminders: boolean;
+  emailPharmacyRequestDecision: boolean;
+  emailBugReportUpdate: boolean;
+  // Groupe : en tant que membre de pharmacie
   emailMedSearchResponse: boolean;
   emailPharmacyInvitation: boolean;
 }

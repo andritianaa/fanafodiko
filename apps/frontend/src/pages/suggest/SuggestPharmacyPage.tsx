@@ -22,12 +22,12 @@ import type {
 } from '@ext/schemas';
 
 // ─── Ordre des étapes ──────────────────────────────────────────────────────────
-const STEPS = ['info', 'location', 'contacts', 'hours'] as const;
+const STEPS = ['location', 'info', 'contacts', 'hours'] as const;
 type Step = (typeof STEPS)[number];
 
 const STEP_LABELS: Record<Step, string> = {
-  info: 'Infos',
   location: 'Localisation',
+  info: 'Infos',
   contacts: 'Contacts',
   hours: 'Horaires',
 };
@@ -47,7 +47,7 @@ export default function SuggestPharmacyPage() {
   const navigate = useNavigate();
   const { mutate, isPending } = useSubmitPharmacyRequest();
   const [proofImages, setProofImages] = useState<string[]>([]);
-  const [currentStep, setCurrentStep] = useState<Step>('info');
+  const [currentStep, setCurrentStep] = useState<Step>('location');
 
   const { register, handleSubmit, control, watch, setValue } =
     useForm<CreatePharmacyRequestInput>({
@@ -137,9 +137,27 @@ export default function SuggestPharmacyPage() {
         <Card>
           <CardContent>
             <Tabs value={currentStep} onValueChange={(v) => setCurrentStep(v as Step)}>
-              
 
-              {/* ── Étape 1 : Infos ── */}
+              {/* ── Étape 1 : Localisation ── */}
+              <TabsContent value="location" className="mt-4">
+                <Controller
+                  control={control}
+                  name="coordinates"
+                  render={({ field }) => (
+                    <LocationPickerMap
+                      value={field.value ? { lat: field.value.lat ?? 0, lng: field.value.lng ?? 0 } : { lat: 0, lng: 0 }}
+                      onChange={field.onChange}
+                      onGeocode={(geo) => {
+                        if (geo.address) setValue('address', geo.address);
+                        if (geo.city)    setValue('city', geo.city);
+                        if (geo.region)  setValue('region', geo.region);
+                      }}
+                    />
+                  )}
+                />
+              </TabsContent>
+
+              {/* ── Étape 2 : Infos ── */}
               <TabsContent value="info" className="space-y-3 mt-4">
                 <div>
                   <Label>Nom *</Label>
@@ -149,8 +167,16 @@ export default function SuggestPharmacyPage() {
                   />
                 </div>
                 <div>
-                  <Label>Adresse *</Label>
-                  <Input {...register('address', { required: true })} />
+                  <Label>
+                    Adresse
+                    <span className="ml-1.5 text-[11px] text-muted-foreground font-normal">(auto-rempli)</span>
+                  </Label>
+                  <Input
+                    {...register('address')}
+                    readOnly
+                    className="bg-muted/40 cursor-default"
+                    placeholder="Sera rempli automatiquement…"
+                  />
                 </div>
                 <div>
                   <Label>Repère visuel</Label>
@@ -158,25 +184,20 @@ export default function SuggestPharmacyPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>Ville *</Label>
-                    <Input {...register('city', { required: true })} />
+                    <Label>
+                      Ville
+                      <span className="ml-1.5 text-[11px] text-muted-foreground font-normal">(auto-rempli)</span>
+                    </Label>
+                    <Input {...register('city')} placeholder="Antananarivo" />
                   </div>
                   <div>
-                    <Label>Région</Label>
-                    <Input {...register('region')} />
+                    <Label>
+                      Région
+                      <span className="ml-1.5 text-[11px] text-muted-foreground font-normal">(auto-rempli)</span>
+                    </Label>
+                    <Input {...register('region')} placeholder="Analamanga" />
                   </div>
                 </div>
-              </TabsContent>
-
-              {/* ── Étape 2 : Localisation ── */}
-              <TabsContent value="location" className="mt-4">
-                <Controller
-                  control={control}
-                  name="coordinates"
-                  render={({ field }) => (
-                    <LocationPickerMap value={field.value ? { lat: field.value.lat ?? 0, lng: field.value.lng ?? 0 } : { lat: 0, lng: 0 }} onChange={field.onChange} />
-                  )}
-                />
               </TabsContent>
 
               {/* ── Étape 3 : Contacts ── */}
@@ -267,8 +288,8 @@ export default function SuggestPharmacyPage() {
           </Button>
 
           {isLast ? (
-            <Button type="submit" disabled={isPending} className="flex-1">
-              {isPending ? 'Envoi…' : 'Envoyer la demande'}
+            <Button type="submit" loading={isPending} className="flex-1">
+              Envoyer la demande
             </Button>
           ) : (
             <Button type="button" onClick={goNext} className="flex-1 gap-1.5">

@@ -128,8 +128,8 @@ export function BatchGuardDialog({ open, onClose, pharmacies }: Props) {
 
         <DialogFooter className="mt-3">
           <Button variant="outline" onClick={onClose}>Annuler</Button>
-          <Button onClick={handleApply} disabled={isPending || selected.size === 0}>
-            {isPending ? 'Application…' : `Appliquer la garde (${selected.size})`}
+          <Button onClick={handleApply} loading={isPending} disabled={selected.size === 0}>
+            {`Appliquer la garde (${selected.size})`}
           </Button>
         </DialogFooter>
       </DialogContent>

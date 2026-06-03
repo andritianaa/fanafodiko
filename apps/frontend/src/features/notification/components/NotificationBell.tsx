@@ -1,4 +1,4 @@
-import { BellIcon, CheckCircleIcon, XCircleIcon, PillIcon } from '@phosphor-icons/react';
+import { BellIcon, CheckCircleIcon, XCircleIcon, PillIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,7 +74,9 @@ export const NotificationBell = ({ profileId }: NotificationBellProps) => {
                   >
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        {isSearchResponse ? (
+                        {notification.type === 'bug_report_update' ? (
+                          <WarningCircleIcon size={14} weight="fill" className="text-amber-500 shrink-0" />
+                        ) : isSearchResponse ? (
                           notification.hasStock
                             ? <CheckCircleIcon size={14} weight="fill" className="text-green-600 shrink-0" />
                             : <XCircleIcon size={14} weight="fill" className="text-red-500 shrink-0" />

@@ -108,11 +108,18 @@ async function sendMemberNotifications(
   const userIds = [...new Set(memberships.map((m) => m.userId))];
 
   const users = await UserModel.find({ _id: { $in: userIds } })
-    .select("_id email pushTokens")
+    .select("_id email pushTokens notificationPreferences")
     .lean();
 
   const userMap = new Map(
-    users.map((u) => [u._id.toString(), { email: u.email, pushTokens: u.pushTokens ?? [] }]),
+    users.map((u) => [
+      u._id.toString(),
+      {
+        email: u.email,
+        pushTokens: u.pushTokens ?? [],
+        emailMedSearchResponse: u.notificationPreferences?.emailMedSearchResponse !== false,
+      },
+    ]),
   );
 
   const pharmacies = await PharmacyModel.find({ _id: { $in: pharmacyIds } })
@@ -126,18 +133,23 @@ async function sendMemberNotifications(
   const allTokens = users.flatMap((u) => u.pushTokens ?? []);
   if (allTokens.length > 0) {
     expoPushService
-      .sendPush(allTokens, "💊 Demande de médicament", `${medicationName} – rayon ${radiusKm} km`, {
-        type: "new_med_search",
-        searchId,
-        medicationName,
-      })
+      .sendPush(
+        allTokens,
+        "💊 Demande de médicament",
+        `${medicationName} – rayon ${radiusKm} km`,
+        {
+          type: "new_med_search",
+          searchId,
+          medicationName,
+        },
+      )
       .catch(() => {});
   }
 
-  // Envoyer un email par membre
+  // Envoyer un email par membre (respecte la préférence emailMedSearchResponse)
   const sends = memberships.map(async (m) => {
     const userData = userMap.get(m.userId);
-    if (!userData?.email) return;
+    if (!userData?.email || !userData.emailMedSearchResponse) return;
     const pharmacyName = pharmacyNameMap.get(m.pharmacyId) ?? "votre pharmacie";
     const { subject, html } = medSearchEmailTemplate({
       pharmacyName,
@@ -318,7 +330,13 @@ ctrl.post("/:id/respond/:pharmacyId", async (c) => {
   );
 
   // Notifier l'utilisateur qui a lancé la recherche (fire-and-forget)
-  notifySearcher(search.props.userId, search.props.medicationName, pharmacyName, body.hasStock, searchId).catch(() => {});
+  notifySearcher(
+    search.props.userId,
+    search.props.medicationName,
+    pharmacyName,
+    body.hasStock,
+    searchId,
+  ).catch(() => {});
 
   return c.json({ message: "Réponse enregistrée" }, 200);
 });
@@ -378,7 +396,10 @@ async function notifySearcher(
   hasStock: boolean,
   searchId: string,
 ): Promise<void> {
-  const profile = await ProfileModel.findOne({ accountId: userId, relationship: "self" }).lean();
+  const profile = await ProfileModel.findOne({
+    accountId: userId,
+    relationship: "self",
+  }).lean();
   if (!profile) return;
 
   const notification = InAppNotification.createSearchResponse({
@@ -398,7 +419,7 @@ async function notifySearcher(
       .sendPush(
         userDoc.pushTokens,
         hasStock ? "✅ Disponible" : "❌ Indisponible",
-        `${pharmacyName} — ${medicationName}`,
+        `${pharmacyName}, ${medicationName}`,
         { type: "search_response", searchId },
       )
       .catch(() => {});

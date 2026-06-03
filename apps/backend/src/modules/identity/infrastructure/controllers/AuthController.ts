@@ -374,10 +374,13 @@ authController.openapi(getPreferencesRoute, async (c) => {
   const doc = await UserModel.findById(user.id)
     .select("notificationPreferences")
     .lean();
-  const prefs = doc?.notificationPreferences ?? {
-    emailMedicationReminders: true,
-    emailMedSearchResponse: true,
-    emailPharmacyInvitation: true,
+  const base = doc?.notificationPreferences ?? {};
+  const prefs = {
+    emailMedicationReminders: base.emailMedicationReminders ?? true,
+    emailPharmacyRequestDecision: base.emailPharmacyRequestDecision ?? true,
+    emailBugReportUpdate: base.emailBugReportUpdate ?? true,
+    emailMedSearchResponse: base.emailMedSearchResponse ?? true,
+    emailPharmacyInvitation: base.emailPharmacyInvitation ?? true,
   };
   return c.json(prefs, 200);
 });
@@ -417,10 +420,13 @@ authController.openapi(updatePreferencesRoute, async (c) => {
   const doc = await UserModel.findById(user.id)
     .select("notificationPreferences")
     .lean();
-  const prefs = doc?.notificationPreferences ?? {
-    emailMedicationReminders: true,
-    emailMedSearchResponse: true,
-    emailPharmacyInvitation: true,
+  const base = doc?.notificationPreferences ?? {};
+  const prefs = {
+    emailMedicationReminders: base.emailMedicationReminders ?? true,
+    emailPharmacyRequestDecision: base.emailPharmacyRequestDecision ?? true,
+    emailBugReportUpdate: base.emailBugReportUpdate ?? true,
+    emailMedSearchResponse: base.emailMedSearchResponse ?? true,
+    emailPharmacyInvitation: base.emailPharmacyInvitation ?? true,
   };
   return c.json(prefs, 200);
 });

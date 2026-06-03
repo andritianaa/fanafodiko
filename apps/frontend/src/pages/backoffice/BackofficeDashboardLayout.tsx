@@ -19,20 +19,24 @@ import {
   HospitalIcon,
   TrayIcon,
   UsersIcon,
+  WarningCircleIcon,
 } from '@phosphor-icons/react';
 import { usePharmacyRequests } from '@/features/pharmacyRequest/api/hooks';
 import { useBackofficePharmacies } from '@/features/pharmacy/api/hooks';
 import { useBackofficeUsers } from '@/features/backoffice/api/hooks';
+import { useBugReports } from '@/features/bugReport/api/hooks';
 
 export default function BackofficeDashboardLayout() {
   const location = useLocation();
   const { data: requestsData } = usePharmacyRequests();
   const { data: pharmaciesData } = useBackofficePharmacies();
   const { data: usersData } = useBackofficeUsers();
+  const { data: bugReportsData } = useBugReports('open');
 
   const pendingCount = requestsData?.requests.filter((r) => r.status === 'pending').length ?? 0;
   const pharmacyCount = pharmaciesData?.total ?? 0;
   const userCount = usersData?.total ?? 0;
+  const openBugCount = bugReportsData?.total ?? 0;
 
   const isActive = (segment: string) =>
     location.pathname.startsWith(`/backoffice/${segment}`);
@@ -58,6 +62,13 @@ export default function BackofficeDashboardLayout() {
       icon: UsersIcon,
       badge: userCount > 0 ? String(userCount) : undefined,
       badgeVariant: 'secondary' as const,
+    },
+    {
+      segment: 'bug-reports',
+      label: 'Signalements',
+      icon: WarningCircleIcon,
+      badge: openBugCount > 0 ? String(openBugCount) : undefined,
+      badgeVariant: 'destructive' as const,
     },
   ];
 

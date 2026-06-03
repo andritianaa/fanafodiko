@@ -41,6 +41,10 @@ export class NotifyPendingTasks {
         const user = await this.userRepo.findById(profile.accountId);
         const profileEmail = user?.email.getValue();
 
+        const userDoc = await UserModel.findById(profile.accountId)
+          .select("pushTokens notificationPreferences")
+          .lean();
+
         await this.notificationService.send({
           profileId: task.profileId,
           medicationName: medication.name,
@@ -48,23 +52,19 @@ export class NotifyPendingTasks {
           scheduledAt: task.scheduledAt,
           profileEmail,
           utcOffsetMinutes: medication.utcOffsetMinutes,
+          emailEnabled: userDoc?.notificationPreferences?.emailMedicationReminders !== false,
         });
 
         // Push vers les appareils de l'utilisateur (fire-and-forget)
-        if (user) {
-          const userDoc = await UserModel.findById(profile.accountId)
-            .select("pushTokens")
-            .lean();
-          if (userDoc?.pushTokens?.length) {
-            expoPushService
-              .sendPush(
-                userDoc.pushTokens,
-                `💊 ${medication.name}`,
-                `Rappel : ${medication.dosage}`,
-                { type: "medication", taskId: task.id, profileId: task.profileId },
-              )
-              .catch(() => {});
-          }
+        if (user && userDoc?.pushTokens?.length) {
+          expoPushService
+            .sendPush(
+              userDoc.pushTokens,
+              `💊 ${medication.name}`,
+              `Rappel : ${medication.dosage}`,
+              { type: "medication", taskId: task.id, profileId: task.profileId },
+            )
+            .catch(() => {});
         }
 
         // Mark as notified so it is never sent again regardless of cron frequency.

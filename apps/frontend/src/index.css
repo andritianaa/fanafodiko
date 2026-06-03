@@ -149,3 +149,29 @@
 .leaflet-control-attribution.leaflet-control {
   display: none !important;
 }
+
+/* ── Page transition ──────────────────────────────────────────────────────── */
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes page-enter-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@utility animate-page-enter {
+  animation: page-enter 220ms ease-out both;
+}
+
+@utility animate-page-enter-fade {
+  animation: page-enter-fade 180ms ease-out both;
+}

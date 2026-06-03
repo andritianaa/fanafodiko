@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   TextInput, ActivityIndicator, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, MapPin, Clock, History, WifiOff } from 'lucide-react-native';
+import { Search, MapPin, Clock, WifiOff, Pill, ArrowRight } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useStore, selectAppState } from '../../../src/store/useStore';
 import { medSearchApi } from '../../../src/api/client';
 import { SyncBanner } from '../../../components/SyncBanner';
 import { colors, spacing, radius, shadows } from '../../../src/theme';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import type { MedSearchHistoryItem } from '../../../src/types';
 
 const RADIUS_OPTIONS = [1, 2, 5, 10, 20];
 
@@ -21,6 +24,13 @@ export default function MedSearchScreen() {
   const [selectedRadius, setSelectedRadius] = useState(5);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
+  const [recentHistory, setRecentHistory] = useState<MedSearchHistoryItem[]>([]);
+
+  useEffect(() => {
+    medSearchApi.myHistory()
+      .then((res) => setRecentHistory((res.data?.history ?? []).slice(0, 5)))
+      .catch(() => {});
+  }, []);
 
   const isOffline = !appState.isOnline;
   const canSubmit = medicationName.trim().length > 0 && !loading && !isOffline;
@@ -30,7 +40,7 @@ export default function MedSearchScreen() {
 
     setLoading(true);
     try {
-      // Géolocalisation — on utilise une position par défaut si l'API n'est pas disponible
+      // Géolocalisation, on utilise une position par défaut si l'API n'est pas disponible
       let lat = -18.9137;
       let lng = 47.5361;
 
@@ -65,16 +75,7 @@ export default function MedSearchScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Text style={styles.title}>Recherche</Text>
-          <TouchableOpacity
-            style={styles.historyBtn}
-            onPress={() => router.push('/(app)/med-search/history')}
-          >
-            <History size={18} color={colors.primary} />
-            <Text style={styles.historyBtnText}>Historique</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.title}>Recherche</Text>
         <Text style={styles.subtitle}>
           Trouvez un médicament dans les pharmacies proches
         </Text>
@@ -174,12 +175,87 @@ export default function MedSearchScreen() {
                 </>
               )}
             </TouchableOpacity>
+
+            {/* ── Recherches récentes ── */}
+            {recentHistory.length > 0 && (
+              <View style={styles.historySection}>
+                <View style={styles.historyHeader}>
+                  <Text style={styles.historyTitle}>Recherches récentes</Text>
+                  <TouchableOpacity
+                    style={styles.seeAllBtn}
+                    onPress={() => router.push('/(app)/med-search/history')}
+                  >
+                    <Text style={styles.seeAllText}>Voir toutes</Text>
+                    <ArrowRight size={12} color={colors.primary} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.historyList}>
+                  {recentHistory.map((item, idx) => (
+                    <RecentSearchRow
+                      key={item.id}
+                      item={item}
+                      isLast={idx === recentHistory.length - 1}
+                      onPress={() => router.push({ pathname: '/(app)/med-search/[id]', params: { id: item.id } })}
+                    />
+                  ))}
+                </View>
+              </View>
+            )}
           </>
         )}
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+// ── Composant ligne recherche récente ────────────────────────────────────────
+
+function RecentSearchRow({
+  item,
+  isLast,
+  onPress,
+}: {
+  item: MedSearchHistoryItem;
+  isLast: boolean;
+  onPress: () => void;
+}) {
+  const isActive = item.status === 'active' && new Date(item.expiresAt) > new Date();
+  const hasAvailable = item.responses.some((r) => r.hasStock);
+  const hasResponded = item.responses.length > 0;
+
+  const badge = isActive
+    ? { label: 'En cours', color: colors.primary, bg: colors.primaryLighter }
+    : hasAvailable
+    ? { label: 'Disponible', color: '#16a34a', bg: '#dcfce7' }
+    : hasResponded
+    ? { label: 'Non trouvé', color: '#dc2626', bg: '#fee2e2' }
+    : { label: 'Expiré', color: colors.textMuted, bg: colors.border };
+
+  return (
+    <TouchableOpacity
+      style={[styles.recentItem, !isLast && styles.recentItemBorder]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <View style={styles.recentIcon}>
+        <Pill size={14} color={colors.primary} />
+      </View>
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text style={styles.recentName} numberOfLines={1}>{item.medicationName}</Text>
+        {item.createdAt && (
+          <Text style={styles.recentDate}>
+            {format(new Date(item.createdAt), 'd MMM · HH:mm', { locale: fr })}
+          </Text>
+        )}
+      </View>
+      <View style={[styles.recentBadge, { backgroundColor: badge.bg }]}>
+        <Text style={[styles.recentBadgeText, { color: badge.color }]}>{badge.label}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
@@ -188,19 +264,8 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
   },
-  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   title: { fontFamily: 'Nunito_800ExtraBold', fontSize: 26, color: colors.text },
   subtitle: { fontFamily: 'Nunito_400Regular', fontSize: 13, color: colors.textSecondary, marginTop: 2 },
-  historyBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: colors.primaryLighter,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: radius.full,
-  },
-  historyBtnText: { fontFamily: 'Nunito_600SemiBold', fontSize: 13, color: colors.primary },
   content: { paddingHorizontal: spacing.md, paddingBottom: spacing.xxl, gap: spacing.md },
   card: {
     backgroundColor: colors.surface,
@@ -317,4 +382,40 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
   },
+  historySection: { gap: spacing.sm },
+  historyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  historyTitle: { fontFamily: 'Nunito_700Bold', fontSize: 13, color: colors.textSecondary },
+  seeAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  seeAllText: { fontFamily: 'Nunito_600SemiBold', fontSize: 12, color: colors.primary },
+  historyList: {
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
+    backgroundColor: colors.surface,
+  },
+  recentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 11,
+  },
+  recentItemBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
+  recentIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: radius.md,
+    backgroundColor: colors.primaryLighter,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  recentName: { fontFamily: 'Nunito_600SemiBold', fontSize: 13, color: colors.text },
+  recentDate: { fontFamily: 'Nunito_400Regular', fontSize: 11, color: colors.textMuted, marginTop: 1 },
+  recentBadge: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: radius.full },
+  recentBadgeText: { fontFamily: 'Nunito_700Bold', fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5 },
 });

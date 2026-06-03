@@ -1,51 +1,61 @@
-import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import MarkerClusterGroup from 'react-leaflet-cluster';
-import { MapLayerSelector, MAP_LAYERS, type LayerOption } from './MapLayerSelector';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { UserLocationMarker } from './UserLocationMarker';
-import { PharmacyStatusBadge } from './PharmacyStatusBadge';
-import type { Pharmacy, PharmacyContact } from '@ext/schemas';
-import { format, isAfter } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-cluster";
+import {
+  MapLayerSelector,
+  MAP_LAYERS,
+  type LayerOption,
+} from "./MapLayerSelector";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { UserLocationMarker } from "./UserLocationMarker";
+import { PharmacyStatusBadge } from "./PharmacyStatusBadge";
+import type { Pharmacy, PharmacyContact } from "@ext/schemas";
 import {
   PhoneIcon,
   NavigationArrowIcon,
-  ClockIcon,
-  CalendarDotsIcon,
-  EnvelopeSimpleIcon,
-  WhatsappLogoIcon,
-  FacebookLogoIcon,
-  LinkIcon,
-  MapPinIcon,
-  WarningIcon,
-} from '@phosphor-icons/react';
+  MapPinSimpleIcon,
+  ArrowSquareOutIcon,
+} from "@phosphor-icons/react";
 
 // Fix Leaflet default icon path in Vite/webpack
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
 const openIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
 const guardIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
 const closedIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
 function getIcon(pharmacy: Pharmacy) {
@@ -58,197 +68,118 @@ function FlyToSelected({ selected }: { selected: Pharmacy | null }) {
   const map = useMap();
   useEffect(() => {
     if (selected) {
-      map.flyTo([selected.coordinates.lat, selected.coordinates.lng], 18, { duration: 1.2 });
+      map.flyTo([selected.coordinates.lat, selected.coordinates.lng], 16, {
+        duration: 1.0,
+      });
     }
   }, [selected, map]);
   return null;
 }
 
-// ── Helpers contacts ──────────────────────────────────────────────────────────
-
-const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-
 function contactHref(c: PharmacyContact): string {
   switch (c.type) {
-    case 'phone': return `tel:${c.value}`;
-    case 'email': return `mailto:${c.value}`;
-    case 'whatsapp': return `https://wa.me/${c.value.replace(/[^0-9]/g, '')}`;
-    case 'facebook': return c.value.startsWith('http') ? c.value : `https://${c.value}`;
-    default: return c.value.startsWith('http') ? c.value : `tel:${c.value}`;
+    case "phone":
+      return `tel:${c.value}`;
+    case "email":
+      return `mailto:${c.value}`;
+    case "whatsapp":
+      return `https://wa.me/${c.value.replace(/[^0-9]/g, "")}`;
+    case "facebook":
+      return c.value.startsWith("http") ? c.value : `https://${c.value}`;
+    default:
+      return c.value.startsWith("http") ? c.value : `tel:${c.value}`;
   }
 }
 
-function ContactIcon({ type }: { type: PharmacyContact['type'] }) {
-  switch (type) {
-    case 'phone': return <PhoneIcon size={13} weight="fill" />;
-    case 'email': return <EnvelopeSimpleIcon size={13} weight="fill" />;
-    case 'whatsapp': return <WhatsappLogoIcon size={13} weight="fill" />;
-    case 'facebook': return <FacebookLogoIcon size={13} weight="fill" />;
-    default: return <LinkIcon size={13} />;
-  }
-}
-
-// ── Contenu riche du popup ────────────────────────────────────────────────────
+// ── Popup simplifié ──────────────────────────────────────────────────────────
+// Contient : nom (cliquable), statut, région/ville, contact principal,
+//            bouton itinéraire, bouton "Voir plus"
 
 function PharmacyPopupContent({ pharmacy }: { pharmacy: Pharmacy }) {
-  const contacts: PharmacyContact[] =
+  const navigate = useNavigate();
+
+  const primaryContact: PharmacyContact | undefined =
     pharmacy.contacts && pharmacy.contacts.length > 0
-      ? pharmacy.contacts
+      ? (pharmacy.contacts.find((c) => c.type === "phone") ??
+        pharmacy.contacts[0])
       : pharmacy.phone
-      ? [{ type: 'phone', value: pharmacy.phone }]
-      : [];
+        ? { type: "phone", value: pharmacy.phone }
+        : undefined;
 
-  const sortedHours = [...(pharmacy.openingHours ?? [])].sort((a, b) => a.day - b.day);
-
-  const now = new Date();
-  const upcomingGuards = [...(pharmacy.guardSchedules ?? [])]
-    .filter((g) => g.isActive && isAfter(new Date(g.endDate), now))
-    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-    .slice(0, 3);
-
-  const handleNavigate = () => {
+  const handleNavigate = (e: React.MouseEvent) => {
+    e.preventDefault();
     const { lat, lng } = pharmacy.coordinates;
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+    window.open(
+      `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+      "_blank",
+    );
+  };
+
+  const handleViewMore = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate(`/pharmacy/${pharmacy.id}`);
   };
 
   return (
-    <div className="w-[300px] max-h-[440px] overflow-y-auto text-foreground">
+    <div className="w-[220px] text-foreground">
+      {/* En-tête */}
+      <div className="px-3 pt-3 pb-2">
+        {/* Nom cliquable → page détail */}
+        <button
+          onClick={handleViewMore}
+          className="font-bold text-[15px] leading-tight text-left hover:text-primary transition-colors w-full mb-1.5"
+        >
+          {pharmacy.name}
+        </button>
 
-      {/* ── En-tête coloré ── */}
-      <div className="bg-primary/5 border-b border-border px-4 pt-4 pb-3">
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="font-bold text-base leading-tight pr-6">{pharmacy.name}</h3>
-          <PharmacyStatusBadge pharmacy={pharmacy} />
-        </div>
-        <p className="text-xs text-muted-foreground">{pharmacy.address}</p>
-        {pharmacy.landmark && (
-          <p className="text-[11px] text-muted-foreground/70 italic flex items-center gap-1 mt-0.5">
-            <MapPinIcon size={10} /> {pharmacy.landmark}
-          </p>
-        )}
-        <p className="text-xs font-semibold mt-1">
-          {pharmacy.city}{pharmacy.region ? `, ${pharmacy.region}` : ''}
+        {/* Statut */}
+        <PharmacyStatusBadge pharmacy={pharmacy} />
+
+        {/* Localisation */}
+        <p className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
+          <MapPinSimpleIcon size={11} weight="fill" />
+          {pharmacy.city}
+          {pharmacy.region ? `, ${pharmacy.region}` : ""}
         </p>
       </div>
 
-      <div className="px-4 py-3 space-y-3">
+      {/* Contact principal */}
+      {primaryContact && (
+        <div className="px-3 pb-2">
+          <a
+            href={contactHref(primaryContact)}
+            className="flex items-center gap-2 text-xs font-medium text-foreground hover:text-primary transition-colors py-1"
+          >
+            <PhoneIcon
+              size={12}
+              weight="fill"
+              className="text-muted-foreground shrink-0"
+            />
+            {primaryContact.label || primaryContact.value}
+          </a>
+        </div>
+      )}
 
-        {/* Images */}
-        {(pharmacy.images ?? []).length > 0 && (
-          <div className="flex gap-2 overflow-x-auto -mx-1 px-1 pb-1 snap-x">
-            {pharmacy.images!.map((url) => (
-              <img
-                key={url}
-                src={url}
-                alt={pharmacy.name}
-                className="h-20 w-28 object-cover rounded-lg border border-border shrink-0 snap-start"
-                loading="lazy"
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Y aller */}
+      {/* Actions */}
+      <div className="px-3 pb-3 flex gap-2">
         <button
           onClick={handleNavigate}
-          className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-border bg-white hover:bg-muted/50 transition-colors text-sm font-medium text-foreground cursor-pointer"
+          className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-border bg-white hover:bg-muted/50 text-xs font-medium text-foreground transition-colors cursor-pointer"
         >
-          <NavigationArrowIcon size={14} weight="fill" className="text-primary" />
-          Y aller (itinéraire)
+          <NavigationArrowIcon
+            size={12}
+            weight="fill"
+            className="text-primary"
+          />
+          Itinéraire
         </button>
-
-        {/* Contacts */}
-        {contacts.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {contacts.map((c, i) => (
-              <a
-                key={i}
-                href={contactHref(c)}
-                target={c.type === 'facebook' ? '_blank' : undefined}
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted text-xs font-medium text-foreground hover:bg-muted/80 transition-colors no-underline"
-              >
-                <ContactIcon type={c.type} />
-                {c.label || c.value}
-              </a>
-            ))}
-          </div>
-        )}
-
-        {/* Horaires */}
-        {pharmacy.isOpen24h ? (
-          <div className="flex items-center gap-1.5 text-sky-600 text-xs font-semibold">
-            <ClockIcon size={13} weight="fill" /> Ouvert 24h/24,7j/7
-          </div>
-        ) : sortedHours.length > 0 ? (
-          <div className="border-t border-border pt-3">
-            <p className="text-xs font-semibold flex items-center gap-1.5 mb-2 text-muted-foreground uppercase tracking-wide">
-              <ClockIcon size={12} /> Horaires
-            </p>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
-              {sortedHours.map((h) => (
-                <div key={h.day} className="flex justify-between text-[11px]">
-                  <span className="text-muted-foreground w-7 shrink-0">{DAYS[h.day]}</span>
-                  {h.isClosed
-                    ? <span className="text-destructive">Fermé</span>
-                    : <span className="font-medium">{h.open}–{h.close}</span>
-                  }
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {/* Prochaines gardes */}
-        {upcomingGuards.length > 0 && (
-          <div className="border-t border-border pt-3 space-y-1.5">
-            <p className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground uppercase tracking-wide">
-              <CalendarDotsIcon size={12} /> Prochaines gardes
-            </p>
-            {upcomingGuards.map((g) => {
-              const start = new Date(g.startDate);
-              const end = new Date(g.endDate);
-              const isNow = now >= start && now <= end;
-              return (
-                <div
-                  key={g.weekIdentifier}
-                  className={`rounded-lg px-3 py-2 text-[11px] ${
-                    isNow
-                      ? 'bg-violet-50 border border-violet-200 text-violet-800'
-                      : 'bg-muted/50 border border-border text-foreground'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{g.weekIdentifier}</span>
-                    {isNow && (
-                      <span className="text-[10px] font-bold uppercase tracking-wide text-violet-600">
-                        En cours
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-muted-foreground mt-0.5">
-                    {format(start, 'eee d MMM, HH:mm', { locale: fr })} → {format(end, 'eee d MMM, HH:mm', { locale: fr })}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Garde en cours */}
-        {pharmacy.isOnGuard && (
-          <div className="border-t border-border pt-3">
-            <div className="bg-violet-50 border border-violet-200 rounded-lg px-3 py-2.5 text-violet-800">
-              <p className="text-xs font-bold flex items-center gap-1.5">
-                <WarningIcon size={13} weight="fill" /> Pharmacie de garde actuellement
-              </p>
-              <p className="text-[11px] text-violet-600 mt-1">
-                Un appel préalable peut être nécessaire.
-              </p>
-            </div>
-          </div>
-        )}
-
+        <button
+          onClick={handleViewMore}
+          className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium transition-colors cursor-pointer"
+        >
+          <ArrowSquareOutIcon size={12} weight="bold" />
+          Voir plus
+        </button>
       </div>
     </div>
   );
@@ -267,7 +198,13 @@ interface Props {
 const MADAGASCAR_CENTER: [number, number] = [-18.9, 47.5];
 const DEFAULT_ZOOM = 6;
 
-export function PharmacyMap({ pharmacies, selected, onSelect, onLocationUpdate, initialCenter }: Props) {
+export function PharmacyMap({
+  pharmacies,
+  selected,
+  onSelect,
+  onLocationUpdate,
+  initialCenter,
+}: Props) {
   const center: [number, number] = initialCenter ?? MADAGASCAR_CENTER;
   const zoom = initialCenter ? 14 : DEFAULT_ZOOM;
   const [activeLayer, setActiveLayer] = useState<LayerOption>(MAP_LAYERS[0]);
@@ -279,6 +216,12 @@ export function PharmacyMap({ pharmacies, selected, onSelect, onLocationUpdate, 
         zoom={zoom}
         className="h-full w-full"
         style={{ minHeight: 300 }}
+        maxBounds={[
+          [-26.5, 42.0],
+          [-11.0, 51.5],
+        ]}
+        maxBoundsViscosity={1.0}
+        minZoom={7}
       >
         <TileLayer
           key={activeLayer.id}
@@ -286,10 +229,33 @@ export function PharmacyMap({ pharmacies, selected, onSelect, onLocationUpdate, 
           url={activeLayer.url}
         />
 
-        <UserLocationMarker autoCenter={!initialCenter} onLocationUpdate={onLocationUpdate} />
+        <UserLocationMarker
+          autoCenter={!initialCenter}
+          onLocationUpdate={onLocationUpdate}
+        />
         <FlyToSelected selected={selected} />
 
-        <MarkerClusterGroup chunkedLoading>
+        <MarkerClusterGroup
+          chunkedLoading
+          iconCreateFunction={(cluster) => {
+            const count = cluster.getChildCount();
+            const size = count >= 100 ? 44 : count >= 10 ? 38 : 32;
+            return L.divIcon({
+              html: `<div style="
+                width:${size}px;height:${size}px;
+                background:#6fcc39f0;
+                border:8px solid #6fcc39af;
+                border-radius:50%;
+                display:flex;align-items:center;justify-content:center;
+                color:black;font-size:${count >= 100 ? 11 : 13}px;
+                box-shadow:0 2px 8px rgba(0,0,0,.35);
+                text-color:black;
+              ">${count}</div>`,
+              className: "",
+              iconSize: L.point(size, size, true),
+            });
+          }}
+        >
           {pharmacies.map((p) => (
             <Marker
               key={p.id}
@@ -297,7 +263,7 @@ export function PharmacyMap({ pharmacies, selected, onSelect, onLocationUpdate, 
               icon={getIcon(p)}
               eventHandlers={{ click: () => onSelect(p) }}
             >
-              <Popup minWidth={300} maxWidth={320} closeButton autoPan>
+              <Popup minWidth={220} maxWidth={240} closeButton autoPan>
                 <PharmacyPopupContent pharmacy={p} />
               </Popup>
             </Marker>
@@ -305,8 +271,8 @@ export function PharmacyMap({ pharmacies, selected, onSelect, onLocationUpdate, 
         </MarkerClusterGroup>
       </MapContainer>
 
-      {/* Layer selector — top-right mobile, bottom-right desktop */}
-      <div className="absolute top-2 right-2 md:top-auto md:bottom-4 md:right-4 z-[800]">
+      {/* Layer selector */}
+      <div className="absolute top-2 right-2 z-[800]">
         <MapLayerSelector
           currentLayerId={activeLayer.id}
           onLayerChange={setActiveLayer}

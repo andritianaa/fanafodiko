@@ -4,7 +4,7 @@ import { madagascarNow, madagascarToday, isWithinGuardPeriod } from "@/core/util
 
 export type PharmacyFilter = "open" | "guard" | "24h" | undefined;
 
-function isPharmacyOpenNow(pharmacy: Pharmacy): boolean {
+export function isPharmacyOpenNow(pharmacy: Pharmacy): boolean {
   const today = madagascarToday();
   const { hours, minutes, dayOfWeek } = madagascarNow();
   const nowMin = hours * 60 + minutes;
@@ -38,7 +38,7 @@ function isPharmacyOpenNow(pharmacy: Pharmacy): boolean {
   return nowMin >= openH * 60 + openM && nowMin < closeH * 60 + closeM;
 }
 
-function isPharmacyOnGuard(pharmacy: Pharmacy): boolean {
+export function isPharmacyOnGuard(pharmacy: Pharmacy): boolean {
   const now = new Date();
   // Gardes assignées par le backoffice (semaine ISO)
   const hasBackofficeGuard = pharmacy.guardSchedules.some(

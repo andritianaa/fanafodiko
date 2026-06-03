@@ -344,8 +344,8 @@ export const MedicationDialog = ({
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={isCreating || isUpdating} className="w-full sm:w-auto">
-              {isCreating || isUpdating ? 'Enregistrement...' : 'Enregistrer'}
+            <Button type="submit" loading={isCreating || isUpdating} className="w-full sm:w-auto">
+              Enregistrer
             </Button>
           </DialogFooter>
         </form>

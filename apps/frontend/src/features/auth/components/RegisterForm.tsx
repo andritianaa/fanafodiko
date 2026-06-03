@@ -96,8 +96,8 @@ export const RegisterForm = () => {
         .
       </p>
 
-      <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? 'Création du compte...' : 'Créer le compte'}
+      <Button type="submit" className="w-full" loading={isPending}>
+        Créer le compte
       </Button>
     </form>
   );

@@ -118,6 +118,10 @@ export class MongoPharmacyRepository implements IPharmacyRepository {
   async save(pharmacy: Pharmacy): Promise<Pharmacy> {
     const data = domainToDoc(pharmacy);
     await PharmacyModel.updateOne({ _id: data._id }, { $set: data }, { upsert: true });
+    // Retourner l'entité avec l'id généré si elle n'en avait pas encore
+    if (!pharmacy.id) {
+      return Pharmacy.reconstitute({ ...pharmacy.props, id: String(data._id) });
+    }
     return pharmacy;
   }
 

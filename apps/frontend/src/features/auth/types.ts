@@ -12,6 +12,8 @@ import {
   ChangePasswordResponseSchema,
   ChangeEmailSchema,
   ChangeEmailResponseSchema,
+  NotificationPreferencesResponseSchema,
+  NotificationPreferencesUpdateSchema,
 } from '@ext/schemas';
 
 export type LoginInput = z.infer<typeof LoginSchema>;
@@ -26,3 +28,5 @@ export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>;
 export type ChangePasswordResponse = z.infer<typeof ChangePasswordResponseSchema>;
 export type ChangeEmailInput = z.infer<typeof ChangeEmailSchema>;
 export type ChangeEmailResponse = z.infer<typeof ChangeEmailResponseSchema>;
+export type NotificationPreferences = z.infer<typeof NotificationPreferencesResponseSchema>;
+export type NotificationPreferencesUpdate = z.infer<typeof NotificationPreferencesUpdateSchema>;

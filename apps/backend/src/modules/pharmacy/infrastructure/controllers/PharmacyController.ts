@@ -1,11 +1,13 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { createController } from "@/core/api/factory";
 import { MongoPharmacyRepository } from "../repositories/PharmacyRepository";
-import { GetPharmacies } from "../../application/use-cases/GetPharmacies";
+import { GetPharmacies, isPharmacyOpenNow, isPharmacyOnGuard } from "../../application/use-cases/GetPharmacies";
 import { serializePharmacy } from "../serializers/pharmacySerializer";
+import { AppError } from "@/core/errors/AppError";
 import {
   PharmacyListResponseSchema,
   PharmacySearchResponseSchema,
+  PharmacySchema,
 } from "@ext/schemas";
 
 const pharmacyController = createController();
@@ -38,6 +40,31 @@ pharmacyController.openapi(listRoute, async (c) => {
   );
 
   return c.json({ pharmacies, total: pharmacies.length }, 200);
+});
+
+// GET /pharmacies/:id
+const getOneRoute = createRoute({
+  method: "get",
+  path: "/:id",
+  request: { params: z.object({ id: z.string() }) },
+  responses: {
+    200: {
+      content: { "application/json": { schema: PharmacySchema } },
+      description: "Détail d'une pharmacie",
+    },
+    404: { description: "Pharmacie introuvable" },
+  },
+});
+
+pharmacyController.openapi(getOneRoute, async (c) => {
+  const { id } = c.req.valid("param");
+  const pharmacy = await repo.findById(id);
+  if (!pharmacy) throw new AppError("Pharmacie introuvable", 404, "NOT_FOUND");
+
+  const isOnGuard = isPharmacyOnGuard(pharmacy);
+  const isOpenNow = isOnGuard || isPharmacyOpenNow(pharmacy);
+
+  return c.json(serializePharmacy(pharmacy, { isOpenNow, isOnGuard }), 200);
 });
 
 // GET /pharmacies/search?q=...

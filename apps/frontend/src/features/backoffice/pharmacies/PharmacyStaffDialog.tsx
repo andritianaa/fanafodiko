@@ -94,7 +94,7 @@ export function PharmacyStaffDialog({ open, onClose, pharmacyId, pharmacyName }:
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserCircleIcon size={20} />
-              Staff — {pharmacyName}
+              Staff, {pharmacyName}
             </DialogTitle>
           </DialogHeader>
 

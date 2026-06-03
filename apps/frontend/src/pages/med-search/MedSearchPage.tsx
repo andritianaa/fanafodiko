@@ -12,13 +12,15 @@ import {
   CheckCircleIcon,
   WarningCircleIcon,
   ArrowSquareOutIcon,
-  ClockCounterClockwiseIcon,
-  CaretRightIcon,
+  ArrowRightIcon,
 } from '@phosphor-icons/react';
 import { useMySearchHistory } from '@/features/medSearch/api/hooks';
 import { useCreateMedSearch } from '@/features/medSearch/api/hooks';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import type { CreateMedSearchInput } from '@ext/schemas';
+import type { UserSearchHistoryItem } from '@/features/medSearch/api/fetchers';
 
 const RADII = [1, 2, 5, 10, 20];
 
@@ -104,7 +106,7 @@ export default function MedSearchPage() {
   };
 
   return (
-    <div className="max-w-lg mx-auto ">
+    <div className="max-w-lg mx-auto space-y-6">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3">
@@ -119,29 +121,6 @@ export default function MedSearchPage() {
           </div>
         </div>
       </div>
-
-      {/* Mes recherches — bouton mis en valeur */}
-      <Link to="/med-search/history" className="block mb-6">
-        <div className="flex items-center gap-3 rounded-xl border bg-muted/30 hover:bg-muted/60 hover:border-primary/30 transition-all px-4 py-3 group">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <ClockCounterClockwiseIcon size={18} weight="duotone" className="text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold">Mes recherches</p>
-            <p className="text-xs text-muted-foreground">
-              {history.length > 0
-                ? `${history.length} recherche${history.length > 1 ? 's' : ''} précédente${history.length > 1 ? 's' : ''}`
-                : 'Historique de vos recherches'}
-            </p>
-          </div>
-          {history.length > 0 && (
-            <span className="text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full shrink-0">
-              {history.length}
-            </span>
-          )}
-          <CaretRightIcon size={16} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-        </div>
-      </Link>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Medication name */}
@@ -212,14 +191,70 @@ export default function MedSearchPage() {
 
         <Button
           type="submit"
-          disabled={isPending || geoState !== 'granted'}
+          loading={isPending}
+          disabled={geoState !== 'granted'}
           className="w-full h-12 text-base gap-2"
         >
           <MagnifyingGlassIcon size={18} />
-          {isPending ? 'Envoi en cours…' : 'Lancer la recherche'}
+          Lancer la recherche
         </Button>
       </form>
+      {/* ── Recherches récentes ── */}
+      {history.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-muted-foreground">Recherches récentes</p>
+            <Link
+              to="/med-search/history"
+              className="text-xs text-primary hover:underline flex items-center gap-1"
+            >
+              Voir toutes <ArrowRightIcon size={11} />
+            </Link>
+          </div>
+          <div className="border rounded-xl overflow-hidden divide-y">
+            {history.slice(0, 5).map((item) => (
+              <RecentSearchRow key={item.id} item={item} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+// ── Ligne de recherche récente ───────────────────────────────────────────────
+
+function RecentSearchRow({ item }: { item: UserSearchHistoryItem }) {
+  const navigate = useNavigate();
+  const isActive = item.status === 'active' && new Date(item.expiresAt) > new Date();
+
+  const badge = isActive
+    ? { label: 'En cours', cls: 'bg-blue-100 text-blue-700' }
+    : item.hasAvailable
+    ? { label: 'Disponible', cls: 'bg-green-100 text-green-700' }
+    : item.respondedCount > 0
+    ? { label: 'Non trouvé', cls: 'bg-red-100 text-red-700' }
+    : { label: 'Expiré', cls: 'bg-muted text-muted-foreground' };
+
+  return (
+    <button
+      onClick={() => navigate(`/med-search/${item.id}`)}
+      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/40 transition-colors text-left"
+    >
+      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+        <PillIcon size={14} weight="duotone" className="text-primary" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate">{item.medicationName}</p>
+        <p className="text-xs text-muted-foreground">
+          {format(new Date(item.createdAt), 'd MMM · HH:mm', { locale: fr })}
+          {' · '}{item.radiusKm} km
+        </p>
+      </div>
+      <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full shrink-0 ${badge.cls}`}>
+        {badge.label}
+      </span>
+    </button>
   );
 }
 

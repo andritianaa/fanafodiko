@@ -92,8 +92,8 @@ export const ResetPasswordForm = () => {
         <FieldError errors={[errors.newPassword]} />
       </Field>
 
-      <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? 'Réinitialisation...' : 'Réinitialiser le mot de passe'}
+      <Button type="submit" className="w-full" loading={isPending}>
+        Réinitialiser le mot de passe
       </Button>
     </form>
   );

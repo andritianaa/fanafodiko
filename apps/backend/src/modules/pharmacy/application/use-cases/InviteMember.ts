@@ -3,6 +3,7 @@ import { AppError } from "@/core/errors/AppError";
 import { IMailer } from "@/core/services/mailing/IMailer";
 import { pharmacyInvitationEmailTemplate } from "@/core/services/mailing/emailTemplates";
 import { IUserRepository } from "@/modules/identity/domain/repositories/IUserRepository";
+import { UserModel } from "@/modules/identity/infrastructure/models/UserModel";
 import { PharmacyRole } from "../../domain/value-objects/PharmacyRole";
 import { PharmacyInvitation, InvitableRole } from "../../domain/entities/PharmacyInvitation";
 import { IPharmacyInvitationRepository } from "../../domain/repositories/IPharmacyInvitationRepository";
@@ -83,11 +84,24 @@ export class InviteMember {
       acceptUrl: `${FRONTEND_URL}/pharmacy-invitation/${token}`,
     });
 
-    try {
-      await this.mailer.sendEmail(normalizedEmail, subject, html);
-    } catch (e) {
-      console.error("Failed to send invitation email:", e);
-      // L'invitation reste valide même si l'email échoue
+    // Respecte la préférence emailPharmacyInvitation si l'utilisateur a déjà un compte
+    let sendEmail = true;
+    if (existingUser?.id) {
+      const userDoc = await UserModel.findById(existingUser.id)
+        .select("notificationPreferences")
+        .lean();
+      if (userDoc?.notificationPreferences?.emailPharmacyInvitation === false) {
+        sendEmail = false;
+      }
+    }
+
+    if (sendEmail) {
+      try {
+        await this.mailer.sendEmail(normalizedEmail, subject, html);
+      } catch (e) {
+        console.error("Failed to send invitation email:", e);
+        // L'invitation reste valide même si l'email échoue
+      }
     }
   }
 }

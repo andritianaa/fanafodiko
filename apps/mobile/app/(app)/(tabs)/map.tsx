@@ -239,7 +239,7 @@ export default function MapScreen() {
         {!appState.isOnline && (
           <View style={styles.offlineBanner}>
             <WifiOff size={13} color={colors.warning} />
-            <Text style={styles.offlineText}>Carte hors ligne — données locales</Text>
+            <Text style={styles.offlineText}>Carte hors ligne, données locales</Text>
           </View>
         )}
       </SafeAreaView>
@@ -268,7 +268,7 @@ export default function MapScreen() {
         </View>
       )}
 
-      {/* Bottom sheet — pharmacy detail card */}
+      {/* Bottom sheet, pharmacy detail card */}
       <BottomSheet
         ref={bottomSheetRef}
         index={-1}

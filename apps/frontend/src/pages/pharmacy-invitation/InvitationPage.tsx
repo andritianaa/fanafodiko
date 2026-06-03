@@ -82,8 +82,8 @@ export default function InvitationPage() {
                   </Button>
                 </div>
               ) : (
-                <Button onClick={handleAccept} disabled={isPending} className="w-full">
-                  {isPending ? 'Acceptation…' : "Accepter l'invitation"}
+                <Button onClick={handleAccept} loading={isPending} className="w-full">
+                  Accepter l'invitation
                 </Button>
               )}
             </>

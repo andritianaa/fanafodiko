@@ -29,8 +29,8 @@ export default function ImagesSection() {
   return (
     <div className="space-y-4 max-w-2xl">
       <PharmacyImagesEditor value={images} onChange={setImages} />
-      <Button onClick={save} disabled={isPending} className="w-full">
-        {isPending ? 'Enregistrement…' : 'Enregistrer les images'}
+      <Button onClick={save} loading={isPending} className="w-full">
+        Enregistrer les images
       </Button>
     </div>
   );

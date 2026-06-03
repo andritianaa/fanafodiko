@@ -18,6 +18,11 @@ type SearchResponse = z.infer<typeof SearchSchema>;
 
 export type PharmacyFilter = 'open' | 'guard' | '24h' | undefined;
 
+export const getPharmacy = async (id: string): Promise<Pharmacy> => {
+  const res = await apiClient.get<Pharmacy>(`/pharmacies/${id}`);
+  return res.data;
+};
+
 export const getPharmacies = async (filter?: PharmacyFilter): Promise<ListResponse> => {
   const params = filter ? { filter } : {};
   const res = await apiClient.get<ListResponse>('/pharmacies', { params });

@@ -45,8 +45,8 @@ export default function HoursSection() {
         <Label htmlFor="o24" className="cursor-pointer">Ouvert 24h/24</Label>
       </div>
       {!isOpen24h && <OpeningHoursEditor value={hours} onChange={setHours} />}
-      <Button onClick={save} disabled={isPending} className="w-full">
-        {isPending ? 'Enregistrement…' : 'Enregistrer les horaires'}
+      <Button onClick={save} loading={isPending} className="w-full">
+        Enregistrer les horaires
       </Button>
     </div>
   );

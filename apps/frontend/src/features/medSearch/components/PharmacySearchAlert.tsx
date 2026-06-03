@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -25,7 +25,7 @@ interface Props {
   pharmacies: Pharmacy[];
 }
 
-/** Hook pour une seule pharmacie — réexporté pour simplifier le composant */
+/** Hook pour une seule pharmacie, réexporté pour simplifier le composant */
 function useAllPendingSearches(pharmacies: Pharmacy[]) {
   const results = pharmacies.map((p) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -37,6 +37,7 @@ function useAllPendingSearches(pharmacies: Pharmacy[]) {
 
 export function PharmacySearchAlert({ pharmacies }: Props) {
   const [pharmIndex, setPharmIndex] = useState(0);
+  const [respondingWith, setRespondingWith] = useState<boolean | null>(null);
   const { mutate: respond, isPending } = useRespondToSearch();
   const qc = useQueryClient();
 
@@ -51,21 +52,26 @@ export function PharmacySearchAlert({ pharmacies }: Props) {
   if (!search || !current) return null;
 
   const handleRespond = (hasStock: boolean) => {
+    setRespondingWith(hasStock);
     respond(
       { searchId: search.searchId, pharmacyId: current.pharmacy.id, data: { hasStock } },
       {
         onSuccess: () => {
           toast.success(
             hasStock
-              ? 'Disponibilité confirmée — le patient est notifié'
+              ? 'Disponibilité confirmée, le patient est notifié'
               : 'Réponse envoyée'
           );
           qc.invalidateQueries({ queryKey: ['pharmacy-pending-searches', current.pharmacy.id] });
           // Passer à la prochaine pharmacie si cette liste est vide après réponse
           const nextIndex = pharmIndex < withPending.length - 1 ? pharmIndex : Math.max(0, pharmIndex - 1);
           setPharmIndex(nextIndex);
+          setRespondingWith(null);
         },
-        onError: () => toast.error('Erreur lors de la réponse'),
+        onError: () => {
+          toast.error('Erreur lors de la réponse');
+          setRespondingWith(null);
+        },
       }
     );
   };
@@ -143,7 +149,6 @@ export function PharmacySearchAlert({ pharmacies }: Props) {
 
           {search.note && (
             <div className="bg-muted/60 rounded-lg px-3 py-2.5 mb-4">
-              <p className="text-xs text-muted-foreground font-medium mb-0.5">Note du patient</p>
               <p className="text-sm italic">"{search.note}"</p>
             </div>
           )}
@@ -166,18 +171,20 @@ export function PharmacySearchAlert({ pharmacies }: Props) {
             <Button
               className="h-14 gap-2 text-base bg-green-600 hover:bg-green-700"
               onClick={() => handleRespond(true)}
-              disabled={isPending}
+              loading={isPending && respondingWith === true}
+              disabled={isPending && respondingWith !== true}
             >
-              <CheckCircleIcon size={20} weight="fill" />
+              {!(isPending && respondingWith === true) && <CheckCircleIcon size={20} weight="fill" />}
               Disponible
             </Button>
             <Button
               variant="destructive"
               className="h-14 gap-2 text-base"
               onClick={() => handleRespond(false)}
-              disabled={isPending}
+              loading={isPending && respondingWith === false}
+              disabled={isPending && respondingWith !== false}
             >
-              <XCircleIcon size={20} weight="fill" />
+              {!(isPending && respondingWith === false) && <XCircleIcon size={20} weight="fill" />}
               Indisponible
             </Button>
           </div>

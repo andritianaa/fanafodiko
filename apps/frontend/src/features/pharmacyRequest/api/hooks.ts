@@ -5,6 +5,7 @@ import {
   approveRequest,
   rejectRequest,
   reviewManagement,
+  deleteRequest,
 } from './fetchers';
 
 export const useSubmitPharmacyRequest = () =>
@@ -29,6 +30,14 @@ export const useRejectRequest = () => {
   return useMutation({
     mutationFn: ({ reqId, reason }: { reqId: string; reason?: string }) =>
       rejectRequest(reqId, reason),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['pharmacy-requests'] }),
+  });
+};
+
+export const useDeleteRequest = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (reqId: string) => deleteRequest(reqId),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['pharmacy-requests'] }),
   });
 };

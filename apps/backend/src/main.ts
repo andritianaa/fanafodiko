@@ -11,6 +11,9 @@ import myPharmacyController from "@/modules/pharmacy/infrastructure/controllers/
 import pharmacyInvitationController from "@/modules/pharmacy/infrastructure/controllers/PharmacyInvitationController";
 import pharmacyRequestController from "@/modules/pharmacy/infrastructure/controllers/PharmacyRequestController";
 import medSearchController from "@/modules/pharmacy/infrastructure/controllers/MedSearchController";
+import geocodingController from "@/modules/pharmacy/infrastructure/controllers/GeocodingController";
+import bugReportController from "@/modules/bugReport/infrastructure/controllers/BugReportController";
+import backofficeBugReportController from "@/modules/bugReport/infrastructure/controllers/BackofficeBugReportController";
 import medicationController from "@/modules/medication_management/infrastructure/controllers/MedicationController";
 import notificationController from "@/modules/notification/infrastructure/controllers/NotificationController";
 import fileController from "@/modules/files/infrastructure/controllers/FileController";
@@ -164,6 +167,13 @@ app.route("/pharmacy-requests", pharmacyRequestController);
 
 app.use("/med-searches/*", apiLimiter);
 app.route("/med-searches", medSearchController);
+
+app.use("/geocoding/*", apiLimiter);
+app.route("/geocoding", geocodingController);
+
+app.use("/bug-reports/*", apiLimiter);
+app.route("/bug-reports", bugReportController);
+app.route("/backoffice/bug-reports", backofficeBugReportController);
 
 // Routes
 app.get("/", (c) => {

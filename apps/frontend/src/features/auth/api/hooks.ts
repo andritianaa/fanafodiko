@@ -8,7 +8,10 @@ import {
   confirmPasswordReset,
   changePassword,
   changeEmail,
+  getNotificationPreferences,
+  updateNotificationPreferences,
 } from './fetchers';
+import type { NotificationPreferencesUpdate } from '../types';
 
 export const useLogin = () => {
     const queryClient = useQueryClient();
@@ -67,6 +70,23 @@ export const useChangeEmail = () => {
     mutationFn: changeEmail,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+  });
+};
+
+export const useNotificationPreferences = () => {
+  return useQuery({
+    queryKey: ['notification-preferences'],
+    queryFn: getNotificationPreferences,
+  });
+};
+
+export const useUpdateNotificationPreferences = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: NotificationPreferencesUpdate) => updateNotificationPreferences(data),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(['notification-preferences'], updated);
     },
   });
 };

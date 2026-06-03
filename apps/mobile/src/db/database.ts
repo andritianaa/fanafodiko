@@ -375,7 +375,7 @@ export async function setSyncMeta(key: string, value: string): Promise<void> {
 
 // ── Pharmacies ─────────────────────────────────────────────────────────────────
 
-function serializePharmacy(p: Pharmacy): unknown[] {
+function serializePharmacy(p: Pharmacy): (string | number | null)[] {
   return [
     p.id, p.name, p.address, p.landmark ?? null, p.city, p.region ?? null,
     p.coordinates.lat, p.coordinates.lng,

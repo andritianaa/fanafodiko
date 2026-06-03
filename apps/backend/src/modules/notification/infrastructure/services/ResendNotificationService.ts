@@ -12,6 +12,8 @@ export class ResendNotificationService implements INotificationService {
   }
 
   async send(params: NotificationParams): Promise<void> {
+    if (params.emailEnabled === false) return;
+
     try {
       const emailBody = this.buildEmailHTML(params);
 

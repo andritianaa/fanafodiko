@@ -218,8 +218,8 @@ export const HouseholdMemberDialog = ({
 
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={isAdding || isUpdating || isUploading}>
-              {(isAdding || isUpdating) ? 'Enregistrement...' : 'Enregistrer'}
+            <Button type="submit" loading={isAdding || isUpdating} disabled={isUploading}>
+              Enregistrer
             </Button>
           </DialogFooter>
         </form>

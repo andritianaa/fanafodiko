@@ -10,12 +10,16 @@ export const PushTokenResponseSchema = z.object({
 
 export const NotificationPreferencesUpdateSchema = z.object({
   emailMedicationReminders: z.boolean().optional().openapi({ example: true }),
+  emailPharmacyRequestDecision: z.boolean().optional().openapi({ example: true }),
+  emailBugReportUpdate: z.boolean().optional().openapi({ example: true }),
   emailMedSearchResponse: z.boolean().optional().openapi({ example: true }),
   emailPharmacyInvitation: z.boolean().optional().openapi({ example: true }),
 });
 
 export const NotificationPreferencesResponseSchema = z.object({
   emailMedicationReminders: z.boolean(),
+  emailPharmacyRequestDecision: z.boolean(),
+  emailBugReportUpdate: z.boolean(),
   emailMedSearchResponse: z.boolean(),
   emailPharmacyInvitation: z.boolean(),
 });

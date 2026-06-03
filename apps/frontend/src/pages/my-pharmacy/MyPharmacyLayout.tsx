@@ -86,13 +86,7 @@ export default function MyPharmacyLayout() {
     <SidebarProvider>
       <Sidebar variant="inset" collapsible="icon">
         <SidebarHeader className="p-3 gap-2">
-          <Link
-            to="/my-pharmacy"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <CaretLeftIcon size={14} />
-            <span className="truncate">Retour</span>
-          </Link>
+         
           <div className="px-1">
             <p className="font-semibold text-sm truncate leading-tight">{pharmacy.name}</p>
             <p className="text-xs text-muted-foreground truncate">{pharmacy.city}</p>

@@ -10,6 +10,7 @@ export interface LayerOption {
   name: string;
   url: string;
   attribution: string;
+  preview: string;
 }
 
 export const MAP_LAYERS: LayerOption[] = [
@@ -18,12 +19,14 @@ export const MAP_LAYERS: LayerOption[] = [
     name: 'Standard',
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    preview: '/standard-layer.png',
   },
   {
     id: 'satellite',
     name: 'Satellite',
     url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
     attribution: '&copy; Google Maps',
+    preview: '/satelite-layer.png',
   },
 ];
 
@@ -40,9 +43,9 @@ export function MapLayerSelector({ currentLayerId, onLayerChange, className }: P
 
   return (
     <div className={cn('relative', className)}>
-      {/* Options — s'affichent au-dessus du bouton */}
+      {/* Options, s'affichent au-dessus du bouton */}
       {open && (
-        <div className="absolute bottom-full mb-2 right-0 flex gap-2 z-10">
+        <div className="absolute top-full mb-2 right-0 flex gap-2 z-10">
           {MAP_LAYERS.map((layer) => (
             <button
               key={layer.id}
@@ -57,24 +60,18 @@ export function MapLayerSelector({ currentLayerId, onLayerChange, className }: P
                 currentLayerId === layer.id && 'ring-2 ring-primary border-primary'
               )}
             >
-              {/* Miniature de couleur représentant le fond */}
-              <div
-                className={cn(
-                  'w-14 h-14 rounded-lg border overflow-hidden',
-                  layer.id === 'satellite'
-                    ? 'bg-gradient-to-br from-green-800 via-green-600 to-blue-800'
-                    : 'bg-gradient-to-br from-slate-100 via-green-50 to-blue-100'
-                )}
-              >
-                <div
-                  className={cn(
-                    'w-full h-full flex items-center justify-center text-[10px] font-semibold',
-                    layer.id === 'satellite' ? 'text-white' : 'text-slate-600'
-                  )}
-                >
-                  {layer.name}
-                </div>
+              {/* Aperçu du fond de carte */}
+              <div className="w-28 aspect-square rounded-lg border overflow-hidden">
+                <img
+                  src={layer.preview}
+                  alt={layer.name}
+                  className="w-full h-full object-cover"
+                  draggable={false}
+                />
               </div>
+              <span className="text-[11px] font-semibold text-foreground">
+                {layer.name}
+              </span>
             </button>
           ))}
         </div>

@@ -290,7 +290,13 @@ function InfoTab({ id, pharmacy }: { id: string; pharmacy: Pharmacy }) {
         <Label>Localisation</Label>
         <LocationPickerMap
           value={form.coordinates ? { lat: form.coordinates.lat ?? 0, lng: form.coordinates.lng ?? 0 } : { lat: 0, lng: 0 }}
-          onChange={(coordinates) => setForm({ ...form, coordinates })}
+          onChange={(coordinates) => setForm((f) => ({ ...f, coordinates }))}
+          onGeocode={(geo) => setForm((f) => ({
+            ...f,
+            address: geo.address || f.address,
+            city:    geo.city    || f.city,
+            region:  geo.region  || f.region,
+          }))}
         />
       </div>
       <div>
@@ -300,8 +306,8 @@ function InfoTab({ id, pharmacy }: { id: string; pharmacy: Pharmacy }) {
           onChange={(contacts) => setForm({ ...form, contacts })}
         />
       </div>
-      <Button onClick={save} disabled={isPending} className="w-full">
-        {isPending ? 'Enregistrement…' : 'Enregistrer les infos'}
+      <Button onClick={save} loading={isPending} className="w-full">
+        Enregistrer les infos
       </Button>
     </div>
   );
@@ -332,8 +338,8 @@ function HoursTab({ id, pharmacy }: { id: string; pharmacy: Pharmacy }) {
         <Label htmlFor="o24-bo" className="cursor-pointer">Ouvert 24h/24</Label>
       </div>
       {!isOpen24h && <OpeningHoursEditor value={hours} onChange={setHours} />}
-      <Button onClick={save} disabled={isPending} className="w-full">
-        {isPending ? 'Enregistrement…' : 'Enregistrer les horaires'}
+      <Button onClick={save} loading={isPending} className="w-full">
+        Enregistrer les horaires
       </Button>
     </div>
   );
@@ -361,14 +367,14 @@ function ImagesTab({ id, pharmacy }: { id: string; pharmacy: Pharmacy }) {
   return (
     <div className="space-y-4">
       <PharmacyImagesEditor value={images} onChange={setImages} />
-      <Button onClick={save} disabled={isPending} className="w-full">
-        {isPending ? 'Enregistrement…' : 'Enregistrer les images'}
+      <Button onClick={save} loading={isPending} className="w-full">
+        Enregistrer les images
       </Button>
     </div>
   );
 }
 
-/* ─── Staff (admin app — accès total) ─── */
+/* ─── Staff (admin app, accès total) ─── */
 function StaffTab({ pharmacyId, pharmacyName }: { pharmacyId: string; pharmacyName: string }) {
   const { data: members, isLoading } = usePharmacyStaff(pharmacyId);
   const { mutate: removeMember, isPending: removing } = useBackofficeRemoveMember(pharmacyId);

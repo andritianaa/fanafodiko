@@ -61,8 +61,8 @@ export const LoginForm = () => {
         <FieldError errors={[errors.password]} />
       </Field>
 
-      <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? 'Connexion en cours...' : 'Se connecter'}
+      <Button type="submit" className="w-full" loading={isPending}>
+        Se connecter
       </Button>
     </form>
   );

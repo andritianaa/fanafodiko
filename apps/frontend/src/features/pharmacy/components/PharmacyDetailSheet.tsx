@@ -178,7 +178,7 @@ export function PharmacyDetailSheet({ pharmacy, onClose }: Props) {
                 {todayException.type === 'closure' ? (
                   <>
                     <span>Fermeture exceptionnelle aujourd'hui</span>
-                    {todayException.label && <span> — {todayException.label}</span>}
+                    {todayException.label && <span>, {todayException.label}</span>}
                     {todayException.reason && (
                       <span className="block text-xs font-normal opacity-80">{todayException.reason}</span>
                     )}
@@ -186,7 +186,7 @@ export function PharmacyDetailSheet({ pharmacy, onClose }: Props) {
                 ) : (
                   <>
                     <span>Ouverture exceptionnelle aujourd'hui</span>
-                    {todayException.label && <span> — {todayException.label}</span>}
+                    {todayException.label && <span>, {todayException.label}</span>}
                     {todayException.startTime && todayException.endTime && (
                       <span className="block text-xs font-normal opacity-80">
                         {todayException.startTime} – {todayException.endTime}
@@ -205,7 +205,7 @@ export function PharmacyDetailSheet({ pharmacy, onClose }: Props) {
             <Separator className="mb-4" />
             <div className="flex items-center gap-2 text-sky-600 font-medium text-sm">
               <ClockIcon size={16} />
-              Ouvert 24h/24 — 7j/7
+              Ouvert 24h/24, 7j/7
             </div>
           </>
         ) : sortedHours.length > 0 ? (

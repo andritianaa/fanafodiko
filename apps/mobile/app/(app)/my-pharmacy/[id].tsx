@@ -226,7 +226,7 @@ export default function MyPharmacyDetailScreen() {
             <Text style={styles.infoText}>
               {todayHour
                 ? todayHour.isClosed
-                  ? 'Fermé aujourd'hui'
+                  ? "Fermé aujourd'hui"
                   : `${todayHour.open} – ${todayHour.close}`
                 : pharmacy.isOpen24h ? 'Ouvert 24h/24' : 'Horaires non définis'
               }
@@ -286,7 +286,7 @@ export default function MyPharmacyDetailScreen() {
           <View style={styles.offlineNote}>
             <WifiOff size={14} color={colors.warning} />
             <Text style={styles.offlineNoteText}>
-              Mode hors ligne — les modifications nécessitent une connexion.
+              Mode hors ligne, les modifications nécessitent une connexion.
             </Text>
           </View>
         )}

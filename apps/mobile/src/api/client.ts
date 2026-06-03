@@ -201,6 +201,19 @@ export const medSearchApi = {
   ) => api.post(`/med-searches/${searchId}/respond/${pharmacyId}`, data),
 };
 
+export const bugReportApi = {
+  create: (data: {
+    description: string;
+    screenshots: string[];
+    deviceInfo: {
+      platform: 'ios' | 'android' | 'web';
+      osVersion?: string;
+      screenSize?: string;
+      language?: string;
+    };
+  }) => api.post<{ id: string }>('/bug-reports', data),
+};
+
 export const myPharmacyApi = {
   list: () =>
     api.get<import("../types").Pharmacy[]>("/my/pharmacies"),

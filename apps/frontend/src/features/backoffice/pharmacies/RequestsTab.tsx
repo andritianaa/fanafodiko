@@ -4,6 +4,7 @@ import {
   useApproveRequest,
   useRejectRequest,
   useReviewManagement,
+  useDeleteRequest,
 } from '@/features/pharmacyRequest/api/hooks';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,7 +33,18 @@ import {
   MapPinIcon,
   PhoneIcon,
   ClockIcon,
+  TrashIcon,
 } from '@phosphor-icons/react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -57,9 +69,11 @@ function RequestCard({ request }: { request: PharmacyRequest }) {
   const { mutate: approve, isPending: approving } = useApproveRequest();
   const { mutate: reject, isPending: rejecting } = useRejectRequest();
   const { mutate: reviewMgmt, isPending: reviewing } = useReviewManagement();
+  const { mutate: deleteReq, isPending: deleting } = useDeleteRequest();
 
   const [expanded, setExpanded] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
 
   const p = request.payload;
@@ -242,6 +256,19 @@ function RequestCard({ request }: { request: PharmacyRequest }) {
             </CollapsibleContent>
           </Collapsible>
 
+          {/* ── Bouton supprimer (toujours visible) ── */}
+          <div className="px-4 pb-1 flex justify-end">
+            <Button
+              size="xs"
+              variant="ghost"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 gap-1"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              <TrashIcon size={13} />
+              Supprimer
+            </Button>
+          </div>
+
           {/* ── Actions ── */}
           <div className="px-4 pb-4 space-y-2">
             {/* Actions pharmacie (en attente) */}
@@ -308,6 +335,35 @@ function RequestCard({ request }: { request: PharmacyRequest }) {
           </div>
         </CardContent>
       </Card>
+
+      {/* ── Dialog confirmation suppression ── */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cette demande ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La demande de <strong>{p.name}</strong> soumise par{' '}
+              <strong>{request.submittedByEmail}</strong> sera définitivement
+              supprimée. Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              onClick={() =>
+                deleteReq(request.id, {
+                  onSuccess: () => toast.success('Demande supprimée'),
+                  onError: () => toast.error('Erreur lors de la suppression'),
+                })
+              }
+              disabled={deleting}
+            >
+              {deleting ? 'Suppression…' : 'Supprimer'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* ── Dialog refus avec motif ── */}
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>

@@ -32,6 +32,10 @@ export const rejectRequest = async (reqId: string, reason?: string) => {
   return res.data;
 };
 
+export const deleteRequest = async (reqId: string): Promise<void> => {
+  await apiClient.delete(`/backoffice/pharmacies/requests/${reqId}`);
+};
+
 export const reviewManagement = async (
   reqId: string,
   decision: 'approve' | 'reject'

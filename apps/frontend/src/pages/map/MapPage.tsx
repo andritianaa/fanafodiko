@@ -286,7 +286,7 @@ export default function MapPage() {
         {/* ── Map area ──────────────────────────────────────────────────── */}
         <div className="flex-1 relative min-w-0">
 
-          {/* Mobile — bouton flottant bas droite pour ouvrir le sheet */}
+          {/* Mobile, bouton flottant bas droite pour ouvrir le sheet */}
           {!sheetOpen && (
             <button
               onClick={() => setSheetOpen(true)}

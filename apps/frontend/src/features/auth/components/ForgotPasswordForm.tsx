@@ -51,8 +51,8 @@ export const ForgotPasswordForm = () => {
         <FieldError errors={[errors.email]} />
       </Field>
 
-      <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? 'Envoi en cours...' : 'Envoyer le lien'}
+      <Button type="submit" className="w-full" loading={isPending}>
+        Envoyer le lien
       </Button>
     </form>
   );

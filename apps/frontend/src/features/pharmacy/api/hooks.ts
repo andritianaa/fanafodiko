@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  getPharmacy,
   getPharmacies,
   searchPharmacies,
   getBackofficePharmacies,
@@ -13,6 +14,14 @@ import {
   type PharmacyFilter,
 } from './fetchers';
 import type { CreatePharmacyInput, UpdatePharmacyInput, BatchGuardInput } from '@ext/schemas';
+
+export const usePharmacy = (id: string) =>
+  useQuery({
+    queryKey: ['pharmacies', id],
+    queryFn: () => getPharmacy(id),
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000, // 5 min
+  });
 
 export const usePharmacies = (filter?: PharmacyFilter) =>
   useQuery({

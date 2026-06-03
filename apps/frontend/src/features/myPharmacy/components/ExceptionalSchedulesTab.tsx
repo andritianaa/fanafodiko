@@ -540,10 +540,8 @@ export function ExceptionalSchedulesTab({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={closeExceptionDialog}>Annuler</Button>
-              <Button onClick={handleSaveException} disabled={isPending || addGuardMutation.isPending || updateGuardMutation.isPending}>
-                {(isPending || addGuardMutation.isPending || updateGuardMutation.isPending)
-                  ? 'Enregistrement…'
-                  : (editing || guardEditing) ? 'Mettre à jour' : 'Ajouter'}
+              <Button onClick={handleSaveException} loading={isPending || addGuardMutation.isPending || updateGuardMutation.isPending}>
+                {(editing || guardEditing) ? 'Mettre à jour' : 'Ajouter'}
               </Button>
             </DialogFooter>
           </DialogContent>

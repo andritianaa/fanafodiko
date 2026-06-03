@@ -1,4 +1,4 @@
-# Fanafodiko — Description complète de l'application
+# Fanafodiko, Description complète de l'application
 
 > *Fanafodiko* signifie **« mon médicament »** en malgache.
 
@@ -48,7 +48,7 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 
 ### Planning et suivi des prises
 - Vue journalière de toutes les prises prévues pour chaque membre
-- Actions : Confirmer pris / Passer (sauter) — en un tap
+- Actions : Confirmer pris / Passer (sauter), en un tap
 - Indicateur de progression de la journée (X sur Y prises)
 - Historique complet : prises confirmées, sautées, oubliées
 
@@ -111,31 +111,31 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 
 ---
 
-## 4. Pages — Application web
+## 4. Pages, Application web
 
 ### Authentification
 
-#### `/login` — Connexion
+#### `/login`, Connexion
 - Formulaire email + mot de passe
 - Lien vers inscription et mot de passe oublié
 - Redirection automatique vers `/dashboard` si déjà connecté
 
-#### `/register` — Inscription
+#### `/register`, Inscription
 - Formulaire : email, mot de passe, prénom, nom
 - Acceptation des CGU obligatoire
 - Création automatique d'un premier profil "soi-même"
 
-#### `/forgot-password` — Mot de passe oublié
+#### `/forgot-password`, Mot de passe oublié
 - Saisie de l'email → envoi d'un code par email
 
-#### `/reset-password` — Réinitialisation du mot de passe
+#### `/reset-password`, Réinitialisation du mot de passe
 - Saisie du code reçu par email + nouveau mot de passe
 
 ---
 
 ### Espace utilisateur
 
-#### `/schedule` — Planning du jour *(page principale)*
+#### `/schedule`, Planning du jour *(page principale)*
 - Sélecteur de membre du foyer (dropdown avec avatars + bouton d'ajout)
 - Raccourcis : "Gérer le foyer" / "Gérer les médicaments"
 - Carte de progression : X sur Y prises effectuées, barre d'adhérence
@@ -146,24 +146,24 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 - État vide avec bouton "Nouveau traitement"
 - Dialogs intégrés : ajout membre foyer / ajout médicament
 
-#### `/dashboard` — Tableau de bord statistiques
+#### `/dashboard`, Tableau de bord statistiques
 - Sélecteurs : membre (tout le foyer ou individuel) + plage temporelle (Aujourd'hui / 7j / 30j / 6 mois)
 - Carte adhérence : pourcentage global, barre de progression, compteurs Prises / Sautées / Oublis / Traitements actifs
 - Activité récente : les 10 dernières actions (prise, saut, oubli) avec médicament, membre, heure, statut
 - Colonne latérale : conseil santé, liste des membres actifs avec nombre de médicaments
 - Lien vers la gestion du foyer
 
-#### `/medications` — Gestion des médicaments
+#### `/medications`, Gestion des médicaments
 - Liste de tous les médicaments par membre
 - Création, modification, suppression, activation/désactivation
 - Formulaire : nom, dosage, fréquence, horaires, dates de traitement
 
-#### `/household` — Gestion du foyer
+#### `/household`, Gestion du foyer
 - Liste de tous les membres avec avatars
 - Ajout, modification, suppression de membres
 - Relations : soi-même, conjoint, enfant, parent, autre
 
-#### `/account` — Paramètres du compte
+#### `/account`, Paramètres du compte
 - Modification de l'adresse email (avec vérification mot de passe)
 - Modification du mot de passe (avec vérification ancien mot de passe)
 
@@ -171,7 +171,7 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 
 ### Pharmacies et recherche
 
-#### `/map` — Carte des pharmacies
+#### `/map`, Carte des pharmacies
 - Carte Leaflet pleine page avec tous les markers de pharmacies
 - **Panneau latéral (desktop) / bottom sheet (mobile)** :
   - Filtres pills : Toutes / Ouvert / De garde / 24h/24
@@ -189,11 +189,11 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
   - Bouton "Y aller" → app de navigation
 - Bouton flottant filtre actif sur mobile
 
-#### `/suggest-pharmacy` — Suggérer une pharmacie
+#### `/suggest-pharmacy`, Suggérer une pharmacie
 - Formulaire de suggestion : nom, adresse, ville, contact
 - Permet aux utilisateurs de signaler une pharmacie manquante
 
-#### `/med-search` — Recherche de médicament
+#### `/med-search`, Recherche de médicament
 - Carte "Mes recherches" avec compteur + lien vers l'historique
 - Formulaire :
   - Nom du médicament (requis)
@@ -203,7 +203,7 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
   - Bouton "Lancer la recherche" (désactivé sans GPS)
 - Soumission → redirection vers `/med-search/:id`
 
-#### `/med-search/:id` — Résultats en temps réel
+#### `/med-search/:id`, Résultats en temps réel
 - Médicament cherché + rayon + statut (En cours / Terminée)
 - Timer d'expiration (2 heures)
 - Compteurs : pharmacies notifiées / réponses reçues / disponibles
@@ -213,7 +213,7 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 - État vide animé "En attente des pharmacies…"
 - Tri automatique : disponibles en premier, puis par distance
 
-#### `/med-search/history` — Historique des recherches
+#### `/med-search/history`, Historique des recherches
 - Liste de toutes les recherches passées
 - Pour chaque recherche : médicament, date, nb pharmacies notifiées, nb réponses, statut final
 - Tap → `/med-search/:id` en mode lecture
@@ -222,12 +222,12 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 
 ### Ma Pharmacie (espace staff)
 
-#### `/my-pharmacy` — Liste des pharmacies gérées
+#### `/my-pharmacy`, Liste des pharmacies gérées
 - Cartes par pharmacie : nom, ville, badge de rôle (Super-admin / Admin / Staff)
 - Redirection automatique si l'utilisateur ne gère qu'une seule pharmacie
-- **Alerte demandes en attente** : `PharmacySearchAlert` — modal plein écran si nouvelles demandes de médicaments, avec boutons Disponible / Indisponible, navigation entre demandes
+- **Alerte demandes en attente** : `PharmacySearchAlert`, modal plein écran si nouvelles demandes de médicaments, avec boutons Disponible / Indisponible, navigation entre demandes
 
-#### `/my-pharmacy/:id` — Gestion d'une pharmacie (7 onglets)
+#### `/my-pharmacy/:id`, Gestion d'une pharmacie (7 onglets)
 
 **Vue d'ensemble**
 - Badge statut temps réel (ouvert/garde/fermé/24h)
@@ -266,16 +266,16 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 
 ### Backoffice *(admin/support uniquement)*
 
-#### `/backoffice/pharmacies` — Gestion de toutes les pharmacies
+#### `/backoffice/pharmacies`, Gestion de toutes les pharmacies
 - Liste complète avec recherche/filtres
 - Création, modification, suppression de pharmacies
 - Même interface 7 onglets que Ma Pharmacie (informations complètes)
 
-#### `/backoffice/requests` — Vue de toutes les recherches médicaments
+#### `/backoffice/requests`, Vue de toutes les recherches médicaments
 - Tableau de toutes les recherches MedSearch du système
 - Filtres par statut, pharmacie, médicament
 
-#### `/backoffice/users` — Gestion des utilisateurs
+#### `/backoffice/users`, Gestion des utilisateurs
 - Liste des comptes avec rôles
 - Modification des rôles (user/admin/support)
 
@@ -283,34 +283,34 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 
 ### Autres
 
-#### `/cgu` — Conditions Générales d'Utilisation
+#### `/cgu`, Conditions Générales d'Utilisation
 - Texte des CGU (accessible sans connexion)
 
-#### `/pharmacy-invitation/:token` — Invitation pharmacie
+#### `/pharmacy-invitation/:token`, Invitation pharmacie
 - Acceptation d'une invitation à rejoindre le staff d'une pharmacie via token email
 - Attribue automatiquement le rôle correspondant
 
 ---
 
-## 5. Pages — Application mobile
+## 5. Pages, Application mobile
 
 ### Authentification
 
-#### `(auth)/login` — Connexion mobile
+#### `(auth)/login`, Connexion mobile
 - Formulaire email + mot de passe
 - Lien CGU, lien inscription
 
-#### `(auth)/register` — Inscription mobile
+#### `(auth)/register`, Inscription mobile
 - Formulaire complet avec acceptation CGU
 
-#### `(auth)/cgu` — Conditions d'utilisation
+#### `(auth)/cgu`, Conditions d'utilisation
 - Affichage des CGU avec bouton retour
 
 ---
 
 ### Navigation principale (6 onglets)
 
-#### `(tabs)/index` — Accueil / Dashboard *(onglet 1)*
+#### `(tabs)/index`, Accueil / Dashboard *(onglet 1)*
 - Bandeau header avec prénom, date du jour, progression circulaire (% prises)
 - `SyncBanner` : état de synchronisation (hors ligne / en cours / erreur)
 - Section "À prendre maintenant" : prises dans les ±30 minutes
@@ -320,7 +320,7 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 - État vide avec icône cloche
 - Pull-to-refresh → `fullSync()`
 
-#### `(tabs)/map` — Carte des pharmacies *(onglet 2)*
+#### `(tabs)/map`, Carte des pharmacies *(onglet 2)*
 - `MapView` (react-native-maps) plein écran avec markers colorés :
   - Vert (ouvert), violet (garde), bleu (24h/24), rouge (fermé)
 - Barre de recherche flottante en haut
@@ -329,10 +329,10 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 - Tap marker → `BottomSheet` glissant avec `PharmacyCard` :
   - Nom + badge statut + adresse + horaire du jour + téléphone
   - Bouton "Y aller" (ouvre Maps) + bouton "Voir détails"
-- Banner "Carte hors ligne — données locales" si offline
+- Banner "Carte hors ligne, données locales" si offline
 - Données : online → API + upsert SQLite / offline → SQLite
 
-#### `(tabs)/my-pharmacy` — Ma Pharmacie *(onglet 3, staff uniquement)*
+#### `(tabs)/my-pharmacy`, Ma Pharmacie *(onglet 3, staff uniquement)*
 - Visible uniquement si `myPharmacies.length > 0`
 - Liste des pharmacies gérées : nom, ville, point de statut vert/rouge
 - Pull-to-refresh
@@ -343,7 +343,7 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
   - Navigation entre demandes (flèches + dots) si plusieurs
   - Poll automatique toutes les 30 secondes
 
-#### `(tabs)/med-search` — Recherche médicament *(onglet 4, FAB central)*
+#### `(tabs)/med-search`, Recherche médicament *(onglet 4, FAB central)*
 - **Offline** : message "Connexion requise" + icône
 - **Online** : formulaire complet
   - Champ médicament avec icône loupe
@@ -353,12 +353,12 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
   - Bouton "Lancer la recherche" → géolocalisation + `POST /med-searches`
 - Bouton "Historique" en haut à droite
 
-#### `(tabs)/members` — Membres du foyer *(onglet 5)*
+#### `(tabs)/members`, Membres du foyer *(onglet 5)*
 - Liste des membres avec avatar, prénom, nb de médicaments actifs
 - Tap → `member/[id]`
 - Bouton ajout de membre
 
-#### `(tabs)/settings` — Réglages *(onglet 6)*
+#### `(tabs)/settings`, Réglages *(onglet 6)*
 - Profil : email + ID utilisateur
 - Section Synchronisation : statut online/offline + bouton sync manuelle
 - Section Serveur API : URL configurable (utile en développement)
@@ -376,7 +376,7 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 
 ### Écrans de détail (stack)
 
-#### `pharmacy/[id]` — Détail d'une pharmacie
+#### `pharmacy/[id]`, Détail d'une pharmacie
 - Header : nom + badge statut (ouvert/garde/fermé/24h)
 - `SyncBanner`
 - Carte infos : adresse, repère visuel, ville, horaire du jour
@@ -386,7 +386,7 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 - Bouton "Y aller" → ouvre l'app de navigation
 - 100% accessible offline depuis le cache SQLite
 
-#### `med-search/[id]` — Résultats en temps réel
+#### `med-search/[id]`, Résultats en temps réel
 - **Offline** : message + lien vers l'historique
 - **Online** : polling `GET /med-searches/:id` toutes les 5 secondes
 - Header : médicament + rayon + badge En cours/Terminée + timer expiration
@@ -399,17 +399,17 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 - Bouton rafraîchir manuel
 - Polling s'arrête quand `status === 'closed'`
 
-#### `med-search/history` — Historique des recherches
+#### `med-search/history`, Historique des recherches
 - Liste avec pull-to-refresh
 - Chaque item : médicament, date/heure, nb notifiées, nb réponses, badge ✅/❌/statut actif
 - Tap → `med-search/[id]` (lecture seule si terminée)
 
-#### `member/[id]` — Détail d'un membre
+#### `member/[id]`, Détail d'un membre
 - Infos du membre (nom, relation, date de naissance)
 - Liste de ses médicaments avec statut actif/inactif
 - Ajout, modification, activation/désactivation
 
-#### `my-pharmacy/[id]` — Gestion d'une pharmacie (staff)
+#### `my-pharmacy/[id]`, Gestion d'une pharmacie (staff)
 - Header : nom + badge statut
 - `SyncBanner`
 - Section Demandes en attente : cards avec médicament + boutons Disponible/Indisponible
@@ -461,4 +461,4 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 
 ---
 
-*Développé par Andritiana Steve Rakotonimanana — pro@andritiana.tech*
+*Développé par Andritiana Steve Rakotonimanana, pro@andritiana.tech*
