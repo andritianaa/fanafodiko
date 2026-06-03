@@ -114,9 +114,7 @@ export default function MainLayout() {
               alt="Fanafodiko"
               className="h-8 w-8 rounded-lg object-contain"
             />
-            <span className="font-bold text-lg hidden sm:block">
-              Fanafodiko
-            </span>
+            <span className="font-bold text-lg">Fanafodiko</span>
           </Link>
 
           {/* Nav principale desktop */}
