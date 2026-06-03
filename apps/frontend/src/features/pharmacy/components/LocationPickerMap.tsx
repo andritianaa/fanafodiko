@@ -268,7 +268,7 @@ export function LocationPickerMap({ value, onChange, onGeocode }: Props) {
   return (
     <div className="space-y-3">
       {/* Barre de recherche */}
-      <div ref={containerRef} className="relative">
+      <div ref={containerRef} className="relative hidden">
         <div className="relative">
           <MagnifyingGlassIcon
             size={15}
@@ -354,18 +354,6 @@ export function LocationPickerMap({ value, onChange, onGeocode }: Props) {
           </div>
         )}
       </div>
-
-      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-        Cliquez sur la carte pour placer le marqueur
-        {onGeocode &&
-          ", l'adresse, la ville et la région seront remplies automatiquement"}
-        {geocoding && (
-          <SpinnerIcon
-            size={11}
-            className="animate-spin text-primary inline-block"
-          />
-        )}
-      </p>
 
       {/* Carte */}
       <div
