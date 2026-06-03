@@ -28,7 +28,7 @@ export default function MedSearchScreen() {
 
   useEffect(() => {
     medSearchApi.myHistory()
-      .then((res) => setRecentHistory((res.data?.history ?? []).slice(0, 5)))
+      .then((res) => setRecentHistory((res.history ?? []).slice(0, 5)))
       .catch(() => {});
   }, []);
 

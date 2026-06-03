@@ -231,12 +231,18 @@ function SidebarContent({
 
 export default function MapPage() {
   const location = useLocation();
-  const flyTarget = location.state as { pharmacyId?: string; lat?: number; lng?: number } | null;
+  const flyTarget = location.state as {
+    pharmacyId?: string;
+    lat?: number;
+    lng?: number;
+  } | null;
 
   const [statusFilter, setStatusFilter] = useState<PharmacyFilter>(undefined);
   const [localFilters, setLocalFilters] = useState<LocalFilters>("");
   const [selected, setSelected] = useState<Pharmacy | null>(null);
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(
+    null,
+  );
   const [sheetOpen, setSheetOpen] = useState(false); // mobile sidebar sheet
 
   const { data, isLoading } = usePharmacies(statusFilter);
@@ -285,7 +291,6 @@ export default function MapPage() {
 
         {/* ── Map area ──────────────────────────────────────────────────── */}
         <div className="flex-1 relative min-w-0">
-
           {/* Mobile, bouton flottant bas droite pour ouvrir le sheet */}
           {!sheetOpen && (
             <button
@@ -301,26 +306,6 @@ export default function MapPage() {
             </button>
           )}
 
-          {/* Desktop top-right controls */}
-          <div className="hidden md:flex absolute top-3 right-3 z-[800] items-center gap-2">
-            {activeFilterCount > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setStatusFilter(undefined);
-                  setLocalFilters("");
-                }}
-                className="gap-1.5 bg-white shadow-sm"
-              >
-                <XIcon size={13} /> Effacer filtres
-                <Badge variant="secondary" className="text-[10px] py-0 px-1.5">
-                  {activeFilterCount}
-                </Badge>
-              </Button>
-            )}
-          </div>
-
           {/* Leaflet map,full size */}
           <Suspense fallback={<Skeleton className="h-full w-full" />}>
             <PharmacyMap
@@ -328,7 +313,11 @@ export default function MapPage() {
               selected={selected}
               onSelect={setSelected}
               onLocationUpdate={setUserLocation}
-              initialCenter={flyTarget?.lat && flyTarget?.lng ? [flyTarget.lat, flyTarget.lng] : null}
+              initialCenter={
+                flyTarget?.lat && flyTarget?.lng
+                  ? [flyTarget.lat, flyTarget.lng]
+                  : null
+              }
             />
           </Suspense>
         </div>
@@ -343,12 +332,14 @@ export default function MapPage() {
           <div className="flex-1 min-h-0 overflow-hidden">
             <SidebarContent
               {...sidebarProps}
-              onSelect={(p) => { setSelected(p); setSheetOpen(false); }}
+              onSelect={(p) => {
+                setSelected(p);
+                setSheetOpen(false);
+              }}
             />
           </div>
         </SheetContent>
       </Sheet>
-
     </>
   );
 }

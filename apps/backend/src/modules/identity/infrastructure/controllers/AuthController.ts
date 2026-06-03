@@ -15,7 +15,7 @@ import { JwtTokenService } from "../security/JwtTokenService";
 import { RequestPasswordReset } from "../../application/use-cases/RequestPasswordReset";
 import { ConfirmPasswordReset } from "../../application/use-cases/ConfirmPasswordReset";
 import { MongoResetPasswordRepository } from "../repositories/ResetPasswordRepository";
-import { UserModel } from "../models/UserModel";
+import { UserModel, INotificationPreferences } from "../models/UserModel";
 
 import { GetCurrentUser } from "../../application/use-cases/GetCurrentUser";
 import {
@@ -374,7 +374,7 @@ authController.openapi(getPreferencesRoute, async (c) => {
   const doc = await UserModel.findById(user.id)
     .select("notificationPreferences")
     .lean();
-  const base = doc?.notificationPreferences ?? {};
+  const base = (doc?.notificationPreferences ?? {}) as Partial<INotificationPreferences>;
   const prefs = {
     emailMedicationReminders: base.emailMedicationReminders ?? true,
     emailPharmacyRequestDecision: base.emailPharmacyRequestDecision ?? true,
@@ -420,7 +420,7 @@ authController.openapi(updatePreferencesRoute, async (c) => {
   const doc = await UserModel.findById(user.id)
     .select("notificationPreferences")
     .lean();
-  const base = doc?.notificationPreferences ?? {};
+  const base = (doc?.notificationPreferences ?? {}) as Partial<INotificationPreferences>;
   const prefs = {
     emailMedicationReminders: base.emailMedicationReminders ?? true,
     emailPharmacyRequestDecision: base.emailPharmacyRequestDecision ?? true,

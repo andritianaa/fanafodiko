@@ -94,8 +94,17 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 - Blocage des opérations qui nécessitent une connexion (recherche médicament, réponse pharmacie, modification pharmacie)
 
 ### Préférences notifications email
-- 3 types configurables individuellement : rappels médicaments / réponses recherche / invitations pharmacie
+- **5 types** configurables individuellement, organisés en deux groupes :
+  - *Utilisateur* : rappels médicaments · décision demande de pharmacie · mise à jour signalement de bug
+  - *Membre de pharmacie* : nouvelle demande de médicament · invitation à gérer une pharmacie
+- Par défaut tous les emails sont activés ; les anciens comptes (sans les nouveaux champs) reçoivent le fallback `true`
 - Les notifications push et in-app ne sont pas désactivables
+
+### Aide & FAQ
+- Base de 45 questions réparties en 8 catégories (Mon compte, Médicaments, Foyer, Pharmacies, MedSearch, Gérer ma pharmacie, Notifications, Données & confidentialité, Problèmes techniques)
+- Données centralisées dans `packages/utils/src/faq.ts` (partagé web + mobile)
+- Recherche plein-texte sur question, réponse et tags
+- Accessible **sans connexion** (page ouverte sur le web, depuis les pages auth et depuis le menu)
 
 ### Sécurité et compte
 - Inscription gratuite (email + mot de passe)
@@ -106,8 +115,10 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 
 ### Backoffice (admin/support)
 - Gestion de toutes les pharmacies (création, modification, suppression)
-- Gestion des utilisateurs
-- Vue de toutes les recherches médicaments
+- Gestion des utilisateurs (rôles user/admin/support)
+- Vue et gestion de toutes les recherches médicaments
+- Gestion des demandes d'ajout de pharmacie (approbation, refus avec motif, attribution de gestion)
+- Gestion des signalements de bugs : liste, mise à jour du statut (résolu/annulé) avec message admin
 
 ---
 
@@ -164,8 +175,12 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 - Relations : soi-même, conjoint, enfant, parent, autre
 
 #### `/account`, Paramètres du compte
+- Informations du compte : email actuel affiché
 - Modification de l'adresse email (avec vérification mot de passe)
 - Modification du mot de passe (avec vérification ancien mot de passe)
+- **Notifications email — Utilisateur** : toggles rappels médicaments / décision demande pharmacie / mise à jour signalement
+- **Notifications email — Membre de pharmacie** : toggles nouvelle demande médicament / invitation pharmacie
+- Préférences d'affichage : sélecteur taille de police (Petit / Moyen / Grand)
 
 ---
 
@@ -284,7 +299,16 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 ### Autres
 
 #### `/cgu`, Conditions Générales d'Utilisation
-- Texte des CGU (accessible sans connexion)
+- Texte complet des CGU (accessible sans connexion)
+- Couvre : éditeur, objet complet (médicaments + réseau pharmacies + MedSearch + gestion pharmacie), données personnelles détaillées (localisation, push tokens, pharmacie, signalements), responsabilité pharmacies tierces
+- Dernière mise à jour : 3 juin 2026
+
+#### `/help`, Aide & FAQ
+- Page standalone accessible **sans connexion** (route ouverte)
+- Accordéon par question (expand/collapse)
+- Barre de recherche temps réel (filtre sur question, réponse, tags)
+- 8 catégories, 45 questions
+- Lien dans le dropdown profil navbar + sheet "Plus" mobile (web responsive) + footer des pages login et register
 
 #### `/pharmacy-invitation/:token`, Invitation pharmacie
 - Acceptation d'une invitation à rejoindre le staff d'une pharmacie via token email
@@ -305,6 +329,7 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 
 #### `(auth)/cgu`, Conditions d'utilisation
 - Affichage des CGU avec bouton retour
+- Dernière mise à jour : 3 juin 2026
 
 ---
 
@@ -363,12 +388,18 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 - Section Synchronisation : statut online/offline + bouton sync manuelle
 - Section Serveur API : URL configurable (utile en développement)
 - Section Notifications locales : toggle activation + bouton re-planifier 30 jours
-- Section Notifications email (online uniquement) :
-  - Toggle "Rappels médicaments" (`emailMedicationReminders`)
-  - Toggle "Réponses recherche" (`emailMedSearchResponse`)
-  - Toggle "Invitations pharmacie" (`emailPharmacyInvitation`)
+- **Section Notifications email — Utilisateur** (online uniquement) :
+  - Toggle rappels médicaments (`emailMedicationReminders`)
+  - Toggle décision demande de pharmacie (`emailPharmacyRequestDecision`)
+  - Toggle mise à jour signalement (`emailBugReportUpdate`)
   - Note : "Les notifications push et in-app ne peuvent pas être désactivées"
+- **Section Notifications email — Membre de pharmacie** (online uniquement) :
+  - Toggle nouvelle demande médicament (`emailMedSearchResponse`)
+  - Toggle invitation à gérer une pharmacie (`emailPharmacyInvitation`)
 - Section Données : info stockage local SQLite + explication offline
+- **Section Aide** :
+  - "Centre d'aide & FAQ" → navigue vers `/(app)/help`
+  - "Signaler un problème" → modal de signalement de bug
 - Section À propos : version
 - Bouton Déconnexion (supprime le push token avant de vider la session)
 
@@ -409,6 +440,14 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 - Liste de ses médicaments avec statut actif/inactif
 - Ajout, modification, activation/désactivation
 
+#### `help`, Aide & FAQ
+- Barre de recherche native avec filtre temps réel (question, réponse, tags)
+- Liste accordéon : tap pour expand/collapse une réponse avec animation `LayoutAnimation`
+- Catégories affichées en sections (titre majuscule) quand pas de recherche active
+- Résultats filtrés en mode recherche
+- Message "Aucun résultat" avec email de contact
+- Accessible depuis Réglages > Aide > "Centre d'aide & FAQ"
+
 #### `my-pharmacy/[id]`, Gestion d'une pharmacie (staff)
 - Header : nom + badge statut
 - `SyncBanner`
@@ -429,6 +468,7 @@ L'application est disponible en **web** (fanafodiko.andritiana.tech) et en **mob
 | Frontend web        | React 19 + Vite + TailwindCSS + shadcn/ui + Leaflet |
 | Mobile              | Expo 54 (React Native 0.81) + Expo Router + SQLite  |
 | Schémas partagés    | Zod (`packages/schemas`)                            |
+| Utilitaires partagés | Validateurs + données FAQ (`packages/utils`)        |
 | Authentification    | JWT (cookie HttpOnly web / AsyncStorage mobile)     |
 | Email               | Resend                                              |
 | Push notifications  | Expo Push API                                       |

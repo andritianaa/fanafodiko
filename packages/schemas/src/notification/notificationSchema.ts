@@ -3,7 +3,7 @@ import { z } from "@hono/zod-openapi";
 export const InAppNotificationSchema = z.object({
   id: z.string(),
   profileId: z.string(),
-  type: z.enum(['medication_reminder', 'search_response']).optional(),
+  type: z.enum(['medication_reminder', 'search_response', 'bug_report_update']).optional(),
   taskId: z.string().optional(),
   medicationName: z.string(),
   dosage: z.string().optional(),

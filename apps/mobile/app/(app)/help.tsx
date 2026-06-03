@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, MagnifyingGlass } from 'lucide-react-native';
-import { faqCategories, searchFaq } from '@ext/utils';
+import { ArrowLeft, Search } from 'lucide-react-native';
+import { faqCategories, searchFaq, type FaqItem, type FaqCategory } from '@ext/utils';
 import { colors, spacing, radius } from '../../src/theme';
 
 if (Platform.OS === 'android') {
@@ -57,7 +57,7 @@ export default function HelpScreen() {
       </View>
 
       <View style={styles.searchWrap}>
-        <MagnifyingGlass size={16} color={colors.textMuted} style={styles.searchIcon} />
+        <Search size={16} color={colors.textMuted} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Rechercher une question…"
@@ -81,16 +81,16 @@ export default function HelpScreen() {
             </Text>
           ) : (
             <View style={styles.categoryBlock}>
-              {results.map((item) => (
+              {results.map((item: FaqItem) => (
                 <FaqItemRow key={item.id} question={item.question} answer={item.answer} />
               ))}
             </View>
           )
         ) : (
-          faqCategories.map((cat) => (
+          faqCategories.map((cat: FaqCategory) => (
             <View key={cat.id} style={styles.categoryBlock}>
               <Text style={styles.categoryLabel}>{cat.label}</Text>
-              {cat.items.map((item) => (
+              {cat.items.map((item: FaqItem) => (
                 <FaqItemRow key={item.id} question={item.question} answer={item.answer} />
               ))}
             </View>

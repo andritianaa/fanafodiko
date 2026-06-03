@@ -3,7 +3,7 @@ import { AppError } from "@/core/errors/AppError";
 export interface InAppNotificationProps {
   id?: string;
   profileId: string;
-  type?: 'medication_reminder' | 'search_response';
+  type?: 'medication_reminder' | 'search_response' | 'bug_report_update';
   taskId?: string;
   medicationName: string;
   dosage?: string;

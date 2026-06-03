@@ -230,6 +230,9 @@ importers:
       '@expo-google-fonts/nunito':
         specifier: ^0.2.3
         version: 0.2.3
+      '@ext/utils':
+        specifier: workspace:^
+        version: link:../../packages/utils
       '@gorhom/bottom-sheet':
         specifier: ^5.0.0
         version: 5.2.14(@types/react@19.1.17)(react-native-gesture-handler@2.28.0)(react-native-reanimated@4.1.7)(react-native@0.81.5)(react@19.1.0)
