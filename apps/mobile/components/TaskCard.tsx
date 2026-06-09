@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Check, X, SkipForward, Clock } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -10,6 +10,7 @@ interface TaskCardProps {
   task: Task;
   medicationName?: string;
   medicationDosage?: string;
+  profileName?: string;
   onTake?: () => void;
   onSkip?: () => void;
   compact?: boolean;
@@ -33,6 +34,7 @@ export function TaskCard({
   task,
   medicationName,
   medicationDosage,
+  profileName,
   onTake,
   onSkip,
   compact = false,
@@ -78,8 +80,10 @@ export function TaskCard({
         <Text style={styles.name} numberOfLines={1}>
           {name}
         </Text>
-        {dosage ? (
-          <Text style={styles.dosage}>{dosage}</Text>
+        {(profileName || dosage) ? (
+          <Text style={styles.dosage} numberOfLines={1}>
+            {profileName && dosage ? `${profileName} - ${dosage}` : profileName ?? dosage}
+          </Text>
         ) : null}
       </View>
 
@@ -152,7 +156,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   time: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 12,
     color: colors.textSecondary,
   },
@@ -164,15 +168,16 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   name: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 14,
     color: colors.text,
     marginBottom: 2,
   },
   dosage: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 12,
     color: colors.textSecondary,
+    marginTop: 2,
   },
   right: {
     alignItems: 'flex-end',

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+﻿import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,10 +11,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, Plus, Pill, X, Calendar } from 'lucide-react-native';
+import { ArrowLeft, Plus, Pill, X, Calendar, Camera } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useStore } from '../../../src/store/useStore';
 import { medicationsApi, householdsApi, ApiError } from '../../../src/api/client';
 import {
@@ -318,6 +320,26 @@ export default function MemberDetailScreen() {
 
   const initials = `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase();
   const activeMeds = profileMeds.filter((m) => m.isActive).length;
+  const [avatarUri, setAvatarUri] = useState<string | null>(profile.avatarUrl ?? null);
+
+  const handleChangeAvatar = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+      base64: true,
+    });
+    if (result.canceled || !result.assets[0]) return;
+    const asset = result.assets[0];
+    const base64Uri = `data:image/jpeg;base64,${asset.base64}`;
+    setAvatarUri(base64Uri);
+    try {
+      await householdsApi.update(profile.id, { avatarUrl: base64Uri });
+    } catch {
+      // silently ignore if upload fails — local preview still shown
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -338,9 +360,18 @@ export default function MemberDetailScreen() {
         }
       >
         <View style={styles.profileCard}>
-          <View style={styles.avatar}>
-            <Text style={styles.initials}>{initials}</Text>
-          </View>
+          <TouchableOpacity onPress={handleChangeAvatar} style={styles.avatarWrap}>
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={styles.avatarImg} />
+            ) : (
+              <View style={styles.avatar}>
+                <Text style={styles.initials}>{initials}</Text>
+              </View>
+            )}
+            <View style={styles.avatarEdit}>
+              <Camera size={12} color="#fff" strokeWidth={2} />
+            </View>
+          </TouchableOpacity>
           <Text style={styles.profileName}>{profile.firstName} {profile.lastName}</Text>
           <Text style={styles.profileRel}>{profile.relationship}</Text>
           <View style={styles.statsRow}>
@@ -421,22 +452,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     ...shadows.sm,
   },
-  avatar: {
-    width: 72, height: 72, borderRadius: radius.full,
-    backgroundColor: colors.primaryLight,
-    alignItems: 'center', justifyContent: 'center',
+  avatarWrap: {
+    position: 'relative',
     marginBottom: 12,
   },
+  avatarImg: {
+    width: 72, height: 72, borderRadius: 36,
+  },
+  avatarEdit: {
+    position: 'absolute', bottom: 0, right: 0,
+    width: 22, height: 22, borderRadius: 11,
+    backgroundColor: colors.primary,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2, borderColor: colors.surface,
+  },
+  avatar: {
+    width: 72, height: 72, borderRadius: 36,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center', justifyContent: 'center',
+  },
   initials: {
-    fontFamily: 'Nunito_800ExtraBold',
+    fontFamily: 'FunnelDisplay_800ExtraBold',
     fontSize: 28, color: colors.primary,
   },
   profileName: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 20, color: colors.text, marginBottom: 4,
   },
   profileRel: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14, color: colors.textSecondary,
     textTransform: 'capitalize', marginBottom: spacing.md,
   },
@@ -448,11 +492,11 @@ const styles = StyleSheet.create({
   },
   stat: { alignItems: 'center' },
   statNum: {
-    fontFamily: 'Nunito_800ExtraBold',
+    fontFamily: 'FunnelDisplay_800ExtraBold',
     fontSize: 22, color: colors.primary,
   },
   statLabel: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 12, color: colors.textSecondary,
   },
   statDiv: {
@@ -463,14 +507,14 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
   },
   sectionTitle: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 17, color: colors.text, marginBottom: spacing.sm,
   },
   empty: {
     alignItems: 'center', paddingVertical: spacing.xl, gap: 12,
   },
   emptyText: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14, color: colors.textSecondary, textAlign: 'center',
   },
 });
@@ -484,14 +528,14 @@ const m = StyleSheet.create({
     padding: spacing.lg, maxHeight: '92%',
   },
   handle: {
-    width: 40, height: 4, borderRadius: 2,
+    width: 40, height: 4, borderRadius: 0,
     backgroundColor: colors.border, alignSelf: 'center', marginBottom: 16,
   },
   header: {
     flexDirection: 'row', alignItems: 'center',
     justifyContent: 'space-between', marginBottom: spacing.lg,
   },
-  title: { fontFamily: 'Nunito_800ExtraBold', fontSize: 20, color: colors.text },
+  title: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 20, color: colors.text },
   closeBtn: {
     width: 34, height: 34, borderRadius: radius.full,
     backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center',
@@ -499,15 +543,15 @@ const m = StyleSheet.create({
   errorBanner: {
     backgroundColor: colors.errorLight, borderRadius: radius.sm, padding: 10, marginBottom: 12,
   },
-  errorText: { fontFamily: 'Nunito_600SemiBold', fontSize: 12, color: colors.error },
-  label: { fontFamily: 'Nunito_600SemiBold', fontSize: 13, color: colors.textSecondary, marginBottom: 8 },
+  errorText: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 12, color: colors.error },
+  label: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 13, color: colors.textSecondary, marginBottom: 8 },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   chip: {
     paddingHorizontal: 14, paddingVertical: 7,
     borderRadius: radius.full, borderWidth: 1.5, borderColor: colors.border,
   },
   chipActive: { borderColor: colors.primary, backgroundColor: colors.primaryLight },
-  chipText: { fontFamily: 'Nunito_600SemiBold', fontSize: 13, color: colors.textSecondary },
+  chipText: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 13, color: colors.textSecondary },
   chipTextActive: { color: colors.primary },
   row: { flexDirection: 'row', gap: 12 },
   half: { flex: 1 },

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -175,13 +175,13 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   appName: {
-    fontFamily: 'Nunito_800ExtraBold',
+    fontFamily: 'FunnelDisplay_800ExtraBold',
     fontSize: 28,
     color: colors.text,
     marginBottom: 6,
   },
   tagline: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14,
     color: colors.textSecondary,
     textAlign: 'center',
@@ -198,13 +198,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   title: {
-    fontFamily: 'Nunito_800ExtraBold',
+    fontFamily: 'FunnelDisplay_800ExtraBold',
     fontSize: 22,
     color: colors.text,
     marginBottom: 4,
   },
   subtitle: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14,
     color: colors.textSecondary,
     marginBottom: spacing.lg,
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   errorBannerText: {
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 13,
     color: colors.error,
     textAlign: 'center',
@@ -229,12 +229,12 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   switchText: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14,
     color: colors.textSecondary,
   },
   switchAction: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     color: colors.primary,
   },
   cguLink: {
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   cguText: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 12,
     color: colors.textMuted,
     textDecorationLine: 'underline',

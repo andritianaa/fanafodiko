@@ -267,7 +267,7 @@ export function LocationPickerMap({ value, onChange, onGeocode }: Props) {
 
   return (
     <div className="space-y-3">
-      {/* Barre de recherche */}
+      {/* TODO: Barre de recherche */}
       <div ref={containerRef} className="relative hidden">
         <div className="relative">
           <MagnifyingGlassIcon

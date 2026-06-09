@@ -456,8 +456,9 @@ export async function searchPharmacies(q: string): Promise<Pharmacy[]> {
   const rows = await db.getAllAsync<Record<string, unknown>>(
     `SELECT * FROM pharmacies
      WHERE name LIKE ? OR city LIKE ? OR address LIKE ?
+        OR landmark LIKE ? OR region LIKE ? OR contacts LIKE ?
      ORDER BY name LIMIT 50`,
-    [like, like, like]
+    [like, like, like, like, like, like]
   );
   return rows.map(deserializePharmacy);
 }

@@ -41,6 +41,7 @@ import {
   UserCirclePlusIcon,
   UsersThreeIcon,
   TrayIcon,
+  StorefrontIcon,
 } from '@phosphor-icons/react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -50,7 +51,9 @@ import { BatchGuardDialog } from '@/features/backoffice/pharmacies/BatchGuardDia
 import { PharmacyFormDialog } from '@/features/backoffice/pharmacies/PharmacyFormDialog';
 import { PharmacyStaffDialog } from '@/features/backoffice/pharmacies/PharmacyStaffDialog';
 import { RequestsTab } from '@/features/backoffice/pharmacies/RequestsTab';
+import { ClaimsTab } from '@/features/backoffice/pharmacies/ClaimsTab';
 import { usePharmacyRequests } from '@/features/pharmacyRequest/api/hooks';
+import { useBackofficeClaims } from '@/features/pharmacy/api/claimHooks';
 
 /* ─────────────────────────────────────────
    CONSTANTES
@@ -444,8 +447,11 @@ function PharmaciesTab() {
 ───────────────────────────────────────── */
 export default function BackofficePage() {
   const { data: requestsData } = usePharmacyRequests();
+  const { data: claimsData } = useBackofficeClaims();
   const pendingCount =
     requestsData?.requests.filter((r) => r.status === 'pending').length ?? 0;
+  const pendingClaimsCount =
+    claimsData?.claims.filter((c) => c.status === 'pending').length ?? 0;
 
   return (
     <div className="space-y-4">
@@ -472,6 +478,14 @@ export default function BackofficePage() {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="claims" className="gap-2">
+            <StorefrontIcon size={14} /> Réclamations
+            {pendingClaimsCount > 0 && (
+              <Badge variant="destructive" className="ml-1 px-1.5 py-0 text-[10px]">
+                {pendingClaimsCount}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="users" className="gap-2">
             <UsersIcon size={14} /> Utilisateurs
           </TabsTrigger>
@@ -481,6 +495,9 @@ export default function BackofficePage() {
         </TabsContent>
         <TabsContent value="requests" className="mt-4">
           <RequestsTab />
+        </TabsContent>
+        <TabsContent value="claims" className="mt-4">
+          <ClaimsTab />
         </TabsContent>
         <TabsContent value="users" className="mt-4">
           <UsersTab />

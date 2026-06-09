@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+﻿import React, { useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator,
 } from 'react-native';
@@ -105,8 +105,8 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
   },
-  title: { fontFamily: 'Nunito_800ExtraBold', fontSize: 26, color: colors.text },
-  subtitle: { fontFamily: 'Nunito_400Regular', fontSize: 13, color: colors.textSecondary },
+  title: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 26, color: colors.text },
+  subtitle: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 13, color: colors.textSecondary },
   list: { paddingHorizontal: spacing.md, paddingBottom: spacing.xl },
   card: {
     flexDirection: 'row',
@@ -127,16 +127,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cardContent: { flex: 1, gap: 3 },
-  cardName: { fontFamily: 'Nunito_700Bold', fontSize: 15, color: colors.text },
+  cardName: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 15, color: colors.text },
   cardMeta: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  cardAddress: { fontFamily: 'Nunito_400Regular', fontSize: 12, color: colors.textMuted, flex: 1 },
-  statusDot: { width: 10, height: 10, borderRadius: 5 },
+  cardAddress: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 12, color: colors.textMuted, flex: 1 },
+  statusDot: { width: 10, height: 10, borderRadius: 0 },
   dotOpen: { backgroundColor: colors.success },
   dotClosed: { backgroundColor: colors.error },
   empty: { alignItems: 'center', paddingTop: spacing.xxl, gap: 12 },
-  emptyTitle: { fontFamily: 'Nunito_700Bold', fontSize: 18, color: colors.text },
+  emptyTitle: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 18, color: colors.text },
   emptyText: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14,
     color: colors.textSecondary,
     textAlign: 'center',

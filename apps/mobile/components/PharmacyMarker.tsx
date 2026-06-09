@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Marker } from 'react-native-maps';
 import { colors } from '../src/theme';
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   pin: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   pinSelected: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 0,
     borderWidth: 3,
     borderColor: '#FFF',
     shadowOpacity: 0.5,
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   dot: {
     width: 8,
     height: 8,
-    borderRadius: 4,
+    borderRadius: 0,
     backgroundColor: 'rgba(255,255,255,0.9)',
   },
   tip: {

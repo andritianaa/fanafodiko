@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+﻿import React, { useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl,
 } from 'react-native';
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  title: { fontFamily: 'Nunito_800ExtraBold', fontSize: 22, color: colors.text },
+  title: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 22, color: colors.text },
   list: { paddingHorizontal: spacing.md, paddingBottom: spacing.xl },
   card: {
     flexDirection: 'row',
@@ -165,20 +165,20 @@ const styles = StyleSheet.create({
   iconActive: { backgroundColor: colors.primaryLighter },
   iconClosed: { backgroundColor: colors.divider },
   cardContent: { flex: 1, gap: 3 },
-  medName: { fontFamily: 'Nunito_700Bold', fontSize: 15, color: colors.text },
-  date: { fontFamily: 'Nunito_400Regular', fontSize: 12, color: colors.textMuted },
+  medName: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 15, color: colors.text },
+  date: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 12, color: colors.textMuted },
   statsRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 2 },
   stat: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  statNum: { fontFamily: 'Nunito_700Bold', fontSize: 13, color: colors.primary },
-  statLbl: { fontFamily: 'Nunito_400Regular', fontSize: 11, color: colors.textSecondary },
-  statusDot: { width: 8, height: 8, borderRadius: 4 },
+  statNum: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 13, color: colors.primary },
+  statLbl: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 11, color: colors.textSecondary },
+  statusDot: { width: 8, height: 8, borderRadius: 0 },
   statusActive: { backgroundColor: colors.success },
   statusClosed: { backgroundColor: colors.textMuted },
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   empty: { alignItems: 'center', paddingTop: spacing.xxl, gap: 12 },
-  emptyTitle: { fontFamily: 'Nunito_700Bold', fontSize: 18, color: colors.text },
+  emptyTitle: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 18, color: colors.text },
   emptyText: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14,
     color: colors.textSecondary,
     textAlign: 'center',

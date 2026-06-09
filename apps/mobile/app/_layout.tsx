@@ -85,7 +85,7 @@ export default function RootLayout() {
   if (!fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
-        <Text style={{ fontSize: 34, fontWeight: '700', color: '#4f46e5', letterSpacing: -0.5 }}>
+        <Text style={{ fontSize: 34, fontWeight: '700', color: '#18181b', letterSpacing: -0.5 }}>
           Fanafodiko
         </Text>
       </View>

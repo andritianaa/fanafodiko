@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { WifiOff, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react-native';
 import { colors, radius, spacing } from '../src/theme';
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.errorLight,
   },
   text: {
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 12,
     flex: 1,
   },

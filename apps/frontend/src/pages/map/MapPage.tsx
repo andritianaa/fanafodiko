@@ -1,4 +1,4 @@
-import { useState, useMemo, lazy, Suspense, useEffect } from "react";
+import { useState, useMemo, lazy, Suspense, useEffect, startTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -252,7 +252,7 @@ export default function MapPage() {
   useEffect(() => {
     if (!flyTarget?.pharmacyId || allPharmacies.length === 0) return;
     const match = allPharmacies.find((p) => p.id === flyTarget.pharmacyId);
-    if (match) setSelected(match);
+    if (match) startTransition(() => setSelected(match));
   }, [flyTarget?.pharmacyId, allPharmacies]);
 
   const filtered = useMemo(

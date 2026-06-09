@@ -1,10 +1,11 @@
-import React, { useState, useCallback, useEffect } from 'react';
+﻿import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, ChevronRight, History } from 'lucide-react-native';
 import { getTasksByDate } from '../../../src/db/database';
+import { useStore, selectMedications, selectProfiles } from '../../../src/store/useStore';
 import { TaskCard } from '../../../components/TaskCard';
 import { colors, spacing, radius } from '../../../src/theme';
 import type { Task, TaskStatus } from '../../../src/types';
@@ -39,8 +40,8 @@ function StatPill({ label, value, color }: { label: string; value: number; color
 }
 const sp = StyleSheet.create({
   pill: { alignItems: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.md, flex: 1 },
-  num: { fontFamily: 'Nunito_800ExtraBold', fontSize: 20 },
-  lbl: { fontFamily: 'Nunito_600SemiBold', fontSize: 11, marginTop: 1 },
+  num: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 20 },
+  lbl: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 11, marginTop: 1 },
 });
 
 export default function HistoryScreen() {
@@ -49,6 +50,17 @@ export default function HistoryScreen() {
   const [filter, setFilter] = useState<Filter>('ALL');
   const [refreshing, setRefreshing] = useState(false);
 
+  const medications = useStore(selectMedications);
+  const profiles    = useStore(selectProfiles);
+
+  const medById = useMemo(
+    () => Object.fromEntries(medications.map((m) => [m.id, m])),
+    [medications],
+  );
+  const profileById = useMemo(
+    () => Object.fromEntries(profiles.map((p) => [p.id, p])),
+    [profiles],
+  );
   const loadTasks = useCallback(async (date: Date) => {
     const loaded = await getTasksByDate(toDateStr(date));
     setTasks(loaded);
@@ -71,7 +83,7 @@ export default function HistoryScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.topBar}>
-        <Text style={styles.title}>Historique</Text>
+        <Text style={styles.title}>Planning</Text>
       </View>
 
       <View style={styles.dateNav}>
@@ -125,9 +137,17 @@ export default function HistoryScreen() {
               <Text style={styles.emptyText}>{tasks.length === 0 ? 'Le planning pour cette date est vide.' : 'Modifiez le filtre.'}</Text>
             </View>
           ) : (
-            filtered.slice().sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()).map((t) => (
-              <TaskCard key={t.id} task={t} />
-            ))
+            filtered.slice().sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()).map((t) => {
+              const med = medById[t.medicationId];
+              return (
+                <TaskCard
+                  key={t.id} task={t}
+                  medicationName={med?.name}
+                  medicationDosage={med?.dosage}
+                  profileName={profileById[t.profileId]?.firstName}
+                />
+              );
+            })
           )}
         </View>
       </ScrollView>
@@ -138,27 +158,27 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   topBar: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.sm },
-  title: { fontFamily: 'Nunito_800ExtraBold', fontSize: 26, color: colors.text },
+  title: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 26, color: colors.text },
   dateNav: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: spacing.sm, gap: 8 },
   navBtn: { width: 40, height: 40, borderRadius: radius.full, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
   navBtnOff: { backgroundColor: colors.divider },
   dateBox: { flex: 1, alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.md, paddingVertical: 10, borderWidth: 1, borderColor: colors.border },
-  dateTxt: { fontFamily: 'Nunito_700Bold', fontSize: 15, color: colors.text, textTransform: 'capitalize' },
-  dateSubTxt: { fontFamily: 'Nunito_400Regular', fontSize: 11, color: colors.textSecondary, marginTop: 2 },
+  dateTxt: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 15, color: colors.text, textTransform: 'capitalize' },
+  dateSubTxt: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 11, color: colors.textSecondary, marginTop: 2 },
   statsCard: { margin: spacing.md, backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, shadowColor: colors.primary, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 8, elevation: 3 },
   statsRow: { flexDirection: 'row', gap: 8, marginBottom: spacing.md },
   adherenceRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  adherenceLbl: { fontFamily: 'Nunito_600SemiBold', fontSize: 12, color: colors.textSecondary, width: 70 },
-  barBg: { flex: 1, height: 6, backgroundColor: colors.divider, borderRadius: 3, overflow: 'hidden' },
-  barFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 3 },
-  adherencePct: { fontFamily: 'Nunito_700Bold', fontSize: 13, color: colors.primary, width: 38, textAlign: 'right' },
+  adherenceLbl: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 12, color: colors.textSecondary, width: 70 },
+  barBg: { flex: 1, height: 6, backgroundColor: colors.divider, borderRadius: 0, overflow: 'hidden' },
+  barFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 0 },
+  adherencePct: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 13, color: colors.primary, width: 38, textAlign: 'right' },
   filters: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, gap: 8 },
   chip: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: radius.full, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface },
   chipActive: { borderColor: colors.primary, backgroundColor: colors.primaryLight },
-  chipText: { fontFamily: 'Nunito_600SemiBold', fontSize: 13, color: colors.textSecondary },
+  chipText: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 13, color: colors.textSecondary },
   chipTextActive: { color: colors.primary },
   taskList: { paddingHorizontal: spacing.md, paddingBottom: spacing.xxl },
   empty: { alignItems: 'center', paddingTop: spacing.xl, paddingHorizontal: spacing.xl, gap: 12 },
-  emptyTitle: { fontFamily: 'Nunito_700Bold', fontSize: 18, color: colors.text },
-  emptyText: { fontFamily: 'Nunito_400Regular', fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 },
+  emptyTitle: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 18, color: colors.text },
+  emptyText: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 },
 });

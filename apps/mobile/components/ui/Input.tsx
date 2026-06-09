@@ -9,7 +9,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
-import { colors, radius } from '../../src/theme';
+import { colors } from '../../src/theme';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -93,9 +93,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 13,
-    color: colors.textSecondary,
+    color: colors.text,
     marginBottom: 6,
   },
   required: {
@@ -107,7 +107,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1.5,
     borderColor: colors.border,
-    borderRadius: radius.md,
     paddingHorizontal: 14,
     minHeight: 50,
   },
@@ -121,7 +120,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 15,
     color: colors.text,
     paddingVertical: 12,
@@ -137,13 +136,13 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   error: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 12,
     color: colors.error,
     marginTop: 4,
   },
   hint: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 12,
     color: colors.textMuted,
     marginTop: 4,

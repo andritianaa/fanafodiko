@@ -1,11 +1,22 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { usePharmacy } from '@/features/pharmacy/api/hooks';
+import { useSubmitClaim } from '@/features/pharmacy/api/claimHooks';
+import { uploadImage } from '@/features/pharmacy/api/upload';
 import { PharmacyStatusBadge } from '@/features/pharmacy/components/PharmacyStatusBadge';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { format, isAfter } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
@@ -25,7 +36,10 @@ import {
   CaretLeftIcon,
   CaretRightIcon,
   MagnifyingGlassPlusIcon,
+  StorefrontIcon,
+  TrashIcon,
 } from '@phosphor-icons/react';
+import { toast } from 'sonner';
 import type { Pharmacy, PharmacyContact } from '@ext/schemas';
 
 // Lazy-load mini-map (Leaflet)
@@ -194,8 +208,129 @@ export default function PharmacyDetailPage() {
   return <PharmacyDetail pharmacy={pharmacy} />;
 }
 
+// ── Claim modal ────────────────────────────────────────────────────────────────
+
+function ClaimModal({ pharmacyId, pharmacyName, open, onClose }: {
+  pharmacyId: string;
+  pharmacyName: string;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const { mutate: submit, isPending } = useSubmitClaim();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [contactInfo, setContactInfo] = useState('');
+  const [proofImages, setProofImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
+    setUploading(true);
+    try {
+      const results = await Promise.all(files.map(uploadImage));
+      setProofImages((prev) => [...prev, ...results.map((r) => r.url)]);
+    } catch {
+      toast.error("Erreur lors du téléversement des images");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!contactInfo.trim()) {
+      toast.error('Veuillez indiquer un contact (téléphone ou email)');
+      return;
+    }
+    submit(
+      { pharmacyId, contactInfo: contactInfo.trim(), proofImages },
+      {
+        onSuccess: () => {
+          toast.success('Réclamation envoyée — nous vous contacterons sous peu');
+          onClose();
+          setContactInfo('');
+          setProofImages([]);
+        },
+        onError: (e: any) => toast.error(e.response?.data?.message || "Erreur lors de l'envoi"),
+      }
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Je suis gérant de {pharmacyName}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-1">
+          <p className="text-sm text-muted-foreground">
+            Renseignez vos coordonnées et joignez des pièces justificatives prouvant
+            que vous gérez cette pharmacie (carte pro, bail, registre du commerce…).
+            Notre équipe examinera votre demande.
+          </p>
+          <div className="space-y-1.5">
+            <Label>Contact <span className="text-destructive">*</span></Label>
+            <Input
+              placeholder="Téléphone ou e-mail"
+              value={contactInfo}
+              onChange={(e) => setContactInfo(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Pièces justificatives</Label>
+            {proofImages.length > 0 && (
+              <div className="flex gap-2 flex-wrap">
+                {proofImages.map((url) => (
+                  <div key={url} className="relative group">
+                    <img src={url} alt="justificatif" className="h-20 w-20 object-cover rounded-lg border" />
+                    <button
+                      type="button"
+                      onClick={() => setProofImages((prev) => prev.filter((u) => u !== url))}
+                      className="absolute -top-1.5 -right-1.5 bg-destructive text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <TrashIcon size={11} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="gap-1.5"
+            >
+              <ImageIcon size={14} />
+              {uploading ? 'Téléversement…' : 'Ajouter des images'}
+            </Button>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={handleSubmit} disabled={isPending || uploading}>
+            {isPending ? 'Envoi…' : 'Envoyer la réclamation'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 function PharmacyDetail({ pharmacy }: { pharmacy: Pharmacy }) {
   const navigate = useNavigate();
+  const [claimOpen, setClaimOpen] = useState(false);
 
   const contacts: PharmacyContact[] =
     pharmacy.contacts && pharmacy.contacts.length > 0
@@ -340,6 +475,13 @@ function PharmacyDetail({ pharmacy }: { pharmacy: Pharmacy }) {
           {/* Actions */}
           <Button onClick={handleNavigate} className="w-full gap-2">
             <NavigationArrowIcon size={16} weight="fill" /> Y aller, Google Maps
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setClaimOpen(true)}
+            className="w-full gap-2 text-muted-foreground"
+          >
+            <StorefrontIcon size={15} weight="fill" /> Je suis gérant de cette pharmacie
           </Button>
 
           {/* Mini-map */}
@@ -531,6 +673,13 @@ function PharmacyDetail({ pharmacy }: { pharmacy: Pharmacy }) {
           <MapPinIcon size={14} /> Voir sur la carte
         </Link>
       </div>
+
+      <ClaimModal
+        pharmacyId={pharmacy.id}
+        pharmacyName={pharmacy.name}
+        open={claimOpen}
+        onClose={() => setClaimOpen(false)}
+      />
     </div>
   );
 }

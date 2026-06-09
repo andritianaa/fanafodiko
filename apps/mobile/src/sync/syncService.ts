@@ -74,13 +74,19 @@ async function replayOfflineAction(action: OfflineQueueAction): Promise<void> {
 
 async function replayQueue(): Promise<void> {
   const pending = await getPendingActions();
+  if (pending.length > 0) console.log(`[sync] replayQueue: ${pending.length} action(s) en attente`);
   for (const { id, action } of pending) {
     try {
+      console.log(`[sync] replay action: ${action.type}`);
       await replayOfflineAction(action);
       await markActionSynced(id);
     } catch (err) {
       if (err instanceof ApiError && err.status === 404) {
+        // Ressource absente côté serveur (tâche remplacée, entrée supprimée…) — on purge proprement
+        if (__DEV__) console.log(`[sync] action obsolète purgée (${action.type}): ressource introuvable`);
         await markActionSynced(id);
+      } else {
+        console.warn(`[sync] replay action échouée (${action.type}):`, err);
       }
     }
   }
@@ -88,7 +94,9 @@ async function replayQueue(): Promise<void> {
 }
 
 async function pullProfiles(): Promise<Profile[]> {
+  console.log('[sync] pullProfiles...');
   const profiles = await householdsApi.list();
+  console.log(`[sync] pullProfiles: ${profiles.length} profil(s)`);
   await upsertProfiles(profiles);
   return profiles;
 }
@@ -96,7 +104,9 @@ async function pullProfiles(): Promise<Profile[]> {
 async function pullMedications(profiles: Profile[]): Promise<Medication[]> {
   const all: Medication[] = [];
   for (const profile of profiles) {
+    console.log(`[sync] pullMedications profil ${profile.id}...`);
     const meds = await medicationsApi.listByProfile(profile.id);
+    console.log(`[sync] pullMedications: ${meds.length} médicament(s)`);
     await upsertMedications(meds);
     all.push(...meds);
   }
@@ -107,7 +117,9 @@ async function pullTasks(profiles: Profile[]): Promise<Task[]> {
   const today = new Date().toISOString().split("T")[0];
   const all: Task[] = [];
   for (const profile of profiles) {
+    console.log(`[sync] pullTasks profil ${profile.id} date ${today}...`);
     const tasks = await tasksApi.list(profile.id, today);
+    console.log(`[sync] pullTasks: ${tasks.length} tâche(s)`);
     await upsertTasks(tasks);
     all.push(...tasks);
   }
@@ -141,6 +153,8 @@ export async function fullSync(): Promise<{
 }> {
   const store = useStore.getState();
 
+  console.log('[sync] ── fullSync START ──');
+
   try {
     store.setSyncing(true);
 
@@ -156,6 +170,7 @@ export async function fullSync(): Promise<{
     store.setSyncResult(true);
 
     await setSyncMeta("lastSync", new Date().toISOString());
+    console.log('[sync] ── fullSync OK ──');
 
     if (await needsReschedule()) {
       const activeMeds = medications.filter((m) => m.isActive);
@@ -178,6 +193,12 @@ export async function fullSync(): Promise<{
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Erreur de synchronisation";
+    console.error('[sync] ── fullSync ERREUR ──');
+    if (err instanceof ApiError) {
+      console.error(`[sync] ApiError status=${err.status} code=${err.code} message=${err.message}`);
+    } else {
+      console.error('[sync] Erreur inconnue:', err);
+    }
     store.setSyncResult(false, message);
     throw err;
   }

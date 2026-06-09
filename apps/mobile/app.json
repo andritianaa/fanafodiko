@@ -8,6 +8,8 @@
     "newArchEnabled": true,
     "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
       "backgroundColor": "#FFFFFF"
     },
     "android": {
@@ -46,7 +48,6 @@
           "iosDisplayInForeground": true
         }
       ],
-      "react-native-maps",
       "expo-background-fetch",
       "expo-task-manager",
       [

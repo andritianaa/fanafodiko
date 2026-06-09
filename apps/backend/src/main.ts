@@ -10,6 +10,8 @@ import backofficePharmacyController from "@/modules/pharmacy/infrastructure/cont
 import myPharmacyController from "@/modules/pharmacy/infrastructure/controllers/MyPharmacyController";
 import pharmacyInvitationController from "@/modules/pharmacy/infrastructure/controllers/PharmacyInvitationController";
 import pharmacyRequestController from "@/modules/pharmacy/infrastructure/controllers/PharmacyRequestController";
+import pharmacyClaimController from "@/modules/pharmacy/infrastructure/controllers/PharmacyClaimController";
+import backofficePharmacyClaimController from "@/modules/pharmacy/infrastructure/controllers/BackofficePharmacyClaimController";
 import medSearchController from "@/modules/pharmacy/infrastructure/controllers/MedSearchController";
 import geocodingController from "@/modules/pharmacy/infrastructure/controllers/GeocodingController";
 import bugReportController from "@/modules/bugReport/infrastructure/controllers/BugReportController";
@@ -164,6 +166,10 @@ app.route("/pharmacy-invitations", pharmacyInvitationController);
 
 app.use("/pharmacy-requests/*", apiLimiter);
 app.route("/pharmacy-requests", pharmacyRequestController);
+
+app.use("/pharmacy-claims/*", apiLimiter);
+app.route("/pharmacy-claims", pharmacyClaimController);
+app.route("/backoffice/pharmacy-claims", backofficePharmacyClaimController);
 
 app.use("/med-searches/*", apiLimiter);
 app.route("/med-searches", medSearchController);

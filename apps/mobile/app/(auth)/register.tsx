@@ -25,11 +25,9 @@ export default function RegisterScreen() {
   const setAuth = useStore((s) => s.setAuth);
 
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     email: '',
     password: '',
-    confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -39,13 +37,11 @@ export default function RegisterScreen() {
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!form.firstName.trim()) e.firstName = 'Prénom requis';
-    if (!form.lastName.trim()) e.lastName = 'Nom requis';
+    if (!form.fullName.trim()) e.fullName = 'Nom requis';
     if (!form.email.trim()) e.email = 'Email requis';
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email invalide';
     if (!form.password) e.password = 'Mot de passe requis';
     else if (form.password.length < 8) e.password = 'Minimum 8 caractères';
-    if (form.password !== form.confirmPassword) e.confirmPassword = 'Les mots de passe ne correspondent pas';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -56,8 +52,7 @@ export default function RegisterScreen() {
     setErrors({});
     try {
       await authApi.register({
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
+        fullName: form.fullName.trim(),
         email: form.email.trim(),
         password: form.password,
       });
@@ -103,29 +98,16 @@ export default function RegisterScreen() {
             </View>
           )}
 
-          <View style={styles.row}>
-            <Input
-              label="Prénom"
-              placeholder="Jean"
-              value={form.firstName}
-              onChangeText={update('firstName')}
-              autoCapitalize="words"
-              error={errors.firstName}
-              required
-              containerStyle={styles.halfInput}
-              leftIcon={<User size={16} color={colors.textMuted} />}
-            />
-            <Input
-              label="Nom"
-              placeholder="Dupont"
-              value={form.lastName}
-              onChangeText={update('lastName')}
-              autoCapitalize="words"
-              error={errors.lastName}
-              required
-              containerStyle={styles.halfInput}
-            />
-          </View>
+          <Input
+            label="Nom complet"
+            placeholder="John Doe"
+            value={form.fullName}
+            onChangeText={update('fullName')}
+            autoCapitalize="words"
+            error={errors.fullName}
+            required
+            leftIcon={<User size={18} color={colors.textMuted} />}
+          />
 
           <Input
             label="Email"
@@ -146,17 +128,6 @@ export default function RegisterScreen() {
             onChangeText={update('password')}
             secureTextEntry
             error={errors.password}
-            required
-            leftIcon={<Lock size={18} color={colors.textMuted} />}
-          />
-
-          <Input
-            label="Confirmer le mot de passe"
-            placeholder="••••••••"
-            value={form.confirmPassword}
-            onChangeText={update('confirmPassword')}
-            secureTextEntry
-            error={errors.confirmPassword}
             required
             leftIcon={<Lock size={18} color={colors.textMuted} />}
           />
@@ -240,13 +211,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.error,
     textAlign: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  halfInput: {
-    flex: 1,
   },
   switchLink: {
     alignItems: 'center',

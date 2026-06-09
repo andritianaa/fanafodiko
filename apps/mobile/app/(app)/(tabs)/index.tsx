@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+﻿import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bell } from 'lucide-react-native';
-import { useStore, selectTodayTasks, selectProfiles, selectAppState } from '../../../src/store/useStore';
+import { useStore, selectTodayTasks, selectProfiles, selectMedications, selectAppState } from '../../../src/store/useStore';
 import { fullSync } from '../../../src/sync/syncService';
 import { updateTaskStatus, enqueueAction } from '../../../src/db/database';
 import { cancelNotificationForDose } from '../../../src/notifications/scheduler';
-import { tasksApi } from '../../../src/api/client';
+import { tasksApi, ApiError } from '../../../src/api/client';
 import { TaskCard } from '../../../components/TaskCard';
 import { SyncBanner } from '../../../components/SyncBanner';
 import { colors, spacing, radius } from '../../../src/theme';
@@ -41,9 +41,9 @@ const ring = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   inner: { alignItems: 'center' },
-  pct: { fontFamily: 'Nunito_800ExtraBold', fontSize: 20, color: '#FFF' },
-  lbl: { fontFamily: 'Nunito_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.8)' },
-  cap: { fontFamily: 'Nunito_600SemiBold', fontSize: 12, color: 'rgba(255,255,255,0.9)', marginTop: 6 },
+  pct: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 20, color: '#FFF' },
+  lbl: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.8)' },
+  cap: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 12, color: 'rgba(255,255,255,0.9)', marginTop: 6 },
 });
 
 function getDayGreeting() {
@@ -61,7 +61,18 @@ export default function DashboardScreen() {
   const user = useStore((s) => s.user);
   const tasks = useStore(selectTodayTasks);
   const profiles = useStore(selectProfiles);
+  const medications = useStore(selectMedications);
   const appState = useStore(selectAppState);
+
+  // Lookups id → nom pour l'affichage dans les cartes
+  const medById = useMemo(
+    () => Object.fromEntries(medications.map((m) => [m.id, m])),
+    [medications],
+  );
+  const profileById = useMemo(
+    () => Object.fromEntries(profiles.map((p) => [p.id, p])),
+    [profiles],
+  );
   const updateStoreTask = useStore((s) => s.updateTaskStatus);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -92,7 +103,9 @@ export default function DashboardScreen() {
     await updateTaskStatus(task.id, 'TAKEN', now);
     await cancelNotificationForDose(task.medicationId, task.scheduledAt);
     if (appState.isOnline) {
-      tasksApi.markTaken(task.id).catch(async () => {
+      tasksApi.markTaken(task.id).catch(async (err) => {
+        // 404 = tâche introuvable sur le serveur, pas la peine de ré-enqueuer
+        if (err instanceof ApiError && err.status === 404) return;
         await enqueueAction({ type: 'TAKE_TASK', taskId: task.id, takenAt: now });
       });
     } else {
@@ -105,7 +118,8 @@ export default function DashboardScreen() {
     await updateTaskStatus(task.id, 'SKIPPED');
     await cancelNotificationForDose(task.medicationId, task.scheduledAt);
     if (appState.isOnline) {
-      tasksApi.markSkipped(task.id).catch(async () => {
+      tasksApi.markSkipped(task.id).catch(async (err) => {
+        if (err instanceof ApiError && err.status === 404) return;
         await enqueueAction({ type: 'SKIP_TASK', taskId: task.id });
       });
     } else {
@@ -140,18 +154,36 @@ export default function DashboardScreen() {
                 <View style={styles.urgentDot} />
                 <Text style={styles.sectionTitle}>À prendre maintenant</Text>
               </View>
-              {nowTasks.map((t) => (
-                <TaskCard key={t.id} task={t} onTake={() => handleTake(t)} onSkip={() => handleSkip(t)} />
-              ))}
+              {nowTasks.map((t) => {
+                const med = medById[t.medicationId];
+                return (
+                  <TaskCard
+                    key={t.id} task={t}
+                    medicationName={med?.name}
+                    medicationDosage={med?.dosage}
+                    profileName={profileById[t.profileId]?.firstName}
+                    onTake={() => handleTake(t)} onSkip={() => handleSkip(t)}
+                  />
+                );
+              })}
             </View>
           )}
 
           {upcomingTasks.length > 0 && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Prochaines prises</Text>
-              {upcomingTasks.map((t) => (
-                <TaskCard key={t.id} task={t} onTake={() => handleTake(t)} onSkip={() => handleSkip(t)} compact />
-              ))}
+              {upcomingTasks.map((t) => {
+                const med = medById[t.medicationId];
+                return (
+                  <TaskCard
+                    key={t.id} task={t} compact
+                    medicationName={med?.name}
+                    medicationDosage={med?.dosage}
+                    profileName={profileById[t.profileId]?.firstName}
+                    onTake={() => handleTake(t)} onSkip={() => handleSkip(t)}
+                  />
+                );
+              })}
             </View>
           )}
 
@@ -161,13 +193,19 @@ export default function DashboardScreen() {
               {tasks
                 .slice()
                 .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())
-                .map((t) => (
-                  <TaskCard
-                    key={t.id} task={t} compact
-                    onTake={t.status === 'PENDING' ? () => handleTake(t) : undefined}
-                    onSkip={t.status === 'PENDING' ? () => handleSkip(t) : undefined}
-                  />
-                ))}
+                .map((t) => {
+                  const med = medById[t.medicationId];
+                  return (
+                    <TaskCard
+                      key={t.id} task={t} compact
+                      medicationName={med?.name}
+                      medicationDosage={med?.dosage}
+                      profileName={profileById[t.profileId]?.firstName}
+                      onTake={t.status === 'PENDING' ? () => handleTake(t) : undefined}
+                      onSkip={t.status === 'PENDING' ? () => handleSkip(t) : undefined}
+                    />
+                  );
+                })}
             </View>
           )}
 
@@ -201,15 +239,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   headerLeft: {},
-  greeting: { fontFamily: 'Nunito_400Regular', fontSize: 16, color: 'rgba(255,255,255,0.8)' },
-  name: { fontFamily: 'Nunito_800ExtraBold', fontSize: 26, color: '#FFF', marginTop: 2, marginBottom: 4 },
-  date: { fontFamily: 'Nunito_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.7)', textTransform: 'capitalize' },
+  greeting: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 16, color: 'rgba(255,255,255,0.8)' },
+  name: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 26, color: '#FFF', marginTop: 2, marginBottom: 4 },
+  date: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.7)', textTransform: 'capitalize' },
   body: { paddingHorizontal: spacing.md, paddingBottom: spacing.xl },
   section: { marginBottom: spacing.lg },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: spacing.sm },
-  urgentDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary },
-  sectionTitle: { fontFamily: 'Nunito_700Bold', fontSize: 16, color: colors.text, marginBottom: spacing.sm },
+  urgentDot: { width: 8, height: 8, borderRadius: 0, backgroundColor: colors.primary },
+  sectionTitle: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 16, color: colors.text, marginBottom: spacing.sm },
   empty: { alignItems: 'center', paddingTop: spacing.xxl, paddingHorizontal: spacing.xl, gap: 12 },
-  emptyTitle: { fontFamily: 'Nunito_700Bold', fontSize: 18, color: colors.text },
-  emptyText: { fontFamily: 'Nunito_400Regular', fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 },
+  emptyTitle: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 18, color: colors.text },
+  emptyText: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 },
 });

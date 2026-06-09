@@ -29,6 +29,7 @@ export default function AppLayout() {
       <Stack.Screen name="med-search/history" />
       <Stack.Screen name="my-pharmacy/index" />
       <Stack.Screen name="my-pharmacy/[id]" />
+      <Stack.Screen name="suggest-pharmacy" />
     </Stack>
   );
 }

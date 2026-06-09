@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerTitle: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 16,
     color: colors.text,
   },
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   searchIcon: { flexShrink: 0 },
   searchInput: {
     flex: 1,
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14,
     color: colors.text,
     paddingVertical: 10,
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   },
   categoryBlock: { gap: 8 },
   categoryLabel: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 13,
     color: colors.textSecondary,
     textTransform: 'uppercase',
@@ -178,18 +178,18 @@ const styles = StyleSheet.create({
   },
   itemQuestion: {
     flex: 1,
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 14,
     color: colors.text,
   },
   itemChevron: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 18,
     color: colors.textMuted,
     lineHeight: 22,
   },
   itemAnswer: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 13,
     color: colors.textSecondary,
     lineHeight: 20,
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   empty: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 13,
     color: colors.textMuted,
     textAlign: 'center',
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   footer: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 11,
     color: colors.textMuted,
     textAlign: 'center',

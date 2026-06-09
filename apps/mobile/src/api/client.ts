@@ -1,15 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const DEFAULT_API_URL = "https://fanafodiko-bck.andritiana.tech";
-
-export async function getApiUrl(): Promise<string> {
-  const stored = await AsyncStorage.getItem("api_url");
-  return stored ?? DEFAULT_API_URL;
-}
-
-export async function setApiUrl(url: string): Promise<void> {
-  await AsyncStorage.setItem("api_url", url.replace(/\/$/, ""));
-}
+const API_URL = "https://fanafodiko-bck.andritiana.tech";
 
 async function getAuthHeader(): Promise<Record<string, string>> {
   const token = await AsyncStorage.getItem("auth_token");
@@ -33,17 +24,21 @@ async function request<T>(
   options: RequestInit = {},
   timeout = 10000,
 ): Promise<T> {
-  const baseUrl = await getApiUrl();
+  const baseUrl = API_URL;
   const authHeaders = await getAuthHeader();
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
 
+  const url = `${baseUrl}${path}`;
+  console.log(`[api] ${options.method ?? 'GET'} ${url}`);
+
   try {
-    const res = await fetch(`${baseUrl}${path}`, {
+    const res = await fetch(url, {
       ...options,
       headers: {
         "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
         ...authHeaders,
         ...((options.headers as Record<string, string>) ?? {}),
       },
@@ -57,6 +52,10 @@ async function request<T>(
       try {
         errBody = await res.json();
       } catch {}
+      // 4xx = erreur client (souvent attendue, ex. 404 queue replay) → warn
+      // 5xx = erreur serveur inattendue → error
+      const logFn = res.status >= 500 ? console.error : console.warn;
+      logFn(`[api] ${res.status} ${url} →`, errBody);
       throw new ApiError(
         res.status,
         errBody.code ?? "UNKNOWN",
@@ -70,7 +69,11 @@ async function request<T>(
   } catch (err) {
     clearTimeout(timer);
     if ((err as Error).name === "AbortError") {
+      console.error(`[api] TIMEOUT ${url}`);
       throw new ApiError(0, "TIMEOUT", "Request timeout");
+    }
+    if (!(err instanceof ApiError)) {
+      console.error(`[api] NETWORK ERROR ${url}:`, (err as Error).message);
     }
     throw err;
   }
@@ -93,9 +96,7 @@ export const authApi = {
   register: (data: {
     email: string;
     password: string;
-    firstName: string;
-    lastName: string;
-    dateOfBirth?: string;
+    fullName: string;
   }) =>
     api.post<{ id: string; email: string; message: string }>(
       "/auth/register",
@@ -112,19 +113,39 @@ export const authApi = {
     }),
 };
 
+type HouseholdRaw = { id: string; fullName: string; relationship: string; avatarUrl?: string | null; dateOfBirth?: string };
+
+function mapHousehold(p: HouseholdRaw): import("../types").Profile {
+  const parts = p.fullName.trim().split(/\s+/);
+  return {
+    id: p.id,
+    firstName: parts[0] ?? p.fullName,
+    lastName: parts.slice(1).join(' '),
+    dateOfBirth: p.dateOfBirth ?? '',
+    relationship: p.relationship,
+    avatarUrl: p.avatarUrl ?? null,
+  };
+}
+
 export const householdsApi = {
-  list: () => api.get<import("../types").Profile[]>("/households"),
-  get: (id: string) => api.get<import("../types").Profile>(`/households/${id}`),
+  list: async (): Promise<import("../types").Profile[]> => {
+    const raw = await api.get<HouseholdRaw[]>("/household");
+    return raw.map(mapHousehold);
+  },
+  get: async (id: string): Promise<import("../types").Profile> => {
+    const raw = await api.get<HouseholdRaw>(`/household/${id}`);
+    return mapHousehold(raw);
+  },
   create: (data: {
     firstName: string;
     lastName: string;
     dateOfBirth: string;
     relationship: string;
     avatarUrl?: string;
-  }) => api.post<import("../types").Profile>("/households", data),
+  }) => api.post<import("../types").Profile>("/household", data),
   update: (id: string, data: Partial<import("../types").Profile>) =>
-    api.patch<import("../types").Profile>(`/households/${id}`, data),
-  remove: (id: string) => api.delete(`/households/${id}`),
+    api.patch<import("../types").Profile>(`/household/${id}`, data),
+  remove: (id: string) => api.delete(`/household/${id}`),
 };
 
 export const medicationsApi = {
@@ -227,6 +248,30 @@ export const myPharmacyApi = {
     api.get<Array<{ id: string; userId: string; email: string; createdAt: string }>>(
       `/my/pharmacies/${id}/requests`,
     ),
+};
+
+export const pharmacyRequestApi = {
+  create: (data: {
+    name: string;
+    address: string;
+    landmark?: string;
+    coordinates: { lat: number; lng: number };
+    contacts: { type: string; value: string }[];
+    city: string;
+    region?: string;
+    isOpen24h: boolean;
+    openingHours: { day: number; open?: string; close?: string; isClosed: boolean }[];
+    wantsToManage: boolean;
+    proofImages: string[];
+  }) => api.post<{ id: string }>('/pharmacy-requests', data),
+};
+
+export const pharmacyClaimApi = {
+  create: (data: {
+    pharmacyId: string;
+    contactInfo: string;
+    proofImages: string[];
+  }) => api.post<{ id: string }>('/pharmacy-claims', data),
 };
 
 export const preferencesApi = {

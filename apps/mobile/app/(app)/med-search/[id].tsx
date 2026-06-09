@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator,
 } from 'react-native';
@@ -66,15 +66,15 @@ const resp = StyleSheet.create({
   cardNok: { backgroundColor: colors.errorLight, borderColor: '#fecaca' },
   left: { paddingTop: 2 },
   content: { flex: 1, gap: 3 },
-  pharmacy: { fontFamily: 'Nunito_700Bold', fontSize: 14, color: colors.text },
-  note: { fontFamily: 'Nunito_400Regular', fontSize: 12, color: colors.textSecondary, fontStyle: 'italic' },
+  pharmacy: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 14, color: colors.text },
+  note: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 12, color: colors.textSecondary, fontStyle: 'italic' },
   meta: { flexDirection: 'row', gap: 12, marginTop: 4 },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  metaText: { fontFamily: 'Nunito_400Regular', fontSize: 11, color: colors.textMuted },
+  metaText: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 11, color: colors.textMuted },
   badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.sm, alignSelf: 'flex-start' },
   badgeOk: { backgroundColor: '#dcfce7' },
   badgeNok: { backgroundColor: '#fee2e2' },
-  badgeText: { fontFamily: 'Nunito_700Bold', fontSize: 11 },
+  badgeText: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 11 },
 });
 
 function ExpiresIn({ expiresAt }: { expiresAt: string }) {
@@ -103,7 +103,7 @@ function ExpiresIn({ expiresAt }: { expiresAt: string }) {
 
 const timer = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  text: { fontFamily: 'Nunito_600SemiBold', fontSize: 13, color: colors.textMuted },
+  text: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 13, color: colors.textMuted },
 });
 
 export default function MedSearchResultScreen() {
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   headerInfo: { flex: 1, gap: 4 },
-  title: { fontFamily: 'Nunito_800ExtraBold', fontSize: 20, color: colors.text },
+  title: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 20, color: colors.text },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   statusBadge: {
     paddingHorizontal: 8,
@@ -283,8 +283,8 @@ const styles = StyleSheet.create({
   },
   statusActive: { backgroundColor: colors.successLight },
   statusClosed: { backgroundColor: colors.divider },
-  statusText: { fontFamily: 'Nunito_700Bold', fontSize: 12 },
-  radiusText: { fontFamily: 'Nunito_400Regular', fontSize: 12, color: colors.textMuted },
+  statusText: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 12 },
+  radiusText: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 12, color: colors.textMuted },
   content: { paddingHorizontal: spacing.md, paddingBottom: spacing.xxl },
   statsRow: {
     flexDirection: 'row',
@@ -301,12 +301,12 @@ const styles = StyleSheet.create({
     ...shadows.sm,
   },
   statValue: {
-    fontFamily: 'Nunito_800ExtraBold',
+    fontFamily: 'FunnelDisplay_800ExtraBold',
     fontSize: 24,
     color: colors.primary,
   },
   statLabel: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 11,
     color: colors.textSecondary,
     textAlign: 'center',
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   sectionTitle: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 16,
     color: colors.text,
   },
@@ -340,20 +340,20 @@ const styles = StyleSheet.create({
     ...shadows.sm,
   },
   waitingText: {
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 14,
     color: colors.text,
     textAlign: 'center',
   },
   waitingSubText: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 12,
     color: colors.textSecondary,
   },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl, gap: 12 },
-  emptyTitle: { fontFamily: 'Nunito_700Bold', fontSize: 18, color: colors.text },
+  emptyTitle: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 18, color: colors.text },
   emptyText: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14,
     color: colors.textSecondary,
     textAlign: 'center',
@@ -365,5 +365,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: 10,
   },
-  linkBtnText: { fontFamily: 'Nunito_700Bold', fontSize: 14, color: colors.primary },
+  linkBtnText: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 14, color: colors.primary },
 });

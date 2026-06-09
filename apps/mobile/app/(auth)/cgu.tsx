@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   Text,
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerTitle: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 16,
     color: colors.text,
   },
@@ -127,13 +127,13 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl * 2,
   },
   pageTitle: {
-    fontFamily: 'Nunito_800ExtraBold',
+    fontFamily: 'FunnelDisplay_800ExtraBold',
     fontSize: 20,
     color: colors.text,
     marginBottom: 4,
   },
   lastUpdate: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 12,
     color: colors.textMuted,
     marginBottom: spacing.lg,
@@ -142,19 +142,19 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   articleTitle: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 14,
     color: colors.text,
     marginBottom: 6,
   },
   articleContent: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 13,
     color: colors.textSecondary,
     lineHeight: 20,
   },
   footer: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 11,
     color: colors.textMuted,
     textAlign: 'center',

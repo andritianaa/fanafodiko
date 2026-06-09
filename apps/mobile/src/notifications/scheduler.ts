@@ -232,9 +232,9 @@ export async function startBackgroundScheduling(): Promise<void> {
   if (!features.backgroundScheduling) return;
 
   try {
-    const [{ default: TaskManager }, { default: BackgroundFetch }] = await Promise.all([
-      import('expo-task-manager') as Promise<{ default: typeof import('expo-task-manager') }>,
-      import('expo-background-fetch') as Promise<{ default: typeof import('expo-background-fetch') }>,
+    const [TaskManager, BackgroundFetch] = await Promise.all([
+      import('expo-task-manager'),
+      import('expo-background-fetch'),
     ]);
 
     const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_SCHEDULE_TASK);

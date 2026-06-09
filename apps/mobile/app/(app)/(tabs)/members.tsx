@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+﻿import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -186,31 +186,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.md,
   },
-  title: { fontFamily: 'Nunito_800ExtraBold', fontSize: 26, color: colors.text },
-  subtitle: { fontFamily: 'Nunito_400Regular', fontSize: 13, color: colors.textSecondary, marginTop: 2 },
+  title: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 26, color: colors.text },
+  subtitle: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 13, color: colors.textSecondary, marginTop: 2 },
   fab: { width: 44, height: 44, borderRadius: radius.full, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', ...shadows.md },
   list: { paddingHorizontal: spacing.md, paddingBottom: spacing.xl },
   empty: { alignItems: 'center', paddingTop: spacing.xxl, paddingHorizontal: spacing.xl, gap: 12 },
-  emptyTitle: { fontFamily: 'Nunito_700Bold', fontSize: 20, color: colors.text },
-  emptyText: { fontFamily: 'Nunito_400Regular', fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 },
+  emptyTitle: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 20, color: colors.text },
+  emptyText: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 },
 });
 
 const m = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
   kav: { justifyContent: 'flex-end' },
   sheet: { backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing.lg, maxHeight: '90%' },
-  handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: 'center', marginBottom: 16 },
+  handle: { width: 40, height: 4, borderRadius: 0, backgroundColor: colors.border, alignSelf: 'center', marginBottom: 16 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.lg },
-  title: { fontFamily: 'Nunito_800ExtraBold', fontSize: 20, color: colors.text },
+  title: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 20, color: colors.text },
   closeBtn: { width: 34, height: 34, borderRadius: radius.full, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
   errorBanner: { backgroundColor: colors.errorLight, borderRadius: radius.sm, padding: 10, marginBottom: 12 },
-  errorText: { fontFamily: 'Nunito_600SemiBold', fontSize: 12, color: colors.error },
+  errorText: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 12, color: colors.error },
   row: { flexDirection: 'row', gap: 12 },
   half: { flex: 1 },
-  relLabel: { fontFamily: 'Nunito_600SemiBold', fontSize: 13, color: colors.textSecondary, marginBottom: 8 },
+  relLabel: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 13, color: colors.textSecondary, marginBottom: 8 },
   relGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
   chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: radius.full, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface },
   chipActive: { borderColor: colors.primary, backgroundColor: colors.primaryLight },
-  chipText: { fontFamily: 'Nunito_600SemiBold', fontSize: 13, color: colors.textSecondary, textTransform: 'capitalize' },
+  chipText: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 13, color: colors.textSecondary, textTransform: 'capitalize' },
   chipTextActive: { color: colors.primary },
 });

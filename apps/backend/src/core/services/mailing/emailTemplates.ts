@@ -381,3 +381,48 @@ export function pharmacyRequestDecisionEmailTemplate(opts: {
     }),
   };
 }
+
+// ─── Notification admin plateforme : nouvelle réclamation de pharmacie ─────────
+export function newPharmacyClaimEmailTemplate(opts: {
+  pharmacyName: string;
+  submitterEmail: string;
+  reviewUrl: string;
+}): { subject: string; html: string } {
+  return {
+    subject: `Nouvelle réclamation de pharmacie : ${opts.pharmacyName}`,
+    html: simpleTemplate({
+      title: "Nouvelle réclamation de pharmacie",
+      subtitle: opts.pharmacyName,
+      body: `Un utilisateur (<strong>${opts.submitterEmail}</strong>) affirme être le gérant de
+        <strong style="color:#4f46e5;">${opts.pharmacyName}</strong>.<br/><br/>
+        Des pièces justificatives et un contact ont été fournis. Connectez-vous au backoffice pour examiner et approuver/refuser la réclamation.`,
+      ctaLabel: "Examiner la réclamation",
+      ctaUrl: opts.reviewUrl,
+    }),
+  };
+}
+
+// ─── Notification au réclamant : décision sur sa réclamation ──────────────────
+export function pharmacyClaimDecisionEmailTemplate(opts: {
+  pharmacyName: string;
+  approved: boolean;
+  reason?: string;
+}): { subject: string; html: string } {
+  const body = opts.approved
+    ? `Bonne nouvelle ! Votre réclamation concernant <strong style="color:#4f46e5;">${opts.pharmacyName}</strong>
+       a été <strong>approuvée</strong>.<br/><br/>
+       Vous êtes maintenant gérant de cette pharmacie et pouvez la gérer depuis la section « Ma pharmacie ».`
+    : `Votre réclamation concernant <strong>${opts.pharmacyName}</strong> a été <strong>refusée</strong>.<br/><br/>
+       ${opts.reason ? `Motif : ${opts.reason}` : "N'hésitez pas à nous contacter pour plus d'informations."}`;
+
+  return {
+    subject: opts.approved
+      ? `Votre réclamation pour ${opts.pharmacyName} a été approuvée`
+      : `Votre réclamation pour ${opts.pharmacyName} a été refusée`,
+    html: simpleTemplate({
+      title: opts.approved ? "Réclamation approuvée 🎉" : "Réclamation refusée",
+      subtitle: opts.pharmacyName,
+      body,
+    }),
+  };
+}

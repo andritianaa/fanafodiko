@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, type ViewStyle } from 'react-native';
-import { colors, radius } from '../../src/theme';
+import { colors } from '../../src/theme';
 import type { TaskStatus } from '../../src/types';
 
 type BadgeVariant = 'primary' | 'success' | 'error' | 'warning' | 'neutral';
@@ -18,7 +18,7 @@ const variantMap: Record<BadgeVariant, { bg: string; text: string; dot: string }
   success: { bg: colors.status.takenBg, text: colors.status.taken, dot: colors.status.taken },
   error: { bg: colors.status.missedBg, text: colors.status.missed, dot: colors.status.missed },
   warning: { bg: colors.status.skippedBg, text: colors.status.skipped, dot: colors.status.skipped },
-  neutral: { bg: '#F3F4F6', text: '#6B7280', dot: '#9CA3AF' },
+  neutral: { bg: '#F4F4F5', text: '#71717a', dot: '#a1a1aa' },
 };
 
 export function Badge({ label, variant = 'neutral', size = 'md', style, dot }: BadgeProps) {
@@ -53,7 +53,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: radius.full,
     alignSelf: 'flex-start',
   },
   sm: {
@@ -63,11 +62,10 @@ const styles = StyleSheet.create({
   dot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
     marginRight: 5,
   },
   text: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 12,
     lineHeight: 16,
   },

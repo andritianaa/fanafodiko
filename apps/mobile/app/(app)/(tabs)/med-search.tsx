@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   TextInput, ActivityIndicator, Alert,
@@ -264,8 +264,8 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
   },
-  title: { fontFamily: 'Nunito_800ExtraBold', fontSize: 26, color: colors.text },
-  subtitle: { fontFamily: 'Nunito_400Regular', fontSize: 13, color: colors.textSecondary, marginTop: 2 },
+  title: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 26, color: colors.text },
+  subtitle: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 13, color: colors.textSecondary, marginTop: 2 },
   content: { paddingHorizontal: spacing.md, paddingBottom: spacing.xxl, gap: spacing.md },
   card: {
     backgroundColor: colors.surface,
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     ...shadows.sm,
   },
   fieldLabel: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 14,
     color: colors.text,
   },
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 15,
     color: colors.text,
     padding: 0,
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: colors.background,
     minHeight: 80,
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14,
     color: colors.text,
     flex: undefined,
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   radiusText: {
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 13,
     color: colors.textSecondary,
   },
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     flex: 1,
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 13,
     color: colors.primary,
     lineHeight: 18,
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   submitBtnText: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 16,
     color: '#FFF',
   },
@@ -374,9 +374,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     ...shadows.sm,
   },
-  offlineTitle: { fontFamily: 'Nunito_800ExtraBold', fontSize: 20, color: colors.text },
+  offlineTitle: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 20, color: colors.text },
   offlineText: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14,
     color: colors.textSecondary,
     textAlign: 'center',
@@ -388,9 +388,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  historyTitle: { fontFamily: 'Nunito_700Bold', fontSize: 13, color: colors.textSecondary },
+  historyTitle: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 13, color: colors.textSecondary },
   seeAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  seeAllText: { fontFamily: 'Nunito_600SemiBold', fontSize: 12, color: colors.primary },
+  seeAllText: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 12, color: colors.primary },
   historyList: {
     borderRadius: radius.lg,
     borderWidth: 1,
@@ -414,8 +414,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  recentName: { fontFamily: 'Nunito_600SemiBold', fontSize: 13, color: colors.text },
-  recentDate: { fontFamily: 'Nunito_400Regular', fontSize: 11, color: colors.textMuted, marginTop: 1 },
+  recentName: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 13, color: colors.text },
+  recentDate: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 11, color: colors.textMuted, marginTop: 1 },
   recentBadge: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: radius.full },
-  recentBadgeText: { fontFamily: 'Nunito_700Bold', fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5 },
+  recentBadgeText: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5 },
 });

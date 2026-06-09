@@ -9,7 +9,7 @@ import {
   type TextStyle,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { colors, radius, shadows } from '../../src/theme';
+import { colors } from '../../src/theme';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
 type Size = 'sm' | 'md' | 'lg';
@@ -30,29 +30,19 @@ interface ButtonProps {
 
 const variantStyles: Record<Variant, { container: ViewStyle; text: TextStyle }> = {
   primary: {
-    container: {
-      backgroundColor: colors.primary,
-      ...shadows.md,
-    },
+    container: { backgroundColor: colors.primary },
     text: { color: '#FFFFFF' },
   },
   secondary: {
-    container: {
-      backgroundColor: colors.primaryLight,
-    },
+    container: { backgroundColor: colors.primaryLight },
     text: { color: colors.primary },
   },
   ghost: {
-    container: {
-      backgroundColor: 'transparent',
-    },
+    container: { backgroundColor: 'transparent' },
     text: { color: colors.primary },
   },
   danger: {
-    container: {
-      backgroundColor: colors.error,
-      ...shadows.md,
-    },
+    container: { backgroundColor: colors.error },
     text: { color: '#FFFFFF' },
   },
   outline: {
@@ -67,15 +57,15 @@ const variantStyles: Record<Variant, { container: ViewStyle; text: TextStyle }> 
 
 const sizeStyles: Record<Size, { container: ViewStyle; text: TextStyle }> = {
   sm: {
-    container: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: radius.sm },
+    container: { paddingVertical: 8, paddingHorizontal: 16 },
     text: { fontSize: 13, lineHeight: 18 },
   },
   md: {
-    container: { paddingVertical: 13, paddingHorizontal: 24, borderRadius: radius.md },
+    container: { paddingVertical: 13, paddingHorizontal: 24 },
     text: { fontSize: 15, lineHeight: 20 },
   },
   lg: {
-    container: { paddingVertical: 16, paddingHorizontal: 32, borderRadius: radius.lg },
+    container: { paddingVertical: 16, paddingHorizontal: 32 },
     text: { fontSize: 16, lineHeight: 22 },
   },
 };
@@ -125,15 +115,7 @@ export function Button({
       ) : (
         <View style={styles.inner}>
           {icon && <View style={styles.iconLeft}>{icon}</View>}
-          <Text
-            style={[
-              styles.text,
-              v.text,
-              s.text,
-              isDisabled && styles.textDisabled,
-              textStyle,
-            ]}
-          >
+          <Text style={[styles.text, v.text, s.text, textStyle]}>
             {label}
           </Text>
           {iconRight && <View style={styles.iconRight}>{iconRight}</View>}
@@ -159,11 +141,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     textAlign: 'center',
   },
   iconLeft: { marginRight: 8 },
   iconRight: { marginLeft: 8 },
-  disabled: { opacity: 0.5 },
-  textDisabled: {},
+  disabled: { opacity: 0.4 },
 });

@@ -16,4 +16,5 @@ export * from './pharmacy/PharmacySchema';
 export * from './pharmacy/PharmacyMembershipSchema';
 export * from './pharmacy/PharmacyRequestSchema';
 export * from './pharmacy/MedSearchSchema';
+export * from './pharmacy/PharmacyClaimSchema';
 export * from './bugReport/BugReportSchema';

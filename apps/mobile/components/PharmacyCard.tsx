@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Linking, Platform,
 } from 'react-native';
@@ -10,7 +10,7 @@ interface Props {
   pharmacy: Pharmacy;
   onViewDetails: () => void;
   onGetDirections?: () => void;
-  /** Mode compact pour les listes (cache les boutons d'action) */
+  onPress?: () => void;
   compact?: boolean;
 }
 
@@ -56,11 +56,11 @@ const badge = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: radius.full,
   },
-  dot: { width: 6, height: 6, borderRadius: 3 },
-  text: { fontFamily: 'Nunito_600SemiBold', fontSize: 11 },
+  dot: { width: 6, height: 6, borderRadius: 0 },
+  text: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 11 },
 });
 
-export function PharmacyCard({ pharmacy, onViewDetails, onGetDirections, compact = false }: Props) {
+export function PharmacyCard({ pharmacy, onViewDetails, onGetDirections, onPress, compact = false }: Props) {
   const phone = pharmacy.contacts.find((c) => c.type === 'phone')?.value ?? pharmacy.phone;
   const todayHour = pharmacy.openingHours[new Date().getDay()];
 
@@ -80,8 +80,9 @@ export function PharmacyCard({ pharmacy, onViewDetails, onGetDirections, compact
     );
   };
 
+  const Wrapper = onPress ? TouchableOpacity : View;
   return (
-    <View style={styles.card}>
+    <Wrapper style={styles.card} onPress={onPress} activeOpacity={0.75}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.nameWrap}>
@@ -153,7 +154,7 @@ export function PharmacyCard({ pharmacy, onViewDetails, onGetDirections, compact
           <ChevronRight size={14} color={colors.primary} />
         </TouchableOpacity>
       )}
-    </View>
+    </Wrapper>
   );
 }
 
@@ -172,7 +173,7 @@ const styles = StyleSheet.create({
   },
   nameWrap: { flex: 1, gap: 5 },
   name: {
-    fontFamily: 'Nunito_800ExtraBold',
+    fontFamily: 'FunnelDisplay_800ExtraBold',
     fontSize: 17,
     color: colors.text,
     lineHeight: 22,
@@ -183,20 +184,20 @@ const styles = StyleSheet.create({
     gap: 7,
   },
   address: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 13,
     color: colors.textSecondary,
     flex: 1,
     lineHeight: 18,
   },
   hours: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 13,
     color: colors.textSecondary,
     flex: 1,
   },
   phone: {
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 13,
     color: colors.primary,
   },
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
   },
   actionBtnOutlineText: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 14,
     color: colors.primary,
   },
@@ -232,7 +233,7 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
   },
   actionBtnPrimaryText: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 14,
     color: '#FFF',
   },
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   compactBtnText: {
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 13,
     color: colors.primary,
   },

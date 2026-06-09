@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   ActivityIndicator, Alert, RefreshControl,
@@ -85,10 +85,10 @@ const pending = StyleSheet.create({
     borderColor: colors.border,
   },
   header: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  med: { fontFamily: 'Nunito_700Bold', fontSize: 15, color: colors.text, flex: 1 },
-  radius: { fontFamily: 'Nunito_600SemiBold', fontSize: 12, color: colors.primary },
-  note: { fontFamily: 'Nunito_400Regular', fontSize: 13, color: colors.textSecondary, fontStyle: 'italic' },
-  date: { fontFamily: 'Nunito_400Regular', fontSize: 11, color: colors.textMuted },
+  med: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 15, color: colors.text, flex: 1 },
+  radius: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 12, color: colors.primary },
+  note: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 13, color: colors.textSecondary, fontStyle: 'italic' },
+  date: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 11, color: colors.textMuted },
   actions: { flexDirection: 'row', gap: spacing.sm, marginTop: 4 },
   btn: {
     flex: 1,
@@ -99,9 +99,9 @@ const pending = StyleSheet.create({
   },
   btnOk: { backgroundColor: colors.successLight, borderColor: '#86efac' },
   btnNok: { backgroundColor: colors.errorLight, borderColor: '#fca5a5' },
-  btnText: { fontFamily: 'Nunito_700Bold', fontSize: 13 },
+  btnText: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 13 },
   offline: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 4 },
-  offlineText: { fontFamily: 'Nunito_600SemiBold', fontSize: 12, color: colors.warning },
+  offlineText: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 12, color: colors.warning },
 });
 
 export default function MyPharmacyDetailScreen() {
@@ -303,37 +303,37 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryLighter, alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
   headerInfo: { flex: 1, gap: 6 },
-  name: { fontFamily: 'Nunito_800ExtraBold', fontSize: 20, color: colors.text },
+  name: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 20, color: colors.text },
   statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.full, alignSelf: 'flex-start' },
   statusOpen: { backgroundColor: colors.successLight },
   statusClosed: { backgroundColor: colors.errorLight },
-  statusText: { fontFamily: 'Nunito_700Bold', fontSize: 12 },
+  statusText: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 12 },
   content: { paddingHorizontal: spacing.md, paddingBottom: spacing.xxl },
   section: { marginBottom: spacing.md },
   sectionTitle: {
-    fontFamily: 'Nunito_700Bold', fontSize: 13, color: colors.textSecondary,
+    fontFamily: 'FunnelDisplay_700Bold', fontSize: 13, color: colors.textSecondary,
     textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6,
   },
   card: {
     backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, ...shadows.sm,
   },
   infoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  infoText: { fontFamily: 'Nunito_400Regular', fontSize: 14, color: colors.text, flex: 1 },
+  infoText: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 14, color: colors.text, flex: 1 },
   hoursRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 5 },
-  hoursDay: { fontFamily: 'Nunito_600SemiBold', fontSize: 14, color: colors.text, width: 100 },
-  hoursTime: { fontFamily: 'Nunito_400Regular', fontSize: 14, color: colors.text },
-  hoursClosed: { fontFamily: 'Nunito_400Regular', fontSize: 14, color: colors.textMuted },
+  hoursDay: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 14, color: colors.text, width: 100 },
+  hoursTime: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 14, color: colors.text },
+  hoursClosed: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 14, color: colors.textMuted },
   calRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
   calBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.sm },
-  calBadgeText: { fontFamily: 'Nunito_700Bold', fontSize: 11 },
-  calDates: { fontFamily: 'Nunito_600SemiBold', fontSize: 13, color: colors.text },
+  calBadgeText: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 11 },
+  calDates: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 13, color: colors.text },
   offlineNote: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 8,
     backgroundColor: colors.warningLight, borderRadius: radius.md, padding: spacing.md,
   },
   offlineNoteText: {
-    fontFamily: 'Nunito_600SemiBold', fontSize: 13, color: colors.warning, flex: 1, lineHeight: 18,
+    fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 13, color: colors.warning, flex: 1, lineHeight: 18,
   },
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { fontFamily: 'Nunito_400Regular', fontSize: 16, color: colors.textSecondary },
+  errorText: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 16, color: colors.textSecondary },
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   Modal, View, Text, StyleSheet, TouchableOpacity,
   SafeAreaView, ScrollView, ActivityIndicator,
@@ -223,12 +223,12 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   alertBadgeText: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 13,
     color: colors.primary,
   },
   counter: {
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 13,
     color: colors.textSecondary,
   },
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pharmacyName: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 16,
     color: colors.text,
     flex: 1,
@@ -273,14 +273,14 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   medLabel: {
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 12,
     color: colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
   medName: {
-    fontFamily: 'Nunito_800ExtraBold',
+    fontFamily: 'FunnelDisplay_800ExtraBold',
     fontSize: 24,
     color: colors.text,
     lineHeight: 30,
@@ -296,14 +296,14 @@ const styles = StyleSheet.create({
   },
   metaItem: { gap: 2 },
   metaLabel: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 11,
     color: colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   metaValue: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 15,
     color: colors.text,
   },
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   noteText: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 13,
     color: colors.textSecondary,
     flex: 1,
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   },
 
   responseLabel: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 15,
     color: colors.text,
     textAlign: 'center',
@@ -350,11 +350,11 @@ const styles = StyleSheet.create({
     borderColor: '#fca5a5',
   },
   responseBtnText: {
-    fontFamily: 'Nunito_800ExtraBold',
+    fontFamily: 'FunnelDisplay_800ExtraBold',
     fontSize: 16,
   },
   responseBtnSub: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 11,
     color: colors.textMuted,
   },
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
   },
   navBtnDisabled: { opacity: 0.4 },
   navBtnText: {
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 14,
     color: colors.primary,
   },
@@ -388,12 +388,12 @@ const styles = StyleSheet.create({
   dot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 0,
     backgroundColor: colors.border,
   },
   dotActive: {
     backgroundColor: colors.primary,
     width: 16,
-    borderRadius: 3,
+    borderRadius: 0,
   },
 });

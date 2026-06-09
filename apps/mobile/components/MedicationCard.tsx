@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Pill, Clock, Calendar, ChevronRight, Pause, Play } from 'lucide-react-native';
 import { colors, radius, shadows, spacing } from '../src/theme';
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   name: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 15,
     color: colors.text,
     flex: 1,
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   dosage: {
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 13,
     color: colors.primary,
     marginBottom: 6,
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   metaText: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 11,
     color: colors.textMuted,
   },
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
   },
   pausedText: {
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: 'FunnelDisplay_600SemiBold',
     fontSize: 10,
     color: colors.textMuted,
   },

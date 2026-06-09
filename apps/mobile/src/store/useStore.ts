@@ -46,8 +46,6 @@ interface PreferencesSlice {
 }
 
 interface SettingsSlice {
-  apiUrl: string;
-  setApiUrl: (url: string) => void;
   notificationsEnabled: boolean;
   setNotificationsEnabled: (enabled: boolean) => void;
 }
@@ -161,8 +159,6 @@ export const useStore = create<StoreState>()(
       setNotificationPreferences: (prefs) => set({ notificationPreferences: prefs }),
 
       // Settings
-      apiUrl: 'http://10.0.2.2:3000',
-      setApiUrl: (url) => set({ apiUrl: url }),
       notificationsEnabled: true,
       setNotificationsEnabled: (enabled) => set({ notificationsEnabled: enabled }),
     }),
@@ -172,7 +168,6 @@ export const useStore = create<StoreState>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
-        apiUrl: state.apiUrl,
         notificationsEnabled: state.notificationsEnabled,
         selectedProfileId: state.selectedProfileId,
         appState: { ...state.appState, isSyncing: false, syncError: null },

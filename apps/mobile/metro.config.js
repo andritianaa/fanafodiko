@@ -16,6 +16,16 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 
+// Force une seule instance de React — override dur via resolveRequest
+// (zustand pnpm embarque son propre node_modules/react, extraNodeModules ne suffit pas)
+const reactRoot = path.resolve(workspaceRoot, 'node_modules', 'react');
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName === 'react') {
+    return { filePath: path.join(reactRoot, 'index.js'), type: 'sourceFile' };
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
+
 // Expose les dossiers workspace au watcher (pour le hot reload en dev)
 // mais uniquement les packages partageables, pas la racine entière
 config.watchFolders = [

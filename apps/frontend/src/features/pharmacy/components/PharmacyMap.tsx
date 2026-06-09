@@ -137,7 +137,6 @@ function PharmacyPopupContent({ pharmacy }: { pharmacy: Pharmacy }) {
 
         {/* Localisation */}
         <p className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
-          <MapPinSimpleIcon size={11} weight="fill" />
           {pharmacy.city}
           {pharmacy.region ? `, ${pharmacy.region}` : ""}
         </p>
@@ -150,11 +149,6 @@ function PharmacyPopupContent({ pharmacy }: { pharmacy: Pharmacy }) {
             href={contactHref(primaryContact)}
             className="flex items-center gap-2 text-xs font-medium text-foreground hover:text-primary transition-colors py-1"
           >
-            <PhoneIcon
-              size={12}
-              weight="fill"
-              className="text-muted-foreground shrink-0"
-            />
             {primaryContact.label || primaryContact.value}
           </a>
         </div>
@@ -166,11 +160,6 @@ function PharmacyPopupContent({ pharmacy }: { pharmacy: Pharmacy }) {
           onClick={handleNavigate}
           className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-border bg-white hover:bg-muted/50 text-xs font-medium text-foreground transition-colors cursor-pointer"
         >
-          <NavigationArrowIcon
-            size={12}
-            weight="fill"
-            className="text-primary"
-          />
           Itinéraire
         </button>
         <button

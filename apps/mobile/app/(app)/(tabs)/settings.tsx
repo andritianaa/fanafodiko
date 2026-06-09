@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,12 +11,13 @@ import {
   TextInput,
   Platform,
   Dimensions,
+  Image,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-  Server,
   Bell,
   LogOut,
   RefreshCw,
@@ -33,11 +34,6 @@ import {
 import { useStore, selectAppState } from "../../../src/store/useStore";
 import { fullSync } from "../../../src/sync/syncService";
 import { bugReportApi } from "../../../src/api/client";
-import {
-  scheduleAllNotifications,
-  requestNotificationPermissions,
-} from "../../../src/notifications/scheduler";
-import { setApiUrl as saveApiUrl } from "../../../src/api/client";
 import { authApi, preferencesApi } from "../../../src/api/client";
 import { Button } from "../../../components/ui/Button";
 import { Input } from "../../../components/ui/Input";
@@ -75,14 +71,10 @@ export default function SettingsScreen() {
   const router = useRouter();
   const user = useStore((s) => s.user);
   const appState = useStore(selectAppState);
-  const apiUrl = useStore((s) => s.apiUrl);
   const notifEnabled = useStore((s) => s.notificationsEnabled);
-  const setStoreApiUrl = useStore((s) => s.setApiUrl);
   const setNotifEnabled = useStore((s) => s.setNotificationsEnabled);
   const clearAuth = useStore((s) => s.clearAuth);
 
-  const [editingUrl, setEditingUrl] = useState(false);
-  const [urlInput, setUrlInput] = useState(apiUrl);
   const [syncing, setSyncing] = useState(false);
   const [emailPrefs, setEmailPrefs] = useState<NotificationPreferences | null>(
     null,
@@ -91,6 +83,21 @@ export default function SettingsScreen() {
   const [bugReportOpen, setBugReportOpen] = useState(false);
   const [bugDesc, setBugDesc] = useState("");
   const [bugSending, setBugSending] = useState(false);
+  const [bugScreenshots, setBugScreenshots] = useState<string[]>([]);
+
+  const pickScreenshot = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      base64: true,
+      quality: 0.5,
+      allowsMultipleSelection: true,
+      selectionLimit: 3,
+    });
+    if (!result.canceled) {
+      const b64s = result.assets.map((a) => `data:image/jpeg;base64,${a.base64}`);
+      setBugScreenshots((prev) => [...prev, ...b64s].slice(0, 3));
+    }
+  };
 
   useEffect(() => {
     if (!appState.isOnline) return;
@@ -118,35 +125,12 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleSaveUrl = async () => {
-    const cleaned = urlInput.replace(/\/$/, "");
-    setStoreApiUrl(cleaned);
-    await saveApiUrl(cleaned);
-    setEditingUrl(false);
-  };
-
   const handleSync = async () => {
     setSyncing(true);
     try {
       await fullSync();
     } catch {}
     setSyncing(false);
-  };
-
-  const handleReschedule = async () => {
-    const ok = await requestNotificationPermissions();
-    if (!ok) {
-      Alert.alert(
-        "Permissions",
-        "Activez les notifications dans les réglages de l'appareil.",
-      );
-      return;
-    }
-    const count = await scheduleAllNotifications();
-    Alert.alert(
-      "Planifié",
-      `${count} notifications programmées pour les 30 prochains jours.`,
-    );
   };
 
   const handleSendBugReport = async () => {
@@ -162,7 +146,7 @@ export default function SettingsScreen() {
       const screen = Dimensions.get("screen");
       await bugReportApi.create({
         description: bugDesc.trim(),
-        screenshots: [],
+        screenshots: bugScreenshots,
         deviceInfo: {
           platform: Platform.OS as "ios" | "android",
           osVersion: String(Platform.Version),
@@ -175,6 +159,7 @@ export default function SettingsScreen() {
         "Votre signalement a bien été envoyé. Notre équipe l'examinera.",
       );
       setBugDesc("");
+      setBugScreenshots([]);
       setBugReportOpen(false);
     } catch {
       Alert.alert(
@@ -266,7 +251,7 @@ export default function SettingsScreen() {
               syncing ? (
                 <Text
                   style={{
-                    fontFamily: "Nunito_600SemiBold",
+                    fontFamily: "FunnelDisplay_600SemiBold",
                     fontSize: 12,
                     color: colors.primary,
                   }}
@@ -276,48 +261,6 @@ export default function SettingsScreen() {
               ) : undefined
             }
           />
-        </View>
-
-        <Text style={styles.sectionTitle}>Serveur API</Text>
-        <View style={styles.card}>
-          {editingUrl ? (
-            <View style={{ padding: spacing.md }}>
-              <Input
-                label="URL du serveur"
-                value={urlInput}
-                onChangeText={setUrlInput}
-                placeholder="http://192.168.1.x:3000"
-                autoCapitalize="none"
-                autoCorrect={false}
-                hint="IP de votre machine hébergeant le backend"
-              />
-              <View style={{ flexDirection: "row", gap: 8 }}>
-                <Button
-                  label="Annuler"
-                  onPress={() => {
-                    setEditingUrl(false);
-                    setUrlInput(apiUrl);
-                  }}
-                  variant="outline"
-                  size="sm"
-                  style={{ flex: 1 }}
-                />
-                <Button
-                  label="Enregistrer"
-                  onPress={handleSaveUrl}
-                  size="sm"
-                  style={{ flex: 1 }}
-                />
-              </View>
-            </View>
-          ) : (
-            <SettingRow
-              icon={<Server size={18} color={colors.primary} />}
-              label="URL du backend"
-              subtitle={apiUrl}
-              onPress={() => setEditingUrl(true)}
-            />
-          )}
         </View>
 
         <Text style={styles.sectionTitle}>Notifications locales</Text>
@@ -334,13 +277,6 @@ export default function SettingsScreen() {
                 thumbColor={notifEnabled ? colors.primary : "#FFF"}
               />
             }
-          />
-          <View style={styles.div} />
-          <SettingRow
-            icon={<RefreshCw size={18} color={colors.primary} />}
-            label="Re-planifier 30 jours"
-            subtitle="Programme les notifications des 30 prochains jours"
-            onPress={handleReschedule}
           />
         </View>
 
@@ -609,6 +545,34 @@ export default function SettingsScreen() {
               {bugDesc.length} car. / min. 10
             </Text>
 
+            {/* Screenshots */}
+            <View>
+              <Text style={styles.modalLabel}>Captures d'écran (optionnel)</Text>
+              <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                {bugScreenshots.map((uri, i) => (
+                  <View key={i} style={{ position: 'relative' }}>
+                    <Image source={{ uri }} style={{ width: 80, height: 80, borderWidth: 1, borderColor: colors.border }} />
+                    <TouchableOpacity
+                      onPress={() => setBugScreenshots((p) => p.filter((_, j) => j !== i))}
+                      style={{ position: 'absolute', top: -6, right: -6, backgroundColor: colors.error, width: 18, height: 18, alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      <Text style={{ color: '#fff', fontSize: 11, fontFamily: 'FunnelDisplay_700Bold' }}>×</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                {bugScreenshots.length < 3 && (
+                  <TouchableOpacity
+                    onPress={pickScreenshot}
+                    style={{ width: 80, height: 80, borderWidth: 1.5, borderColor: colors.border, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+                  >
+                    <Camera size={20} color={colors.textMuted} strokeWidth={1.5} />
+                    <Text style={{ fontFamily: 'FunnelDisplay_400Regular', fontSize: 10, color: colors.textMuted }}>Ajouter</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <Text style={styles.modalHint}>Max. 3 captures</Text>
+            </View>
+
             <View style={styles.deviceInfoBox}>
               <Text style={styles.deviceInfoTitle}>
                 Infos collectées automatiquement
@@ -650,13 +614,13 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
   },
   screenTitle: {
-    fontFamily: "Nunito_800ExtraBold",
+    fontFamily: "FunnelDisplay_800ExtraBold",
     fontSize: 26,
     color: colors.text,
   },
   section: { paddingHorizontal: spacing.md, marginBottom: spacing.md },
   sectionTitle: {
-    fontFamily: "Nunito_700Bold",
+    fontFamily: "FunnelDisplay_700Bold",
     fontSize: 13,
     color: colors.textSecondary,
     textTransform: "uppercase",
@@ -689,18 +653,18 @@ const styles = StyleSheet.create({
   },
   rowContent: { flex: 1 },
   rowLabel: {
-    fontFamily: "Nunito_600SemiBold",
+    fontFamily: "FunnelDisplay_600SemiBold",
     fontSize: 15,
     color: colors.text,
   },
   rowSub: {
-    fontFamily: "Nunito_400Regular",
+    fontFamily: "FunnelDisplay_400Regular",
     fontSize: 12,
     color: colors.textSecondary,
     marginTop: 2,
   },
   div: { height: 1, backgroundColor: colors.divider, marginLeft: 64 },
-  dot: { width: 10, height: 10, borderRadius: 5 },
+  dot: { width: 10, height: 10, borderRadius: 0 },
   modalSafe: { flex: 1, backgroundColor: colors.background },
   modalHeader: {
     flexDirection: "row",
@@ -712,13 +676,13 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   modalTitle: {
-    fontFamily: "Nunito_700Bold",
+    fontFamily: "FunnelDisplay_700Bold",
     fontSize: 18,
     color: colors.text,
   },
   modalClose: { padding: 4 },
   modalLabel: {
-    fontFamily: "Nunito_700Bold",
+    fontFamily: "FunnelDisplay_700Bold",
     fontSize: 14,
     color: colors.text,
     marginBottom: 4,
@@ -728,14 +692,14 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radius.md,
     padding: spacing.md,
-    fontFamily: "Nunito_400Regular",
+    fontFamily: "FunnelDisplay_400Regular",
     fontSize: 14,
     color: colors.text,
     minHeight: 140,
     backgroundColor: colors.surface,
   },
   modalHint: {
-    fontFamily: "Nunito_400Regular",
+    fontFamily: "FunnelDisplay_400Regular",
     fontSize: 11,
     color: colors.textMuted,
     textAlign: "right",
@@ -746,13 +710,13 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   deviceInfoTitle: {
-    fontFamily: "Nunito_700Bold",
+    fontFamily: "FunnelDisplay_700Bold",
     fontSize: 12,
     color: colors.primary,
     marginBottom: 4,
   },
   deviceInfoText: {
-    fontFamily: "Nunito_400Regular",
+    fontFamily: "FunnelDisplay_400Regular",
     fontSize: 12,
     color: colors.primary,
     lineHeight: 20,
@@ -782,13 +746,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   avatarLetter: {
-    fontFamily: "Nunito_800ExtraBold",
+    fontFamily: "FunnelDisplay_800ExtraBold",
     fontSize: 24,
     color: colors.primary,
   },
-  email: { fontFamily: "Nunito_700Bold", fontSize: 15, color: colors.text },
+  email: { fontFamily: "FunnelDisplay_700Bold", fontSize: 15, color: colors.text },
   userId: {
-    fontFamily: "Nunito_400Regular",
+    fontFamily: "FunnelDisplay_400Regular",
     fontSize: 12,
     color: colors.textSecondary,
     marginTop: 2,

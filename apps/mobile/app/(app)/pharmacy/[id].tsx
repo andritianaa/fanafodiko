@@ -1,21 +1,181 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  ActivityIndicator, Linking, Platform,
+  ActivityIndicator, Linking, Platform, Modal, TextInput,
+  Alert, KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ArrowLeft, MapPin, Phone, Clock, Calendar, ChevronRight,
-  Navigation, MessageCircle, Mail, WifiOff,
+  Navigation, MessageCircle, Mail, WifiOff, Store, Image as ImageIcon,
+  X as XIcon, Trash2,
 } from 'lucide-react-native';
-import { pharmacyApi } from '../../../src/api/client';
+import * as ImagePicker from 'expo-image-picker';
+import { pharmacyApi, pharmacyClaimApi } from '../../../src/api/client';
 import { getPharmacyById } from '../../../src/db/database';
 import { useStore, selectAppState } from '../../../src/store/useStore';
 import { colors, spacing, radius, shadows } from '../../../src/theme';
 import type { Pharmacy, OpeningHour, ExceptionalSchedule, PharmacyGuard } from '../../../src/types';
 
 const DAY_NAMES = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+
+// ── Claim modal ────────────────────────────────────────────────────────────────
+
+function ClaimModal({ pharmacyId, pharmacyName, visible, onClose }: {
+  pharmacyId: string;
+  pharmacyName: string;
+  visible: boolean;
+  onClose: () => void;
+}) {
+  const [contactInfo, setContactInfo] = useState('');
+  const [proofImages, setProofImages] = useState<string[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+
+  const pickImages = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      selectionLimit: 5,
+      base64: true,
+      quality: 0.6,
+    });
+    if (!result.canceled) {
+      const b64s = result.assets.map((a) => `data:image/jpeg;base64,${a.base64}`);
+      setProofImages((prev) => [...prev, ...b64s].slice(0, 5));
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!contactInfo.trim()) {
+      Alert.alert('Contact requis', 'Veuillez indiquer un téléphone ou un email.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await pharmacyClaimApi.create({
+        pharmacyId,
+        contactInfo: contactInfo.trim(),
+        proofImages,
+      });
+      Alert.alert(
+        'Réclamation envoyée',
+        'Notre équipe examinera votre demande et vous contactera sous peu.',
+        [{ text: 'OK', onPress: () => { onClose(); setContactInfo(''); setProofImages([]); } }],
+      );
+    } catch {
+      Alert.alert('Erreur', "Impossible d'envoyer la réclamation. Vérifiez votre connexion.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={cm.overlay}>
+        <View style={cm.sheet}>
+          <View style={cm.header}>
+            <Text style={cm.title} numberOfLines={2}>Je suis gérant de {pharmacyName}</Text>
+            <TouchableOpacity onPress={onClose} style={cm.closeBtn}>
+              <XIcon size={18} color={colors.textMuted} />
+            </TouchableOpacity>
+          </View>
+
+          <Text style={cm.desc}>
+            Indiquez vos coordonnées et joignez des pièces justificatives. Notre équipe vous contactera pour vérification.
+          </Text>
+
+          <Text style={cm.label}>Contact <Text style={cm.req}>*</Text></Text>
+          <TextInput
+            style={cm.input}
+            placeholder="Téléphone ou e-mail"
+            placeholderTextColor={colors.textMuted}
+            value={contactInfo}
+            onChangeText={setContactInfo}
+            keyboardType="default"
+            autoCapitalize="none"
+          />
+
+          <Text style={cm.label}>Pièces justificatives ({proofImages.length}/5)</Text>
+          {proofImages.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={cm.imgRow}>
+              {proofImages.map((uri, i) => (
+                <View key={i} style={cm.imgWrap}>
+                  <TouchableOpacity
+                    style={cm.imgRemove}
+                    onPress={() => setProofImages((p) => p.filter((_, j) => j !== i))}
+                  >
+                    <Trash2 size={12} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
+          )}
+          <TouchableOpacity style={cm.pickBtn} onPress={pickImages} disabled={proofImages.length >= 5}>
+            <ImageIcon size={16} color={colors.primary} />
+            <Text style={cm.pickBtnText}>Ajouter des images</Text>
+          </TouchableOpacity>
+
+          <View style={cm.actions}>
+            <TouchableOpacity style={cm.cancelBtn} onPress={onClose}>
+              <Text style={cm.cancelText}>Annuler</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[cm.submitBtn, submitting && cm.btnDisabled]}
+              onPress={handleSubmit}
+              disabled={submitting}
+            >
+              {submitting
+                ? <ActivityIndicator size="small" color="#fff" />
+                : <Text style={cm.submitText}>Envoyer</Text>
+              }
+            </TouchableOpacity>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
+const cm = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
+  sheet: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    padding: spacing.lg,
+    paddingBottom: 36,
+  },
+  header: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, marginBottom: spacing.sm },
+  title: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 16, color: colors.text, flex: 1 },
+  closeBtn: { padding: 4, marginLeft: 4 },
+  desc: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 13, color: colors.textSecondary, marginBottom: spacing.md, lineHeight: 18 },
+  label: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 13, color: colors.textSecondary, marginBottom: 6 },
+  req: { color: colors.error },
+  input: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontFamily: 'FunnelDisplay_400Regular',
+    fontSize: 14,
+    color: colors.text,
+    marginBottom: spacing.md,
+    backgroundColor: colors.background,
+  },
+  imgRow: { marginBottom: spacing.sm },
+  imgWrap: { width: 60, height: 60, borderRadius: radius.sm, backgroundColor: colors.divider, marginRight: 8, overflow: 'hidden' },
+  imgRemove: { position: 'absolute', top: 2, right: 2, backgroundColor: colors.error, borderRadius: 10, width: 18, height: 18, alignItems: 'center', justifyContent: 'center' },
+  pickBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, borderWidth: 1, borderColor: colors.primary, borderRadius: radius.md, justifyContent: 'center', marginBottom: spacing.lg },
+  pickBtnText: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 14, color: colors.primary },
+  actions: { flexDirection: 'row', gap: spacing.sm },
+  cancelBtn: { flex: 1, paddingVertical: 13, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, alignItems: 'center' },
+  cancelText: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 15, color: colors.textSecondary },
+  submitBtn: { flex: 1, paddingVertical: 13, backgroundColor: colors.primary, borderRadius: radius.lg, alignItems: 'center' },
+  submitText: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 15, color: '#FFF' },
+  btnDisabled: { opacity: 0.6 },
+});
 const DAY_NAMES_SHORT = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
 function StatusBadge({ pharmacy }: { pharmacy: Pharmacy }) {
@@ -27,7 +187,7 @@ function StatusBadge({ pharmacy }: { pharmacy: Pharmacy }) {
 
 const sb = StyleSheet.create({
   base: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.full },
-  text: { fontFamily: 'Nunito_700Bold', fontSize: 12 },
+  text: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 12 },
 });
 
 function HoursRow({ hour }: { hour: OpeningHour }) {
@@ -44,9 +204,9 @@ function HoursRow({ hour }: { hour: OpeningHour }) {
 
 const hours = StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
-  day: { fontFamily: 'Nunito_600SemiBold', fontSize: 14, color: colors.text, width: 100 },
-  time: { fontFamily: 'Nunito_400Regular', fontSize: 14, color: colors.text },
-  closed: { fontFamily: 'Nunito_400Regular', fontSize: 14, color: colors.textMuted },
+  day: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 14, color: colors.text, width: 100 },
+  time: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 14, color: colors.text },
+  closed: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 14, color: colors.textMuted },
 });
 
 function ExceptionalItem({ item }: { item: ExceptionalSchedule }) {
@@ -80,11 +240,11 @@ const exc = StyleSheet.create({
     borderBottomColor: colors.divider,
   },
   badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.sm, alignSelf: 'flex-start' },
-  badgeText: { fontFamily: 'Nunito_700Bold', fontSize: 11 },
+  badgeText: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 11 },
   info: { flex: 1, gap: 2 },
-  dates: { fontFamily: 'Nunito_600SemiBold', fontSize: 13, color: colors.text },
-  time: { fontFamily: 'Nunito_400Regular', fontSize: 12, color: colors.textSecondary },
-  note: { fontFamily: 'Nunito_400Regular', fontSize: 12, color: colors.textMuted, fontStyle: 'italic' },
+  dates: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 13, color: colors.text },
+  time: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 12, color: colors.textSecondary },
+  note: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 12, color: colors.textMuted, fontStyle: 'italic' },
 });
 
 function GuardItem({ item }: { item: PharmacyGuard }) {
@@ -108,6 +268,7 @@ export default function PharmacyDetailScreen() {
   const appState = useStore(selectAppState);
   const [pharmacy, setPharmacy] = useState<Pharmacy | null>(null);
   const [loading, setLoading] = useState(true);
+  const [claimVisible, setClaimVisible] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -304,7 +465,26 @@ export default function PharmacyDetailScreen() {
           <Navigation size={18} color="#FFF" />
           <Text style={styles.mapsBtnText}>Y aller</Text>
         </TouchableOpacity>
+
+        {/* Bouton réclamation gérant */}
+        <TouchableOpacity
+          style={styles.claimBtn}
+          onPress={() => setClaimVisible(true)}
+          activeOpacity={0.8}
+        >
+          <Store size={16} color={colors.textSecondary} />
+          <Text style={styles.claimBtnText}>Je suis gérant de cette pharmacie</Text>
+        </TouchableOpacity>
       </ScrollView>
+
+      {pharmacy && (
+        <ClaimModal
+          pharmacyId={pharmacy.id}
+          pharmacyName={pharmacy.name}
+          visible={claimVisible}
+          onClose={() => setClaimVisible(false)}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -327,7 +507,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   headerInfo: { flex: 1, gap: 6 },
-  name: { fontFamily: 'Nunito_800ExtraBold', fontSize: 20, color: colors.text },
+  name: { fontFamily: 'FunnelDisplay_800ExtraBold', fontSize: 20, color: colors.text },
   offlineBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -339,7 +519,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     borderRadius: radius.sm,
   },
-  offlineText: { fontFamily: 'Nunito_600SemiBold', fontSize: 12, color: colors.warning },
+  offlineText: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 12, color: colors.warning },
   scroll: { paddingHorizontal: spacing.md, paddingBottom: spacing.xxl },
   card: {
     backgroundColor: colors.surface,
@@ -349,7 +529,7 @@ const styles = StyleSheet.create({
     ...shadows.sm,
   },
   sectionTitle: {
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: 'FunnelDisplay_700Bold',
     fontSize: 13,
     color: colors.textSecondary,
     textTransform: 'uppercase',
@@ -363,7 +543,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   infoText: {
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'FunnelDisplay_400Regular',
     fontSize: 14,
     color: colors.text,
     flex: 1,
@@ -382,7 +562,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  contactValue: { flex: 1, fontFamily: 'Nunito_600SemiBold', fontSize: 14, color: colors.text },
+  contactValue: { flex: 1, fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 14, color: colors.text },
   divider: { height: 1, backgroundColor: colors.divider, marginLeft: 48 },
   mapsBtn: {
     flexDirection: 'row',
@@ -395,7 +575,19 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     ...shadows.md,
   },
-  mapsBtnText: { fontFamily: 'Nunito_700Bold', fontSize: 16, color: '#FFF' },
+  mapsBtnText: { fontFamily: 'FunnelDisplay_700Bold', fontSize: 16, color: '#FFF' },
+  claimBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    paddingVertical: 12,
+    marginTop: spacing.sm,
+  },
+  claimBtnText: { fontFamily: 'FunnelDisplay_600SemiBold', fontSize: 14, color: colors.textSecondary },
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { fontFamily: 'Nunito_400Regular', fontSize: 16, color: colors.textSecondary },
+  errorText: { fontFamily: 'FunnelDisplay_400Regular', fontSize: 16, color: colors.textSecondary },
 });
